@@ -34,21 +34,21 @@ type GoalOption = {
 
 const GOALS: GoalOption[] = [
   {
-    id: "faang",
-    label: "FAANG / Big Tech",
-    subtitle: "Google, Meta, Amazon, Apple, Microsoft",
-    icon: "rocket-outline",
+    id: "palantir",
+    label: "Palantir Mode",
+    subtitle: "Graphs, edge cases, and hard-core problem solving",
+    icon: "diamond-outline",
     difficulties: ["Medium", "Hard"],
     topics: [
-      "Dynamic Programming",
+      "Array",
+      "Hash Table",
       "Graph",
       "Tree",
       "Binary Search",
-      "Two Pointers",
-      "Sliding Window",
       "Heap",
-      "Trie",
-      "Backtracking",
+      "Greedy",
+      "Dynamic Programming",
+      "Stack",
     ],
   },
   {
@@ -69,20 +69,21 @@ const GOALS: GoalOption[] = [
     ],
   },
   {
-    id: "general",
-    label: "General SWE Prep",
-    subtitle: "Solid foundation across all topics",
-    icon: "code-slash-outline",
-    difficulties: ["Easy", "Medium"],
+    id: "faang",
+    label: "FAANG / Big Tech",
+    subtitle: "Google, Meta, Amazon, Apple, Microsoft",
+    icon: "rocket-outline",
+    difficulties: ["Medium", "Hard"],
     topics: [
-      "Array",
-      "String",
-      "Hash Table",
-      "Linked List",
-      "Stack",
-      "Two Pointers",
+      "Dynamic Programming",
+      "Graph",
+      "Tree",
       "Binary Search",
-      "Recursion",
+      "Two Pointers",
+      "Sliding Window",
+      "Heap",
+      "Trie",
+      "Backtracking",
     ],
   },
   {
@@ -384,7 +385,7 @@ function WelcomeSlide() {
       <View style={{ marginTop: 24, gap: 16 }}>
         <FeatureRow icon="play-circle" text="TikTok-style LeetCode walkthroughs" />
         <FeatureRow icon="code-slash" text="Solve problems right in the app" />
-        <FeatureRow icon="flash-outline" text="Actually retain what you learn" />
+        <FeatureRow icon="flash-outline" text="Addictive algorithm, productive scroll" />
       </View>
     </View>
   );

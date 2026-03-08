@@ -10,14 +10,14 @@ import React, {
 import {
   ActivityIndicator,
   Pressable,
+  ScrollView,
   Text,
   View,
 } from "react-native";
+import { useRouter } from "expo-router";
 import BottomSheet, {
-  BottomSheetFlatList,
-  BottomSheetFlatListMethods,
+  BottomSheetScrollView,
   BottomSheetTextInput,
-  BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../lib/auth";
@@ -49,8 +49,9 @@ const TutorSheet = forwardRef<TutorSheetRef, Props>(function TutorSheet(
   ref
 ) {
   const { session } = useAuth();
+  const router = useRouter();
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const flatListRef = useRef<BottomSheetFlatListMethods | null>(null);
+  const scrollViewRef = useRef<ScrollView | null>(null);
 
   const [messages, setMessages] = useState<TutorMessage[]>([]);
   const [inputText, setInputText] = useState("");
@@ -60,12 +61,16 @@ const TutorSheet = forwardRef<TutorSheetRef, Props>(function TutorSheet(
   const streamingIndexRef = useRef<number | null>(null);
   const prevStreamingRef = useRef(false);
   const hasLoadedForOpenRef = useRef(false);
+  const listMetricsRef = useRef({ contentHeight: 0, viewportHeight: 0 });
 
   const snapPoints = useMemo(() => ["50%", "85%"], []);
+  const requiresSignIn = !session?.access_token;
+  const signInPrompt =
+    "Sign in to use LeetTok Tutor. You can still browse clips as a guest, but asking questions requires an account.";
 
   const scrollToBottom = useCallback(() => {
-    flatListRef.current?.scrollToEnd({ animated: true });
-  }, []);
+    scrollViewRef.current?.scrollToEnd({ animated: true });
+  }, [messages.length]);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -87,7 +92,22 @@ const TutorSheet = forwardRef<TutorSheetRef, Props>(function TutorSheet(
   const sendMessage = useCallback(
     async (text: string) => {
       const trimmed = text.trim();
-      if (!trimmed || !session?.access_token || isStreaming || limitReached) return;
+      if (!trimmed) {
+        return;
+      }
+      if (!session?.access_token) {
+        setMessages((prev) => {
+          const alreadyShown = prev.some(
+            (message) => message.role === "assistant" && message.content === signInPrompt
+          );
+          if (alreadyShown) return prev;
+          return [...prev, { role: "assistant", content: signInPrompt }];
+        });
+        return;
+      }
+      if (isStreaming || limitReached) {
+        return;
+      }
 
       if (session.user?.id) {
         trackEvent(session.user.id, clipContext.clipId, "tutor_message_sent");
@@ -139,7 +159,7 @@ const TutorSheet = forwardRef<TutorSheetRef, Props>(function TutorSheet(
         }
       );
     },
-    [clipContext, messages, session?.access_token, session?.user?.id, isStreaming, limitReached]
+    [clipContext, messages, session?.access_token, session?.user?.id, isStreaming, limitReached, signInPrompt]
   );
 
   const handleSend = useCallback(() => {
@@ -185,15 +205,6 @@ const TutorSheet = forwardRef<TutorSheetRef, Props>(function TutorSheet(
     [clipContext.clipId, onClose, session?.user?.id]
   );
 
-  const renderItem = useCallback(
-    ({ item }: { item: TutorMessage }) => (
-      <TutorMessageComponent message={item} />
-    ),
-    []
-  );
-
-  const keyExtractor = useCallback((_: TutorMessage, index: number) => String(index), []);
-
   const ListHeaderComponent = useMemo(
     () => (
       <View className="px-4 pt-2">
@@ -218,86 +229,115 @@ const TutorSheet = forwardRef<TutorSheetRef, Props>(function TutorSheet(
       backgroundStyle={{ backgroundColor: "#111111" }}
       handleIndicatorStyle={{ backgroundColor: "#5c6370" }}
     >
-      <BottomSheetView style={{ flex: 1 }}>
-        {/* Header */}
-        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: "#1a1a1a", paddingHorizontal: 16, paddingVertical: 12 }}>
-          <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8 }}>
-            <Text style={{ fontSize: 18, fontWeight: "600", color: "#fff" }}>LeetTok Tutor</Text>
-            {remaining !== null && !limitReached && (
-              <Text style={{ fontSize: 12, color: "#5c6370" }}>
-                {remaining.remaining} messages left today
-              </Text>
-            )}
-          </View>
-          <Pressable
-            onPress={() => bottomSheetRef.current?.close()}
-            style={{ height: 32, width: 32, alignItems: "center", justifyContent: "center", borderRadius: 16, backgroundColor: "#1a1a1a" }}
-          >
-            <Ionicons name="close" size={20} color="#fff" />
-          </Pressable>
-        </View>
-
-        {/* Message list */}
-        <BottomSheetFlatList
-          ref={flatListRef}
-          data={messages}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          ListHeaderComponent={messages.length === 0 ? ListHeaderComponent : null}
-          style={{ flex: 1 }}
-          contentContainerStyle={{
-            paddingHorizontal: 16,
-            paddingBottom: 16,
-            flexGrow: 1,
-          }}
-          inverted={false}
-        />
-
-        {/* Chips above input when messages exist */}
-        {messages.length > 0 && (
-          <View style={{ borderTopWidth: 1, borderTopColor: "#1a1a1a", paddingHorizontal: 16, paddingTop: 8 }}>
-            <QuickActionChips
-              onSend={sendMessage}
-              collapsed={chipsCollapsed}
-              onToggle={() => setChipsCollapsed((c) => !c)}
-            />
-          </View>
-        )}
-
-        {/* Limit reached message */}
-        {limitReached && (
-          <View style={{ borderTopWidth: 1, borderTopColor: "#1a1a1a", backgroundColor: "#1a1a1a", paddingHorizontal: 16, paddingVertical: 12 }}>
-            <Text style={{ textAlign: "center", fontSize: 14, color: "#5c6370" }}>
-              You've used all {remaining?.limit ?? 20} tutor messages today. Come back tomorrow!
+      {/* Header */}
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: "#1a1a1a", paddingHorizontal: 16, paddingVertical: 12 }}>
+        <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <Text style={{ fontSize: 18, fontWeight: "600", color: "#fff" }}>LeetTok Tutor</Text>
+          {remaining !== null && !limitReached && (
+            <Text style={{ fontSize: 12, color: "#5c6370" }}>
+              {remaining.remaining} messages left today
             </Text>
-          </View>
-        )}
+          )}
+        </View>
+        <Pressable
+          onPress={() => bottomSheetRef.current?.close()}
+          style={{ height: 32, width: 32, alignItems: "center", justifyContent: "center", borderRadius: 16, backgroundColor: "#1a1a1a" }}
+        >
+          <Ionicons name="close" size={20} color="#fff" />
+        </Pressable>
+      </View>
 
-        {/* Input */}
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8, borderTopWidth: 1, borderTopColor: "#1a1a1a", paddingHorizontal: 16, paddingTop: 12, paddingBottom: 92 }}>
-          <BottomSheetTextInput
-            value={inputText}
-            onChangeText={setInputText}
-            placeholder="Ask about this problem..."
-            placeholderTextColor="#5c6370"
-            editable={!isStreaming && !limitReached}
-            onSubmitEditing={handleSend}
-            returnKeyType="send"
-            style={{ flex: 1, borderRadius: 12, backgroundColor: "#1a1a1a", paddingHorizontal: 16, paddingVertical: 12, fontSize: 15, color: "#fff" }}
+      {/* Message list */}
+      <BottomSheetScrollView
+        ref={scrollViewRef}
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingHorizontal: messages.length === 0 ? 0 : 16,
+          paddingBottom: 16,
+          flexGrow: 1,
+        }}
+        showsVerticalScrollIndicator
+        onContentSizeChange={(_, height) => {
+          listMetricsRef.current.contentHeight = height;
+        }}
+        onLayout={(event) => {
+          const height = event.nativeEvent.layout.height;
+          listMetricsRef.current.viewportHeight = height;
+        }}
+        onScrollBeginDrag={() => {}}
+      >
+        {messages.length === 0 ? (
+          ListHeaderComponent
+        ) : (
+          <>
+            {messages.map((item, index) => (
+              <TutorMessageComponent key={String(index)} message={item} />
+            ))}
+          </>
+        )}
+      </BottomSheetScrollView>
+
+      {/* Chips above input when messages exist */}
+      {messages.length > 0 && (
+        <View style={{ borderTopWidth: 1, borderTopColor: "#1a1a1a", paddingHorizontal: 16, paddingTop: 8 }}>
+          <QuickActionChips
+            onSend={sendMessage}
+            collapsed={chipsCollapsed}
+            onToggle={() => setChipsCollapsed((c) => !c)}
           />
+        </View>
+      )}
+
+      {/* Limit reached message */}
+      {limitReached && (
+        <View style={{ borderTopWidth: 1, borderTopColor: "#1a1a1a", backgroundColor: "#1a1a1a", paddingHorizontal: 16, paddingVertical: 12 }}>
+          <Text style={{ textAlign: "center", fontSize: 14, color: "#5c6370" }}>
+            You've used all {remaining?.limit ?? 20} tutor messages today. Come back tomorrow!
+          </Text>
+        </View>
+      )}
+
+      {requiresSignIn && (
+        <View style={{ borderTopWidth: 1, borderTopColor: "#1a1a1a", backgroundColor: "#1a1a1a", paddingHorizontal: 16, paddingVertical: 12 }}>
+          <Text style={{ marginBottom: 10, fontSize: 14, color: "#afb3b6" }}>
+            Sign in to ask the tutor questions and save your conversation.
+          </Text>
           <Pressable
-            onPress={handleSend}
-            disabled={!inputText.trim() || isStreaming || limitReached}
-            style={{ height: 44, width: 44, alignItems: "center", justifyContent: "center", borderRadius: 22, backgroundColor: "#fff", opacity: (!inputText.trim() || isStreaming || limitReached) ? 0.5 : 1 }}
+            onPress={() => {
+              bottomSheetRef.current?.close();
+              router.push("/auth/login");
+            }}
+            style={{ alignItems: "center", borderRadius: 12, backgroundColor: "#fff", paddingVertical: 12 }}
           >
-            {isStreaming ? (
-              <ActivityIndicator size="small" color="#000" />
-            ) : (
-              <Ionicons name="send" size={18} color="#000" />
-            )}
+            <Text style={{ fontSize: 15, fontWeight: "600", color: "#000" }}>Sign In to Use Tutor</Text>
           </Pressable>
         </View>
-      </BottomSheetView>
+      )}
+
+      {/* Input */}
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 8, borderTopWidth: 1, borderTopColor: "#1a1a1a", paddingHorizontal: 16, paddingTop: 12, paddingBottom: 92 }}>
+        <BottomSheetTextInput
+          value={inputText}
+          onChangeText={setInputText}
+          placeholder={requiresSignIn ? "Sign in to ask the tutor..." : "Ask about this problem..."}
+          placeholderTextColor="#5c6370"
+          editable={!requiresSignIn && !isStreaming && !limitReached}
+          onSubmitEditing={handleSend}
+          returnKeyType="send"
+          style={{ flex: 1, borderRadius: 12, backgroundColor: "#1a1a1a", paddingHorizontal: 16, paddingVertical: 12, fontSize: 15, color: "#fff" }}
+        />
+        <Pressable
+          onPress={handleSend}
+          disabled={requiresSignIn || !inputText.trim() || isStreaming || limitReached}
+          style={{ height: 44, width: 44, alignItems: "center", justifyContent: "center", borderRadius: 22, backgroundColor: "#fff", opacity: (requiresSignIn || !inputText.trim() || isStreaming || limitReached) ? 0.5 : 1 }}
+        >
+          {isStreaming ? (
+            <ActivityIndicator size="small" color="#000" />
+          ) : (
+            <Ionicons name="send" size={18} color="#000" />
+          )}
+        </Pressable>
+      </View>
     </BottomSheet>
   );
 });

@@ -2,7 +2,7 @@
  * Client for code execution via Supabase Edge Function.
  */
 
-import { SUPABASE_URL } from "../constants/config";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../constants/config";
 
 export const LANGUAGE_IDS = {
   python: 71,
@@ -45,6 +45,7 @@ export async function submitCode({
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
+      apikey: SUPABASE_ANON_KEY,
     },
     body: JSON.stringify({
       code,
@@ -54,10 +55,17 @@ export async function submitCode({
     }),
   });
 
-  const data = await res.json();
+  const raw = await res.text();
+  let data: unknown = null;
+  try {
+    data = raw ? JSON.parse(raw) : null;
+  } catch {
+    data = { message: raw };
+  }
 
   if (!res.ok) {
-    throw new Error(data?.error ?? data?.message ?? `Request failed: ${res.status}`);
+    const errorData = data as { error?: string; message?: string } | null;
+    throw new Error(errorData?.error ?? errorData?.message ?? `Request failed: ${res.status}`);
   }
 
   return data as SubmissionResult;

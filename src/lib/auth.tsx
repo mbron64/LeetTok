@@ -66,8 +66,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
-      setSession(s);
+    const hydrateSession = async () => {
+      const { data: { session: storedSession } } = await supabase.auth.getSession();
+      setSession(storedSession);
+      setLoading(false);
+    };
+
+    hydrateSession().catch(() => {
+      setSession(null);
       setLoading(false);
     });
 
@@ -81,7 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });

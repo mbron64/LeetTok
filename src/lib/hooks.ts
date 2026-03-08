@@ -3,7 +3,7 @@ import { supabase } from "./supabase";
 import { useAuth } from "./auth";
 import { isSupabaseConfigured } from "../constants/config";
 import { sampleClips } from "../constants/sampleData";
-import { assembleFeed } from "./feed";
+import { assembleFeed, fetchPublicFeed } from "./feed";
 import { fetchUserProfile } from "./userProfile";
 import type { Clip, Difficulty } from "../types";
 
@@ -31,7 +31,8 @@ export function useClips() {
       }
 
       if (!user?.id) {
-        setClips([]);
+        const publicClips = await fetchPublicFeed(PAGE_SIZE);
+        setClips(publicClips.length > 0 ? publicClips : sampleClips);
         setLoading(false);
         setHasMore(false);
         return;
@@ -47,7 +48,8 @@ export function useClips() {
         });
 
         if (feedClips.length === 0 && pageNum === 1) {
-          setClips(sampleClips);
+          const publicClips = await fetchPublicFeed(PAGE_SIZE);
+          setClips(publicClips.length > 0 ? publicClips : sampleClips);
           setHasMore(false);
         } else if (append) {
           setClips((prev) => [...prev, ...feedClips]);
@@ -73,8 +75,19 @@ export function useClips() {
       return;
     }
     if (!user?.id) {
-      setClips([]);
-      setLoading(false);
+      setLoading(true);
+      fetchPublicFeed(PAGE_SIZE)
+        .then((publicClips) => {
+          setClips(publicClips.length > 0 ? publicClips : sampleClips);
+          setHasMore(false);
+        })
+        .catch(() => {
+          setClips(sampleClips);
+          setHasMore(false);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
       return;
     }
     setLoading(true);

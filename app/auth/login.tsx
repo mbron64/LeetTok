@@ -18,6 +18,7 @@ import { signInWithProvider } from "../../src/lib/oauth";
 export default function LoginScreen() {
   const { signIn } = useAuth();
   const router = useRouter();
+  const githubEnabled = false;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -76,7 +77,13 @@ export default function LoginScreen() {
         </View>
 
         <Pressable
-          onPress={() => handleOAuth("github")}
+          onPress={() => {
+            if (githubEnabled) {
+              handleOAuth("github");
+            } else {
+              setOauthError("GitHub login is not configured yet. Use Google or email for now.");
+            }
+          }}
           disabled={isOauthInProgress}
           className="mb-3 flex-row items-center justify-center rounded-xl py-4"
           style={{
@@ -84,13 +91,13 @@ export default function LoginScreen() {
             opacity: isOauthInProgress ? 0.6 : 1,
           }}
         >
-          {oauthLoading === "github" ? (
+          {oauthLoading === "github" && githubEnabled ? (
             <ActivityIndicator color="#fff" />
           ) : (
             <>
               <Ionicons name="logo-github" size={22} color="#fff" />
               <Text className="ml-2 text-base font-semibold text-white">
-                Continue with GitHub
+                {githubEnabled ? "Continue with GitHub" : "GitHub Coming Soon"}
               </Text>
             </>
           )}

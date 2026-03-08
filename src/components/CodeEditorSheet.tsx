@@ -144,7 +144,7 @@ function CodeEditorSheetInner(
 
   const handleRun = useCallback(async () => {
     if (!problem || !session?.access_token || !isSupabaseConfigured) {
-      setError("Sign in and configure Supabase to run code.");
+      setError("Sign in to run code.");
       return;
     }
     setLoading(true);
@@ -173,7 +173,7 @@ function CodeEditorSheetInner(
 
   const handleSubmit = useCallback(async () => {
     if (!problem || !session?.access_token || !isSupabaseConfigured) {
-      setError("Sign in and configure Supabase to submit.");
+      setError("Sign in to submit code.");
       return;
     }
     setLoading(true);
@@ -286,14 +286,14 @@ function CodeEditorSheetInner(
             <Pressable
               onPress={handleRun}
               disabled={loading}
-              style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: "rgba(6,182,212,0.2)", borderWidth: 1, borderColor: "rgba(6,182,212,0.4)" }}
+              style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: "rgba(6,182,212,0.2)", borderWidth: 1, borderColor: "rgba(6,182,212,0.4)", opacity: loading ? 0.6 : 1 }}
             >
               <Text style={{ color: "#22d3ee", fontWeight: "500", fontSize: 14 }}>Run</Text>
             </Pressable>
             <Pressable
               onPress={handleSubmit}
               disabled={loading}
-              style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: "rgba(34,197,94,0.2)", borderWidth: 1, borderColor: "rgba(34,197,94,0.4)" }}
+              style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: "rgba(34,197,94,0.2)", borderWidth: 1, borderColor: "rgba(34,197,94,0.4)", opacity: loading ? 0.6 : 1 }}
             >
               <Text style={{ color: "#4ade80", fontWeight: "500", fontSize: 14 }}>Submit</Text>
             </Pressable>

@@ -28,7 +28,9 @@ export async function signInWithProvider(
       provider,
       options: { redirectTo, skipBrowserRedirect: true },
     });
-    if (error) return error.message;
+    if (error) {
+      return error.message;
+    }
     const res = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
     if (res.type === "success") {
       await createSessionFromUrl(res.url);

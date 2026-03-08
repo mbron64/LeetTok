@@ -89,9 +89,10 @@ export default function TestResults({
 
   return (
     <ScrollView
-      style={{ flex: 1 }}
+      style={{ maxHeight: 220 }}
       contentContainerStyle={{ paddingBottom: 24 }}
       showsVerticalScrollIndicator={false}
+      nestedScrollEnabled
     >
       <View
         className={`flex-row items-center gap-2 py-3 px-4 rounded-lg mb-4 ${

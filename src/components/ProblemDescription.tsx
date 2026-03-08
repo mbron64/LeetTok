@@ -97,7 +97,9 @@ export default function ProblemDescription({ problem }: Props) {
         )}
 
         <Pressable
-          onPress={() => Linking.openURL(leetCodeUrl).catch(() => {})}
+          onPress={() => {
+            Linking.openURL(leetCodeUrl).catch(() => {});
+          }}
           className="mt-6 flex-row items-center gap-2 py-3 px-4 rounded-lg bg-white/10 border border-white/20 active:bg-white/15"
         >
           <Ionicons name="open-outline" size={18} color="#ffffff" />

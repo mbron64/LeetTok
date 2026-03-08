@@ -1,4 +1,4 @@
-import { SUPABASE_URL } from "../constants/config";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../constants/config";
 import { supabase } from "./supabase";
 
 const DAILY_LIMIT = 20;
@@ -16,6 +16,36 @@ export interface ClipContext {
   topics: string[];
   transcript: string;
   codeSnippets: string[];
+}
+
+function emitTokensFromSsePayload(
+  payload: string,
+  onToken: (token: string) => void,
+  onDone: () => void
+): boolean {
+  const lines = payload.split("\n");
+  let sawDone = false;
+  for (const line of lines) {
+    if (!line.startsWith("data: ")) continue;
+    const data = line.slice(6);
+    if (data === "[DONE]") {
+      sawDone = true;
+      continue;
+    }
+    try {
+      const parsed = JSON.parse(data);
+      if (parsed?.text) {
+        onToken(parsed.text);
+      }
+    } catch {
+      // Ignore malformed SSE lines.
+    }
+  }
+  if (sawDone) {
+    onDone();
+    return true;
+  }
+  return false;
 }
 
 /**
@@ -38,6 +68,7 @@ export async function streamTutorResponse(
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${supabaseAccessToken}`,
+        apikey: SUPABASE_ANON_KEY,
       },
       body: JSON.stringify({ messages, clipContext }),
     });
@@ -57,7 +88,14 @@ export async function streamTutorResponse(
 
     const reader = response.body?.getReader();
     if (!reader) {
-      onError("No response body");
+      const fallbackText = await response.text();
+      if (!fallbackText) {
+        onError("No response body");
+        return;
+      }
+      if (!emitTokensFromSsePayload(fallbackText, onToken, onDone)) {
+        onDone();
+      }
       return;
     }
 
@@ -72,30 +110,14 @@ export async function streamTutorResponse(
       const lines = buffer.split("\n");
       buffer = lines.pop() ?? "";
 
-      for (const line of lines) {
-        if (line.startsWith("data: ")) {
-          const data = line.slice(6);
-          if (data === "[DONE]") {
-            onDone();
-            return;
-          }
-          try {
-            const parsed = JSON.parse(data);
-            if (parsed?.text) {
-              onToken(parsed.text);
-            }
-          } catch {
-            // Skip malformed lines
-          }
-        }
+      if (emitTokensFromSsePayload(lines.join("\n"), onToken, onDone)) {
+        return;
       }
     }
 
     // Check for [DONE] in remaining buffer
-    if (buffer.trim().startsWith("data: ")) {
-      const data = buffer.trim().slice(6);
-      if (data === "[DONE]") {
-        onDone();
+    if (buffer.trim()) {
+      if (emitTokensFromSsePayload(buffer.trim(), onToken, onDone)) {
         return;
       }
     }

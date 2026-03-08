@@ -2,6 +2,7 @@ import React from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 
 const CATEGORIES = ["For You", "MadLeets", "NeetCode 150", "Trending", "New"] as const;
 export type Category = (typeof CATEGORIES)[number];
@@ -17,8 +18,17 @@ export default function CategoryBar({ active, onCategoryChange, onSearchPress }:
 
   return (
     <View
-      style={{ position: "absolute", left: 0, right: 0, zIndex: 10, flexDirection: "row", alignItems: "center", top: 0, paddingTop: insets.top }}
+      style={{ position: "absolute", left: 0, right: 0, zIndex: 10, top: 0 }}
     >
+      <LinearGradient
+        colors={["rgba(0,0,0,0.45)", "rgba(0,0,0,0.22)", "rgba(0,0,0,0)"]}
+        locations={[0, 0.55, 1]}
+        pointerEvents="none"
+        style={{ position: "absolute", left: 0, right: 0, top: 0, height: insets.top + 72 }}
+      />
+      <View
+        style={{ flexDirection: "row", alignItems: "center", paddingTop: insets.top }}
+      >
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -57,6 +67,7 @@ export default function CategoryBar({ active, onCategoryChange, onSearchPress }:
       <Pressable onPress={onSearchPress} style={{ paddingRight: 16, paddingLeft: 8 }}>
         <Ionicons name="search" size={22} color="#fff" />
       </Pressable>
+      </View>
     </View>
   );
 }

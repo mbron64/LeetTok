@@ -132,6 +132,48 @@ export async function generateCandidates(
   return result;
 }
 
+export async function fetchPublicFeed(limit: number = PAGE_SIZE_DEFAULT): Promise<Clip[]> {
+  if (!isSupabaseConfigured) return [];
+
+  const { data, error } = await supabase
+    .from("clips")
+    .select(
+      `
+      id,
+      title,
+      video_url,
+      creator,
+      hook,
+      likes_count,
+      bookmarks_count,
+      created_at,
+      problems!inner(number, difficulty, topics)
+    `,
+    )
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error || !data?.length) return [];
+
+  return data.map((row: any) => {
+    const problem = row.problems ?? {};
+    return {
+      id: row.id,
+      title: row.title,
+      problemNumber: problem.number ?? 0,
+      difficulty: (problem.difficulty ?? "Medium") as Difficulty,
+      topics: Array.isArray(problem.topics) ? problem.topics : [],
+      videoUrl: row.video_url,
+      creator: row.creator ?? "",
+      hook: row.hook ?? "",
+      likes: row.likes_count ?? 0,
+      comments: 0,
+      bookmarks: row.bookmarks_count ?? 0,
+      shares: 0,
+    };
+  });
+}
+
 /**
  * Blended final score for a clip.
  * engagement 0.25, topicMatch 0.20, contentSim 0.15, difficultyFit 0.20,
