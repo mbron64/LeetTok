@@ -10,6 +10,7 @@ from pipeline.config import load_config
 from pipeline.db import _init_client, get_known_video_ids, insert_discovered_videos
 from pipeline.discover import discover, filter_new_videos
 from pipeline.download import download_video, video_id_from_url
+from pipeline.transcribe import transcribe
 
 log = logging.getLogger(__name__)
 
@@ -37,12 +38,24 @@ def _cmd_discover(args: argparse.Namespace) -> None:
         print(f"  • {v.title}{problem}")
 
 
+def _print_transcript_summary(segments, source: str) -> None:
+    print(f"  Source: {source}")
+    print(f"  Segments: {len(segments)}")
+    if segments:
+        duration = segments[-1].end - segments[0].start
+        print(f"  Coverage: {segments[0].start:.1f}s – {segments[-1].end:.1f}s ({duration:.1f}s)")
+        preview = segments[0].text[:80]
+        if len(segments[0].text) > 80:
+            preview += "..."
+        print(f'  Preview: "{preview}"')
+
+
 def _cmd_process(args: argparse.Namespace) -> None:
     logging.basicConfig(
         level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
     )
 
-    load_config()
+    config = load_config()
 
     video_id = video_id_from_url(args.youtube_url)
     output_dir = Path("tmp") / video_id
@@ -58,15 +71,15 @@ def _cmd_process(args: argparse.Namespace) -> None:
     segments = extract_captions(args.youtube_url, output_dir)
 
     if segments:
-        print(f"  Found {len(segments)} caption segments")
-        coverage = f"{segments[0].start:.1f}s – {segments[-1].end:.1f}s"
-        print(f"  Coverage: {coverage}")
-        preview = segments[0].text[:80]
-        if len(segments[0].text) > 80:
-            preview += "..."
-        print(f'  Preview: "{preview}"')
+        print("\nTranscript ready:")
+        _print_transcript_summary(segments, "YouTube captions")
     else:
-        print("  No captions available — Whisper fallback needed")
+        print("  No captions available — running Whisper transcription fallback")
+        mode = "cloud (gpt-4o-mini-transcribe)" if args.cloud_transcribe else "local (faster-whisper large-v2)"
+        print(f"  Mode: {mode}")
+        segments = transcribe(result.audio_path, config, cloud=args.cloud_transcribe)
+        print("\nTranscript ready:")
+        _print_transcript_summary(segments, f"Whisper ({mode})")
 
 
 def _cmd_batch(args: argparse.Namespace) -> None:
@@ -88,6 +101,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     process_p = sub.add_parser("process", help="Run the full pipeline on a single video")
     process_p.add_argument("youtube_url", help="YouTube video URL to process")
+    process_p.add_argument(
+        "--cloud-transcribe",
+        action="store_true",
+        default=False,
+        help="Use OpenAI gpt-4o-mini-transcribe instead of local faster-whisper for Whisper fallback",
+    )
 
     sub.add_parser("batch", help="Discover new videos and process all of them")
 
