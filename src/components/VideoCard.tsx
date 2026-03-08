@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
+  Linking,
   Pressable,
   StyleSheet,
   Text,
@@ -24,6 +25,7 @@ type Props = {
 function VideoCard({ clip, isActive, height }: Props) {
   const { width } = useWindowDimensions();
   const [isPaused, setIsPaused] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const [progress, setProgress] = useState(0);
   const pauseIconOpacity = useRef(new Animated.Value(0)).current;
 
@@ -72,6 +74,21 @@ function VideoCard({ clip, isActive, height }: Props) {
     flashIcon();
   }, [flashIcon]);
 
+  const openLeetCode = useCallback(() => {
+    Linking.openURL(
+      `https://leetcode.com/problems/${clip.title.toLowerCase().replace(/\s+/g, "-")}/`,
+    );
+  }, [clip.title]);
+
+  const initials = clip.creator
+    .split(/\s+/)
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  const difficultyColor = theme.difficulty[clip.difficulty];
+
   return (
     <View style={{ width, height }} className="bg-black">
       <VideoView
@@ -98,44 +115,51 @@ function VideoCard({ clip, isActive, height }: Props) {
       </Pressable>
 
       <LinearGradient
-        colors={["transparent", "rgba(0,0,0,0.8)"]}
+        colors={["transparent", "rgba(0,0,0,0.7)"]}
         style={styles.gradient}
         pointerEvents="none"
       />
 
-      <View className="absolute bottom-16 left-4 right-16" pointerEvents="none">
-        <View className="mb-2 flex-row items-center gap-2">
-          <Text className="text-xl font-bold text-white">
-            {clip.problemNumber}. {clip.title}
-          </Text>
-        </View>
-
-        <View className="mb-2 flex-row items-center gap-2">
-          <View
-            style={{ backgroundColor: theme.difficulty[clip.difficulty] }}
-            className="rounded-full px-2.5 py-0.5"
-          >
-            <Text className="text-xs font-semibold text-white">
-              {clip.difficulty}
-            </Text>
-          </View>
-          {clip.topics.map((topic) => (
-            <View
-              key={topic}
-              className="rounded-full bg-white/20 px-2.5 py-0.5"
-            >
-              <Text className="text-xs text-white">{topic}</Text>
-            </View>
-          ))}
-        </View>
-
-        <Text className="mb-1 text-sm font-medium text-white">
+      {/* Bottom-left overlay text */}
+      <View className="absolute bottom-5 left-3 right-20">
+        <Text className="text-[15px] font-bold text-white">
           @{clip.creator}
         </Text>
-        <Text className="text-xs text-gray-400">{clip.hook}</Text>
+        <Pressable onPress={() => setExpanded((e) => !e)}>
+          <Text
+            className="mt-1 text-[13px] leading-[18px] text-white"
+            numberOfLines={expanded ? undefined : 2}
+          >
+            {clip.title}
+            {clip.hook ? ` — ${clip.hook}` : ""}
+          </Text>
+          {!expanded && clip.hook && clip.hook.length > 40 && (
+            <Text className="text-[13px] font-semibold text-white/70">
+              more
+            </Text>
+          )}
+        </Pressable>
+        <View className="mt-1.5 flex-row flex-wrap gap-1.5">
+          {clip.topics.map((topic) => (
+            <Text key={topic} className="text-[11px] text-white/50">
+              #{topic.replace(/\s+/g, "")}
+            </Text>
+          ))}
+        </View>
       </View>
 
-      <View className="absolute bottom-28 right-3 items-center gap-5">
+      {/* Right-side action column */}
+      <View className="absolute bottom-24 right-3 items-center gap-4">
+        {/* Creator avatar */}
+        <View className="mb-1 items-center">
+          <View className="h-12 w-12 items-center justify-center rounded-full border-2 border-white bg-gray-700">
+            <Text className="text-sm font-bold text-white">{initials}</Text>
+          </View>
+          <View className="absolute -bottom-1.5 h-5 w-5 items-center justify-center rounded-full bg-[#ff2d55]">
+            <Ionicons name="add" size={14} color="#fff" />
+          </View>
+        </View>
+
         <ActionButton
           icon={liked ? "heart" : "heart-outline"}
           color={liked ? "#ef4444" : "#fff"}
@@ -143,14 +167,32 @@ function VideoCard({ clip, isActive, height }: Props) {
           onPress={toggleLike}
         />
         <ActionButton
+          icon="chatbubble-ellipses-outline"
+          color="#fff"
+          count={clip.comments}
+        />
+        <ActionButton
           icon={bookmarked ? "bookmark" : "bookmark-outline"}
           color={bookmarked ? "#eab308" : "#fff"}
           count={clip.bookmarks + bookmarkOffset}
           onPress={toggleBookmark}
         />
-        <ActionButton icon="share-social" color="#fff" />
+        <ActionButton icon="arrow-redo" color="#fff" count={clip.shares} />
+
+        {/* LeetCode problem badge */}
+        <Pressable onPress={openLeetCode} className="mt-1 items-center">
+          <View
+            style={{ backgroundColor: difficultyColor }}
+            className="h-10 w-10 items-center justify-center rounded-full"
+          >
+            <Text className="text-xs font-bold text-white">
+              {clip.problemNumber}
+            </Text>
+          </View>
+        </Pressable>
       </View>
 
+      {/* Progress bar */}
       <View className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/20">
         <View
           style={{ width: `${progress * 100}%` }}
@@ -176,7 +218,7 @@ const ActionButton = React.memo(function ActionButton({
     <Pressable onPress={onPress} className="items-center">
       <Ionicons name={icon} size={28} color={color} />
       {count != null && (
-        <Text className="mt-0.5 text-xs text-white">
+        <Text className="mt-0.5 text-[11px] text-white">
           {formatCount(count)}
         </Text>
       )}
@@ -192,6 +234,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    height: "50%",
+    height: "45%",
   },
 });

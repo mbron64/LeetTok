@@ -10,5 +10,7 @@ export type Clip = {
   creator: string;
   hook: string;
   likes: number;
+  comments: number;
   bookmarks: number;
+  shares: number;
 };

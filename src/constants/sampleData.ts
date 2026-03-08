@@ -12,7 +12,9 @@ export const sampleClips: Clip[] = [
     creator: "NeetCode",
     hook: "The classic interview opener — here's the O(n) trick",
     likes: 14200,
+    comments: 842,
     bookmarks: 3400,
+    shares: 1200,
   },
   {
     id: "2",
@@ -25,7 +27,9 @@ export const sampleClips: Clip[] = [
     creator: "NeetCode",
     hook: "Sliding window pattern you'll use in 20+ problems",
     likes: 9800,
+    comments: 523,
     bookmarks: 2100,
+    shares: 780,
   },
   {
     id: "3",
@@ -38,7 +42,9 @@ export const sampleClips: Clip[] = [
     creator: "NeetCode",
     hook: "Binary search on the partition — not the arrays",
     likes: 7300,
+    comments: 391,
     bookmarks: 1850,
+    shares: 540,
   },
   {
     id: "4",
@@ -51,7 +57,9 @@ export const sampleClips: Clip[] = [
     creator: "NeetCode",
     hook: "Stack basics — if you can't solve this, keep grinding",
     likes: 11500,
+    comments: 678,
     bookmarks: 2900,
+    shares: 950,
   },
   {
     id: "5",
@@ -64,7 +72,9 @@ export const sampleClips: Clip[] = [
     creator: "NeetCode",
     hook: "Dummy node technique saves you from edge cases",
     likes: 8700,
+    comments: 412,
     bookmarks: 1600,
+    shares: 620,
   },
   {
     id: "6",
@@ -77,7 +87,9 @@ export const sampleClips: Clip[] = [
     creator: "NeetCode",
     hook: "HashMap + doubly linked list = O(1) everything",
     likes: 12400,
+    comments: 731,
     bookmarks: 3800,
+    shares: 1100,
   },
   {
     id: "7",
@@ -90,7 +102,9 @@ export const sampleClips: Clip[] = [
     creator: "NeetCode",
     hook: "Bottom-up DP with a twist — think backwards",
     likes: 6100,
+    comments: 289,
     bookmarks: 1450,
+    shares: 430,
   },
   {
     id: "8",
@@ -103,6 +117,8 @@ export const sampleClips: Clip[] = [
     creator: "NeetCode",
     hook: "Two pointer approach makes this a one-pass solution",
     likes: 15800,
+    comments: 923,
     bookmarks: 4200,
+    shares: 1500,
   },
 ];

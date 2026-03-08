@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import VideoFeed from "../../src/components/VideoFeed";
+import CategoryBar, { Category } from "../../src/components/CategoryBar";
 import { useClips } from "../../src/lib/hooks";
 import { recommendClips } from "../../src/lib/recommend";
 import { theme } from "../../src/constants/theme";
@@ -17,6 +18,7 @@ export default function FeedScreen() {
   const [prefDifficulties, setPrefDifficulties] = useState<Difficulty[]>([]);
   const [prefTopics, setPrefTopics] = useState<string[]>([]);
   const [prefsLoaded, setPrefsLoaded] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<Category>("For You");
 
   useEffect(() => {
     Promise.all([
@@ -40,6 +42,10 @@ export default function FeedScreen() {
     });
   }, [clips, prefsLoaded, prefDifficulties, prefTopics]);
 
+  const handleCategoryChange = useCallback((cat: Category) => {
+    setActiveCategory(cat);
+  }, []);
+
   return (
     <View className="flex-1 bg-black">
       <StatusBar style="light" />
@@ -48,7 +54,13 @@ export default function FeedScreen() {
           <ActivityIndicator color={theme.colors.accent} size="large" />
         </View>
       ) : (
-        <VideoFeed clips={recommended} />
+        <>
+          <VideoFeed clips={recommended} />
+          <CategoryBar
+            active={activeCategory}
+            onCategoryChange={handleCategoryChange}
+          />
+        </>
       )}
     </View>
   );

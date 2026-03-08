@@ -58,7 +58,9 @@ export function useClips() {
         creator: row.creator ?? "",
         hook: row.hook ?? "",
         likes: row.likes_count,
+        comments: row.comments_count ?? 0,
         bookmarks: row.bookmarks_count,
+        shares: row.shares_count ?? 0,
       }));
 
       if (after) {
