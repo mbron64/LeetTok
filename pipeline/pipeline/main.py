@@ -8,6 +8,12 @@ import yt_dlp
 
 from pipeline.captions_extract import TranscriptSegment, extract_captions
 from pipeline.captions_render import produce_final_clip
+from pipeline.challenges import (
+    MadLeetsChallenge,
+    generate_answer_variations,
+    generate_challenge,
+    save_challenge,
+)
 from pipeline.clip import clip_and_reframe
 from pipeline.config import Config
 from pipeline.db import (
@@ -158,6 +164,38 @@ def process_video(
                 final_path,
             )
             final_clips.append(final_path)
+
+        # Generate MadLeets challenges for each clip
+        challenges_dir = output_dir / "challenges"
+        challenges: list[MadLeetsChallenge | None] = []
+        for i, seg in enumerate(segments):
+            challenge = _timed(
+                f"Generated challenge for clip {i}",
+                generate_challenge,
+                transcript,
+                video_title,
+                problem_number or 0,
+                seg.start_time,
+                seg.end_time,
+                config,
+                provider,
+            )
+            if challenge is not None:
+                _timed(
+                    f"Generated answer variations for clip {i}",
+                    generate_answer_variations,
+                    challenge,
+                    config,
+                    provider,
+                )
+                save_challenge(challenge, challenges_dir / f"{i}_challenge.json")
+            challenges.append(challenge)
+
+        challenge_count = sum(1 for c in challenges if c is not None)
+        log.info(
+            "Generated %d/%d MadLeets challenges for %s",
+            challenge_count, len(segments), video_id,
+        )
 
         # Upload to R2
         urls: list[str] = _timed(
