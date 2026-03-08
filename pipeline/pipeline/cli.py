@@ -3,10 +3,13 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
+from pathlib import Path
 
+from pipeline.captions_extract import extract_captions
 from pipeline.config import load_config
 from pipeline.db import _init_client, get_known_video_ids, insert_discovered_videos
 from pipeline.discover import discover, filter_new_videos
+from pipeline.download import download_video, video_id_from_url
 
 log = logging.getLogger(__name__)
 
@@ -35,7 +38,35 @@ def _cmd_discover(args: argparse.Namespace) -> None:
 
 
 def _cmd_process(args: argparse.Namespace) -> None:
-    print(f"Processing not yet implemented for: {args.youtube_url}")
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
+    )
+
+    load_config()
+
+    video_id = video_id_from_url(args.youtube_url)
+    output_dir = Path("tmp") / video_id
+
+    print(f"Downloading: {args.youtube_url}")
+    result = download_video(args.youtube_url, output_dir)
+    print(f"  Video: {result.video_path}")
+    print(f"  Audio: {result.audio_path}")
+    if result.caption_path:
+        print(f"  Captions file: {result.caption_path}")
+
+    print("\nExtracting captions...")
+    segments = extract_captions(args.youtube_url, output_dir)
+
+    if segments:
+        print(f"  Found {len(segments)} caption segments")
+        coverage = f"{segments[0].start:.1f}s – {segments[-1].end:.1f}s"
+        print(f"  Coverage: {coverage}")
+        preview = segments[0].text[:80]
+        if len(segments[0].text) > 80:
+            preview += "..."
+        print(f'  Preview: "{preview}"')
+    else:
+        print("  No captions available — Whisper fallback needed")
 
 
 def _cmd_batch(args: argparse.Namespace) -> None:
