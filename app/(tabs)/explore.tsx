@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   Pressable,
   Text,
@@ -10,8 +11,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { sampleClips } from "../../src/constants/sampleData";
-import type { Clip, Difficulty } from "../../src/types";
+import { useProblems } from "../../src/lib/hooks";
+import type { Difficulty } from "../../src/types";
 
 const DIFFICULTY_COLORS: Record<Difficulty, string> = {
   Easy: "#22c55e",
@@ -21,48 +22,16 @@ const DIFFICULTY_COLORS: Record<Difficulty, string> = {
 
 const FILTERS: Array<Difficulty | "All"> = ["All", "Easy", "Medium", "Hard"];
 
-type Problem = {
-  problemNumber: number;
-  title: string;
-  difficulty: Difficulty;
-  topics: string[];
-  clipCount: number;
-};
-
-function extractProblems(clips: Clip[]): Problem[] {
-  const map = new Map<number, Problem>();
-  for (const clip of clips) {
-    const existing = map.get(clip.problemNumber);
-    if (existing) {
-      existing.clipCount++;
-      for (const t of clip.topics) {
-        if (!existing.topics.includes(t)) existing.topics.push(t);
-      }
-    } else {
-      map.set(clip.problemNumber, {
-        problemNumber: clip.problemNumber,
-        title: clip.title,
-        difficulty: clip.difficulty,
-        topics: [...clip.topics],
-        clipCount: 1,
-      });
-    }
-  }
-  return Array.from(map.values()).sort(
-    (a, b) => a.problemNumber - b.problemNumber,
-  );
-}
-
 export default function ExploreScreen() {
   const router = useRouter();
   const { width } = useWindowDimensions();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<Difficulty | "All">("All");
 
-  const allProblems = useMemo(() => extractProblems(sampleClips), []);
+  const { problems, loading } = useProblems();
 
   const filtered = useMemo(() => {
-    let result = allProblems;
+    let result = problems;
     if (filter !== "All") {
       result = result.filter((p) => p.difficulty === filter);
     }
@@ -71,11 +40,11 @@ export default function ExploreScreen() {
       result = result.filter(
         (p) =>
           p.title.toLowerCase().includes(q) ||
-          String(p.problemNumber).includes(q),
+          String(p.number).includes(q),
       );
     }
     return result;
-  }, [allProblems, filter, search]);
+  }, [problems, filter, search]);
 
   const cardWidth = (width - 48) / 2;
 
@@ -132,79 +101,78 @@ export default function ExploreScreen() {
         </View>
       </View>
 
-      <FlatList
-        data={filtered}
-        numColumns={2}
-        keyExtractor={(item) => String(item.problemNumber)}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}
-        columnWrapperStyle={{ gap: 16, marginTop: 16 }}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View className="mt-20 items-center">
-            <Ionicons name="search-outline" size={48} color="#333" />
-            <Text className="mt-3 text-sm text-gray-500">
-              No problems found
-            </Text>
-          </View>
-        }
-        renderItem={({ item }) => (
-          <Pressable
-            style={{ width: cardWidth }}
-            className="rounded-2xl bg-[#111] p-4"
-            onPress={() =>
-              router.push({
-                pathname: "/problem/[id]",
-                params: { id: String(item.problemNumber) },
-              })
-            }
-          >
-            <View className="mb-2 flex-row items-center justify-between">
-              <Text className="text-xs font-medium text-gray-500">
-                #{item.problemNumber}
+      {loading ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator color="#fff" size="large" />
+        </View>
+      ) : (
+        <FlatList
+          data={filtered}
+          numColumns={2}
+          keyExtractor={(item) => String(item.number)}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}
+          columnWrapperStyle={{ gap: 16, marginTop: 16 }}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View className="mt-20 items-center">
+              <Ionicons name="search-outline" size={48} color="#333" />
+              <Text className="mt-3 text-sm text-gray-500">
+                No problems found
               </Text>
-              <View
-                className="rounded-full px-2 py-0.5"
-                style={{
-                  backgroundColor:
-                    DIFFICULTY_COLORS[item.difficulty] + "20",
-                }}
-              >
-                <Text
-                  className="text-[10px] font-bold"
-                  style={{ color: DIFFICULTY_COLORS[item.difficulty] }}
-                >
-                  {item.difficulty}
-                </Text>
-              </View>
             </View>
-
-            <Text
-              className="mb-3 text-sm font-semibold text-white"
-              numberOfLines={2}
+          }
+          renderItem={({ item }) => (
+            <Pressable
+              style={{ width: cardWidth }}
+              className="rounded-2xl bg-[#111] p-4"
+              onPress={() =>
+                router.push({
+                  pathname: "/problem/[id]",
+                  params: { id: String(item.number) },
+                })
+              }
             >
-              {item.title}
-            </Text>
-
-            <View className="flex-row flex-wrap gap-1">
-              {item.topics.slice(0, 3).map((topic) => (
+              <View className="mb-2 flex-row items-center justify-between">
+                <Text className="text-xs font-medium text-gray-500">
+                  #{item.number}
+                </Text>
                 <View
-                  key={topic}
-                  className="rounded-full bg-white/10 px-2 py-0.5"
+                  className="rounded-full px-2 py-0.5"
+                  style={{
+                    backgroundColor:
+                      DIFFICULTY_COLORS[item.difficulty] + "20",
+                  }}
                 >
-                  <Text className="text-[10px] text-gray-400">{topic}</Text>
+                  <Text
+                    className="text-[10px] font-bold"
+                    style={{ color: DIFFICULTY_COLORS[item.difficulty] }}
+                  >
+                    {item.difficulty}
+                  </Text>
                 </View>
-              ))}
-            </View>
+              </View>
 
-            <View className="mt-3 flex-row items-center gap-1">
-              <Ionicons name="play-circle" size={12} color="#666" />
-              <Text className="text-[10px] text-gray-500">
-                {item.clipCount} {item.clipCount === 1 ? "clip" : "clips"}
+              <Text
+                className="mb-3 text-sm font-semibold text-white"
+                numberOfLines={2}
+              >
+                {item.title}
               </Text>
-            </View>
-          </Pressable>
-        )}
-      />
+
+              <View className="flex-row flex-wrap gap-1">
+                {item.topics.slice(0, 3).map((topic) => (
+                  <View
+                    key={topic}
+                    className="rounded-full bg-white/10 px-2 py-0.5"
+                  >
+                    <Text className="text-[10px] text-gray-400">{topic}</Text>
+                  </View>
+                ))}
+              </View>
+            </Pressable>
+          )}
+        />
+      )}
     </SafeAreaView>
   );
 }

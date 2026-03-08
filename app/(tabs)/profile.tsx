@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Pressable, ScrollView, Switch, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "../../src/lib/auth";
+import { isSupabaseConfigured } from "../../src/constants/config";
 
 const STATS = [
   { label: "Clips Watched", value: "47" },
@@ -10,7 +12,12 @@ const STATS = [
 ];
 
 export default function ProfileScreen() {
+  const { user, signOut } = useAuth();
   const [darkMode, setDarkMode] = useState(true);
+
+  const displayName =
+    user?.email?.split("@")[0] ?? "LeetTok User";
+  const initial = displayName.charAt(0).toUpperCase();
 
   return (
     <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
@@ -19,18 +26,21 @@ export default function ProfileScreen() {
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
         <View className="items-center px-4 pb-6 pt-6">
           <View className="mb-3 h-20 w-20 items-center justify-center rounded-full bg-[#6366f1]">
-            <Text className="text-3xl font-bold text-white">L</Text>
+            <Text className="text-3xl font-bold text-white">{initial}</Text>
           </View>
-          <Text className="text-xl font-bold text-white">LeetTok User</Text>
-          <Text className="mt-1 text-sm text-gray-500">
-            Grinding one clip at a time
-          </Text>
+          <Text className="text-xl font-bold text-white">{displayName}</Text>
+          {user?.email && (
+            <Text className="mt-1 text-sm text-gray-500">{user.email}</Text>
+          )}
+          {!isSupabaseConfigured && (
+            <Text className="mt-1 text-xs text-gray-600">
+              Offline mode — Supabase not configured
+            </Text>
+          )}
         </View>
 
-        {/* Stats */}
         <View className="mx-4 mb-6 flex-row rounded-2xl bg-[#111] p-4">
           {STATS.map((stat, i) => (
             <View
@@ -47,14 +57,12 @@ export default function ProfileScreen() {
           ))}
         </View>
 
-        {/* Settings */}
         <View className="mx-4">
           <Text className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
             Settings
           </Text>
 
           <View className="overflow-hidden rounded-2xl bg-[#111]">
-            {/* Dark Mode */}
             <View className="flex-row items-center justify-between border-b border-[#1a1a1a] px-4 py-3.5">
               <View className="flex-row items-center gap-3">
                 <View className="h-8 w-8 items-center justify-center rounded-lg bg-[#6366f1]/20">
@@ -70,7 +78,6 @@ export default function ProfileScreen() {
               />
             </View>
 
-            {/* Notifications */}
             <SettingsRow
               icon="notifications"
               iconColor="#eab308"
@@ -79,17 +86,28 @@ export default function ProfileScreen() {
               showBorder
             />
 
-            {/* About */}
             <SettingsRow
               icon="information-circle"
               iconColor="#22c55e"
               iconBg="bg-[#22c55e]/20"
               label="About"
+              showBorder={!!user}
             />
+
+            {user && (
+              <Pressable
+                onPress={signOut}
+                className="flex-row items-center gap-3 px-4 py-3.5"
+              >
+                <View className="h-8 w-8 items-center justify-center rounded-lg bg-red-500/20">
+                  <Ionicons name="log-out" size={16} color="#ef4444" />
+                </View>
+                <Text className="text-sm text-red-400">Sign Out</Text>
+              </Pressable>
+            )}
           </View>
         </View>
 
-        {/* App info */}
         <View className="mt-8 items-center">
           <Text className="text-xs text-gray-600">LeetTok v1.0.0</Text>
         </View>

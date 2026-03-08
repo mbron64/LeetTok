@@ -12,6 +12,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { Clip } from "../types";
 import { formatCount } from "../lib/format";
+import { useLike, useBookmark } from "../lib/hooks";
 
 const DIFFICULTY_COLORS: Record<Clip["difficulty"], string> = {
   Easy: "#22c55e",
@@ -30,6 +31,13 @@ export default function VideoCard({ clip, isActive, height }: Props) {
   const [isPaused, setIsPaused] = useState(false);
   const [progress, setProgress] = useState(0);
   const pauseIconOpacity = useRef(new Animated.Value(0)).current;
+
+  const { liked, count: likeOffset, toggle: toggleLike } = useLike(clip.id);
+  const {
+    bookmarked,
+    count: bookmarkOffset,
+    toggle: toggleBookmark,
+  } = useBookmark(clip.id);
 
   const player = useVideoPlayer(clip.videoUrl, (p) => {
     p.loop = true;
@@ -79,7 +87,6 @@ export default function VideoCard({ clip, isActive, height }: Props) {
       />
 
       <Pressable style={StyleSheet.absoluteFill} onPress={handleTap}>
-        {/* Play/Pause flash icon */}
         <Animated.View
           style={{ opacity: pauseIconOpacity }}
           className="absolute inset-0 items-center justify-center"
@@ -95,14 +102,12 @@ export default function VideoCard({ clip, isActive, height }: Props) {
         </Animated.View>
       </Pressable>
 
-      {/* Bottom gradient overlay */}
       <LinearGradient
         colors={["transparent", "rgba(0,0,0,0.8)"]}
         style={styles.gradient}
         pointerEvents="none"
       />
 
-      {/* Bottom info overlay */}
       <View className="absolute bottom-16 left-4 right-16" pointerEvents="none">
         <View className="mb-2 flex-row items-center gap-2">
           <Text className="text-xl font-bold text-white">
@@ -135,14 +140,22 @@ export default function VideoCard({ clip, isActive, height }: Props) {
         <Text className="text-xs text-gray-400">{clip.hook}</Text>
       </View>
 
-      {/* Right side action buttons */}
       <View className="absolute bottom-28 right-3 items-center gap-5">
-        <ActionButton icon="heart" count={clip.likes} />
-        <ActionButton icon="bookmark" count={clip.bookmarks} />
-        <ActionButton icon="share-social" />
+        <ActionButton
+          icon={liked ? "heart" : "heart-outline"}
+          color={liked ? "#ef4444" : "#fff"}
+          count={clip.likes + likeOffset}
+          onPress={toggleLike}
+        />
+        <ActionButton
+          icon={bookmarked ? "bookmark" : "bookmark-outline"}
+          color={bookmarked ? "#eab308" : "#fff"}
+          count={clip.bookmarks + bookmarkOffset}
+          onPress={toggleBookmark}
+        />
+        <ActionButton icon="share-social" color="#fff" />
       </View>
 
-      {/* Progress bar */}
       <View className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/20">
         <View
           style={{ width: `${progress * 100}%` }}
@@ -155,20 +168,24 @@ export default function VideoCard({ clip, isActive, height }: Props) {
 
 function ActionButton({
   icon,
+  color = "#fff",
   count,
+  onPress,
 }: {
   icon: React.ComponentProps<typeof Ionicons>["name"];
+  color?: string;
   count?: number;
+  onPress?: () => void;
 }) {
   return (
-    <View className="items-center">
-      <Ionicons name={icon} size={28} color="#fff" />
+    <Pressable onPress={onPress} className="items-center">
+      <Ionicons name={icon} size={28} color={color} />
       {count != null && (
         <Text className="mt-0.5 text-xs text-white">
           {formatCount(count)}
         </Text>
       )}
-    </View>
+    </Pressable>
   );
 }
 
