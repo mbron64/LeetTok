@@ -6,13 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import VideoFeed from "../../src/components/VideoFeed";
 import { sampleClips } from "../../src/constants/sampleData";
-import type { Difficulty } from "../../src/types";
-
-const DIFFICULTY_COLORS: Record<Difficulty, string> = {
-  Easy: "#22c55e",
-  Medium: "#eab308",
-  Hard: "#ef4444",
-};
+import { theme } from "../../src/constants/theme";
 
 export default function ProblemFeedScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -69,7 +63,7 @@ export default function ProblemFeedScreen() {
               <View
                 className="rounded-full px-2 py-0.5"
                 style={{
-                  backgroundColor: DIFFICULTY_COLORS[problem.difficulty],
+                  backgroundColor: theme.difficulty[problem.difficulty],
                 }}
               >
                 <Text className="text-[10px] font-bold text-white">

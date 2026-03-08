@@ -10,13 +10,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { sampleClips } from "../../src/constants/sampleData";
-import type { Clip, Difficulty } from "../../src/types";
-
-const DIFFICULTY_COLORS: Record<Difficulty, string> = {
-  Easy: "#22c55e",
-  Medium: "#eab308",
-  Hard: "#ef4444",
-};
+import { theme } from "../../src/constants/theme";
+import type { Clip } from "../../src/types";
 
 const INITIAL_BOOKMARKS = [
   sampleClips[0].id,
@@ -122,12 +117,12 @@ function BookmarkCard({
           <View
             className="rounded-full px-2 py-0.5"
             style={{
-              backgroundColor: DIFFICULTY_COLORS[clip.difficulty] + "20",
+              backgroundColor: theme.difficultyBg[clip.difficulty],
             }}
           >
             <Text
               className="text-[10px] font-bold"
-              style={{ color: DIFFICULTY_COLORS[clip.difficulty] }}
+              style={{ color: theme.difficulty[clip.difficulty] }}
             >
               {clip.difficulty}
             </Text>

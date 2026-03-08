@@ -12,13 +12,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useProblems } from "../../src/lib/hooks";
+import { theme } from "../../src/constants/theme";
 import type { Difficulty } from "../../src/types";
-
-const DIFFICULTY_COLORS: Record<Difficulty, string> = {
-  Easy: "#22c55e",
-  Medium: "#eab308",
-  Hard: "#ef4444",
-};
 
 const FILTERS: Array<Difficulty | "All"> = ["All", "Easy", "Medium", "Hard"];
 
@@ -76,10 +71,10 @@ export default function ExploreScreen() {
             const isActive = filter === f;
             const bg =
               isActive && f !== "All"
-                ? DIFFICULTY_COLORS[f as Difficulty]
+                ? theme.difficulty[f as Difficulty]
                 : isActive
-                  ? "#fff"
-                  : "#1a1a1a";
+                  ? theme.colors.text
+                  : theme.colors.surfaceElevated;
             const textColor = isActive && f === "All" ? "#000" : "#fff";
 
             return (
@@ -139,13 +134,12 @@ export default function ExploreScreen() {
                 <View
                   className="rounded-full px-2 py-0.5"
                   style={{
-                    backgroundColor:
-                      DIFFICULTY_COLORS[item.difficulty] + "20",
+                    backgroundColor: theme.difficultyBg[item.difficulty],
                   }}
                 >
                   <Text
                     className="text-[10px] font-bold"
-                    style={{ color: DIFFICULTY_COLORS[item.difficulty] }}
+                    style={{ color: theme.difficulty[item.difficulty] }}
                   >
                     {item.difficulty}
                   </Text>

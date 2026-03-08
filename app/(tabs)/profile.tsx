@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../src/lib/auth";
 import { isSupabaseConfigured } from "../../src/constants/config";
+import { theme } from "../../src/constants/theme";
 
 const STATS = [
   { label: "Clips Watched", value: "47" },
@@ -73,8 +74,8 @@ export default function ProfileScreen() {
               <Switch
                 value={darkMode}
                 onValueChange={setDarkMode}
-                trackColor={{ false: "#333", true: "#6366f1" }}
-                thumbColor="#fff"
+                trackColor={{ false: theme.colors.textDim, true: theme.colors.accent }}
+                thumbColor={theme.colors.text}
               />
             </View>
 

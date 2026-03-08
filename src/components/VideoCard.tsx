@@ -13,12 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Clip } from "../types";
 import { formatCount } from "../lib/format";
 import { useLike, useBookmark } from "../lib/hooks";
-
-const DIFFICULTY_COLORS: Record<Clip["difficulty"], string> = {
-  Easy: "#22c55e",
-  Medium: "#eab308",
-  Hard: "#ef4444",
-};
+import { theme } from "../constants/theme";
 
 type Props = {
   clip: Clip;
@@ -26,7 +21,7 @@ type Props = {
   height: number;
 };
 
-export default function VideoCard({ clip, isActive, height }: Props) {
+function VideoCard({ clip, isActive, height }: Props) {
   const { width } = useWindowDimensions();
   const [isPaused, setIsPaused] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -117,7 +112,7 @@ export default function VideoCard({ clip, isActive, height }: Props) {
 
         <View className="mb-2 flex-row items-center gap-2">
           <View
-            style={{ backgroundColor: DIFFICULTY_COLORS[clip.difficulty] }}
+            style={{ backgroundColor: theme.difficulty[clip.difficulty] }}
             className="rounded-full px-2.5 py-0.5"
           >
             <Text className="text-xs font-semibold text-white">
@@ -166,7 +161,7 @@ export default function VideoCard({ clip, isActive, height }: Props) {
   );
 }
 
-function ActionButton({
+const ActionButton = React.memo(function ActionButton({
   icon,
   color = "#fff",
   count,
@@ -187,7 +182,9 @@ function ActionButton({
       )}
     </Pressable>
   );
-}
+});
+
+export default React.memo(VideoCard);
 
 const styles = StyleSheet.create({
   gradient: {
