@@ -170,7 +170,7 @@ function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true
   const openLeetCode = useCallback(() => {
     Linking.openURL(
       `https://leetcode.com/problems/${clip.title.toLowerCase().replace(/\s+/g, "-")}/`,
-    );
+    ).catch(() => {});
   }, [clip.title]);
 
   const handleTutorOpen = useCallback(() => {
@@ -208,7 +208,7 @@ function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true
   const difficultyColor = theme.difficulty[clip.difficulty];
 
   return (
-    <View style={{ width, height }} className="bg-black">
+    <View style={{ width, height, backgroundColor: "#000" }}>
       <VideoView
         player={player}
         style={StyleSheet.absoluteFill}
@@ -270,8 +270,8 @@ function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true
       <View className="absolute bottom-24 right-3 items-center gap-4">
         {/* AI Tutor */}
         <Pressable onPress={handleTutorOpen} className="items-center">
-          <View className="h-12 w-12 items-center justify-center rounded-full bg-[#6366f1]/90">
-            <Ionicons name="sparkles" size={24} color="#fff" />
+          <View className="h-12 w-12 items-center justify-center rounded-full bg-white/20">
+            <Ionicons name="sparkles" size={24} color="#fbb862" />
           </View>
           <Text className="mt-0.5 text-[11px] text-white">Tutor</Text>
         </Pressable>
@@ -309,7 +309,7 @@ function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true
         />
         <ActionButton
           icon={bookmarked ? "bookmark" : "bookmark-outline"}
-          color={bookmarked ? "#eab308" : "#fff"}
+          color={bookmarked ? "#fbb862" : "#fff"}
           count={clip.bookmarks + bookmarkOffset}
           onPress={toggleBookmark}
         />

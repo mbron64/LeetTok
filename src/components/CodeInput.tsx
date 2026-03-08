@@ -69,7 +69,7 @@ const CodeInput = forwardRef<TextInput, Props>(function CodeInput(
           fontSize: 14,
           lineHeight: 22,
           color: "#e4e4e7",
-          backgroundColor: "#1e1e2e",
+          backgroundColor: "#1a1a1a",
           borderWidth: 1.5,
           borderColor: "#06b6d4",
           borderRadius: 8,

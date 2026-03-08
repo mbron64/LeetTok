@@ -1,9 +1,7 @@
-// TODO: Replace with your actual Supabase project URL
-export const SUPABASE_URL = "https://your-project.supabase.co";
+export const SUPABASE_URL = "https://zqhbjgioibiyaagjihhx.supabase.co";
 
-// TODO: Replace with your actual Supabase anon/public key
-export const SUPABASE_ANON_KEY = "your-anon-key";
+export const SUPABASE_ANON_KEY = "sb_publishable_BDfV_eVtgmb4_apS0e5ymw_j6DAjl6_";
 
-export const isSupabaseConfigured =
-  SUPABASE_URL !== "https://your-project.supabase.co" &&
-  SUPABASE_ANON_KEY !== "your-anon-key";
+// Temporarily false to preview UI with sample data while migrations are pending.
+// Flip to true once Supabase migrations are applied.
+export const isSupabaseConfigured = false;

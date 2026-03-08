@@ -31,7 +31,7 @@ function TokenRow({ tokens, onInsertToken }: Props) {
   );
 
   return (
-    <View style={{ backgroundColor: "#1a1a2e" }}>
+    <View style={{ backgroundColor: "#1a1a1a" }}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -66,7 +66,7 @@ function TokenRow({ tokens, onInsertToken }: Props) {
               style={{
                 fontFamily: MONO_FONT,
                 fontSize: 13,
-                color: "#c9d1d9",
+                color: "#afb3b6",
               }}
             >
               {token}

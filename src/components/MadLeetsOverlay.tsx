@@ -263,18 +263,17 @@ export default function MadLeetsOverlay({
     <Animated.View
       entering={FadeIn.duration(250)}
       exiting={FadeOut.duration(200)}
-      className="absolute inset-0 z-50"
-      style={{ backgroundColor: "rgba(0,0,0,0.7)" }}
+      style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 50, backgroundColor: "rgba(0,0,0,0.7)" }}
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1 justify-end"
+        style={{ flex: 1, justifyContent: "flex-end" }}
       >
         <Animated.View
           entering={SlideInDown.springify().damping(18).stiffness(140)}
           exiting={SlideOutDown.duration(250)}
           className="rounded-t-3xl"
-          style={{ backgroundColor: "#0f0f1a" }}
+          style={{ backgroundColor: "#111111" }}
         >
           <View className="px-5 pb-10 pt-5">
             {/* Drag handle */}
@@ -296,7 +295,7 @@ export default function MadLeetsOverlay({
                 </Text>
               </View>
               <Pressable onPress={onDismiss} hitSlop={12}>
-                <Ionicons name="close" size={22} color="#666" />
+                <Ionicons name="close" size={22} color="#5c6370" />
               </Pressable>
             </View>
 
@@ -309,7 +308,7 @@ export default function MadLeetsOverlay({
                     challenge.difficulty === "Easy"
                       ? "rgba(34,197,94,0.15)"
                       : challenge.difficulty === "Medium"
-                        ? "rgba(234,179,8,0.15)"
+                        ? "rgba(251,184,98,0.15)"
                         : "rgba(239,68,68,0.15)",
                 }}
               >
@@ -320,7 +319,7 @@ export default function MadLeetsOverlay({
                       challenge.difficulty === "Easy"
                         ? "#22c55e"
                         : challenge.difficulty === "Medium"
-                          ? "#eab308"
+                          ? "#fbb862"
                           : "#ef4444",
                   }}
                 >
@@ -332,7 +331,7 @@ export default function MadLeetsOverlay({
                   +{challenge.xpValue} XP
                 </Text>
               </View>
-              <Text className="text-xs" style={{ color: "#555" }}>
+              <Text className="text-xs" style={{ color: "#5c6370" }}>
                 {challenge.language}
               </Text>
             </View>
@@ -340,7 +339,7 @@ export default function MadLeetsOverlay({
             {/* Code block */}
             <View
               className="mb-4 overflow-hidden rounded-xl"
-              style={{ backgroundColor: "#1a1a2e" }}
+              style={{ backgroundColor: "#1a1a1a" }}
             >
               {challenge.codeBlock.map((line, idx) => {
                 const isBlank = idx === challenge.blankLineIndex;
@@ -365,7 +364,7 @@ export default function MadLeetsOverlay({
                       style={{
                         fontFamily: MONO_FONT,
                         fontSize: 11,
-                        color: "#444",
+                        color: "#5c6370",
                         width: 36,
                         textAlign: "right",
                         paddingRight: 10,
@@ -414,7 +413,7 @@ export default function MadLeetsOverlay({
                         style={{
                           fontFamily: MONO_FONT,
                           fontSize: 13,
-                          color: "#c9d1d9",
+                          color: "#afb3b6",
                           lineHeight: 20,
                         }}
                       >
@@ -500,7 +499,7 @@ export default function MadLeetsOverlay({
                   {result.message}
                 </Text>
                 {computedXP > 0 && (
-                  <Text className="text-xs" style={{ color: "#555" }}>
+                  <Text className="text-xs" style={{ color: "#5c6370" }}>
                     (+{computedXP} XP)
                   </Text>
                 )}
@@ -517,7 +516,7 @@ export default function MadLeetsOverlay({
                   className="mb-3 rounded-lg p-3"
                   style={{ backgroundColor: "rgba(239,68,68,0.08)" }}
                 >
-                  <Text className="mb-1 text-xs" style={{ color: "#888" }}>
+                  <Text className="mb-1 text-xs" style={{ color: "#afb3b6" }}>
                     Correct answer:
                   </Text>
                   <Text
@@ -540,8 +539,8 @@ export default function MadLeetsOverlay({
                   onPress={() => setShowHint(true)}
                   className="flex-row items-center gap-1.5"
                 >
-                  <Ionicons name="bulb-outline" size={14} color="#eab308" />
-                  <Text className="text-xs" style={{ color: "#eab308" }}>
+                  <Ionicons name="bulb-outline" size={14} color="#fbb862" />
+                  <Text className="text-xs" style={{ color: "#fbb862" }}>
                     {challenge.hint}
                   </Text>
                 </Pressable>
@@ -553,9 +552,9 @@ export default function MadLeetsOverlay({
               <Animated.View
                 entering={FadeIn.delay(600).duration(400)}
                 className="mb-3 rounded-lg p-3"
-                style={{ backgroundColor: "rgba(99,102,241,0.08)" }}
+                style={{ backgroundColor: "rgba(251,184,98,0.08)" }}
               >
-                <Text className="text-xs leading-4" style={{ color: "#a0a0a0" }}>
+                <Text className="text-xs leading-4" style={{ color: "#afb3b6" }}>
                   {challenge.explanation}
                 </Text>
               </Animated.View>
@@ -570,10 +569,10 @@ export default function MadLeetsOverlay({
                   style={{ backgroundColor: "rgba(255,255,255,0.06)" }}
                 >
                   <Ionicons name="play-skip-forward" size={16} color="#888" />
-                  <Text className="text-sm font-medium" style={{ color: "#888" }}>
+                  <Text className="text-sm font-medium" style={{ color: "#afb3b6" }}>
                     Skip
                   </Text>
-                  <Text className="text-[10px]" style={{ color: "#555" }}>
+                  <Text className="text-[10px]" style={{ color: "#5c6370" }}>
                     -5 XP
                   </Text>
                 </Pressable>
@@ -607,7 +606,7 @@ export default function MadLeetsOverlay({
               >
                 <Text
                   className="text-sm font-medium"
-                  style={{ color: "#a0a0a0" }}
+                  style={{ color: "#afb3b6" }}
                 >
                   Continue
                 </Text>

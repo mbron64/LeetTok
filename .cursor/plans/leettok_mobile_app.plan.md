@@ -4,19 +4,19 @@ overview: Build LeetTok mobile-first with React Native/Expo, starting with the T
 todos:
   - id: phase1-init
     content: "Phase 1: Initialize Expo project, configure structure, NativeWind, expo-router, linting (commits 1-5)"
-    status: pending
+    status: completed
   - id: phase2-feed
     content: "Phase 2: Build TikTok-style video feed MVP with snap-scroll, auto-play, overlay UI, action buttons (commits 6-15)"
-    status: pending
+    status: completed
   - id: phase3-nav
     content: "Phase 3: Build tab navigation, Explore, Bookmarks, Profile screens, search (commits 16-20)"
-    status: pending
+    status: completed
   - id: phase4-backend
     content: "Phase 4: Set up Supabase, define schema, add auth, connect feed to real data (commits 21-26)"
-    status: pending
+    status: completed
   - id: phase5-polish
     content: "Phase 5: Recommendations, onboarding, theming, app icon, performance audit, TestFlight (commits 27-32)"
-    status: pending
+    status: completed
 isProject: false
 ---
 

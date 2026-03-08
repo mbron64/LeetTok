@@ -16,8 +16,8 @@ function XPLevelCard({ data }: Props) {
     <View className="mb-4 rounded-2xl bg-[#111] p-4">
       <View className="mb-3 flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
-          <View className="h-10 w-10 items-center justify-center rounded-xl bg-[#6366f1]/20">
-            <Ionicons name="star" size={20} color="#818cf8" />
+          <View className="h-10 w-10 items-center justify-center rounded-xl bg-[#fbb862]/15">
+            <Ionicons name="star" size={20} color="#fbb862" />
           </View>
           <View>
             <Text className="text-xs text-gray-500">LEVEL</Text>
@@ -28,16 +28,16 @@ function XPLevelCard({ data }: Props) {
         </View>
         <View className="items-end">
           <Text className="text-xs text-gray-500">TOTAL XP</Text>
-          <Text className="text-lg font-bold text-[#818cf8]">
+          <Text className="text-lg font-bold text-[#fbb862]">
             {data.totalXP.toLocaleString()}
           </Text>
         </View>
       </View>
 
       {/* XP progress bar */}
-      <View className="mb-1 h-3 overflow-hidden rounded-full bg-[#1a1a2e]">
+      <View className="mb-1 h-3 overflow-hidden rounded-full bg-[#1a1a1a]">
         <View
-          className="h-full rounded-full bg-[#6366f1]"
+          className="h-full rounded-full bg-[#fbb862]"
           style={{ width: `${Math.min(progress * 100, 100)}%` }}
         />
       </View>
@@ -128,7 +128,7 @@ function TopicBar({ topic }: { topic: TopicBreakdown }) {
           {topic.correct}/{topic.total} ({topic.accuracy}%)
         </Text>
       </View>
-      <View className="h-2 overflow-hidden rounded-full bg-[#1a1a2e]">
+      <View className="h-2 overflow-hidden rounded-full bg-[#1a1a1a]">
         <View
           className="h-full rounded-full"
           style={{
@@ -137,7 +137,7 @@ function TopicBar({ topic }: { topic: TopicBreakdown }) {
               topic.accuracy >= 70
                 ? "#22c55e"
                 : topic.accuracy >= 40
-                  ? "#eab308"
+                  ? "#fbb862"
                   : "#ef4444",
           }}
         />
@@ -175,7 +175,7 @@ function TopicBreakdownCard({ data }: Props) {
 function DifficultyCard({ data }: Props) {
   const difficulties = [
     { key: "Easy" as const, color: "#22c55e", bg: "bg-[#22c55e]/15" },
-    { key: "Medium" as const, color: "#eab308", bg: "bg-[#eab308]/15" },
+    { key: "Medium" as const, color: "#fbb862", bg: "bg-[#fbb862]/15" },
     { key: "Hard" as const, color: "#ef4444", bg: "bg-[#ef4444]/15" },
   ];
 

@@ -32,14 +32,14 @@ export default function ProfileScreen() {
   const initial = displayName.charAt(0).toUpperCase();
 
   return (
-    <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }} edges={["top"]}>
       <ScrollView
-        className="flex-1"
+        style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
         <View className="items-center px-4 pb-6 pt-6">
-          <View className="mb-3 h-20 w-20 items-center justify-center rounded-full bg-[#6366f1]">
+          <View className="mb-3 h-20 w-20 items-center justify-center rounded-full bg-[#222]">
             <Text className="text-3xl font-bold text-white">{initial}</Text>
           </View>
           <Text className="text-xl font-bold text-white">{displayName}</Text>
@@ -91,8 +91,8 @@ export default function ProfileScreen() {
           <View className="overflow-hidden rounded-2xl bg-[#111]">
             <View className="flex-row items-center justify-between border-b border-[#1a1a1a] px-4 py-3.5">
               <View className="flex-row items-center gap-3">
-                <View className="h-8 w-8 items-center justify-center rounded-lg bg-[#6366f1]/20">
-                  <Ionicons name="moon" size={16} color="#818cf8" />
+                <View className="h-8 w-8 items-center justify-center rounded-lg bg-white/10">
+                  <Ionicons name="moon" size={16} color="#afb3b6" />
                 </View>
                 <Text className="text-sm text-white">Dark Mode</Text>
               </View>
@@ -100,8 +100,8 @@ export default function ProfileScreen() {
                 value={darkMode}
                 onValueChange={setDarkMode}
                 trackColor={{
-                  false: theme.colors.textDim,
-                  true: theme.colors.accent,
+                  false: theme.colors.textMuted,
+                  true: theme.colors.text,
                 }}
                 thumbColor={theme.colors.text}
               />
@@ -117,23 +117,23 @@ export default function ProfileScreen() {
               <Switch
                 value={madLeetsEnabled}
                 onValueChange={toggleMadLeets}
-                trackColor={{ false: theme.colors.textDim, true: "#06b6d4" }}
+                trackColor={{ false: theme.colors.textMuted, true: "#06b6d4" }}
                 thumbColor={theme.colors.text}
               />
             </View>
 
             <SettingsRow
               icon="notifications"
-              iconColor="#eab308"
-              iconBg="bg-[#eab308]/20"
+              iconColor="#afb3b6"
+              iconBg="bg-white/10"
               label="Notifications"
               showBorder
             />
 
             <SettingsRow
               icon="information-circle"
-              iconColor="#22c55e"
-              iconBg="bg-[#22c55e]/20"
+              iconColor="#afb3b6"
+              iconBg="bg-white/10"
               label="About"
               showBorder={!!user}
             />
@@ -185,7 +185,7 @@ function SettingsRow({
         </View>
         <Text className="text-sm text-white">{label}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={16} color="#333" />
+      <Ionicons name="chevron-forward" size={16} color="#5c6370" />
     </Pressable>
   );
 }

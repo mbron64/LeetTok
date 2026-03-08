@@ -4,31 +4,31 @@ overview: Standalone Python pipeline that discovers NeetCode YouTube videos, dow
 todos:
   - id: clip-scaffold
     content: "Phase 1: Initialize pipeline project structure, CLI entry point, config module (commits 1-2)"
-    status: pending
+    status: completed
   - id: clip-discover
     content: "Phase 2: YouTube Data API discovery + metadata persistence (commits 3-4)"
-    status: pending
+    status: completed
   - id: clip-download
     content: "Phase 3: yt-dlp download + YouTube caption extraction (commits 5-6)"
-    status: pending
+    status: completed
   - id: clip-transcribe
     content: "Phase 4: Whisper transcription fallback module (commit 7)"
-    status: pending
+    status: completed
   - id: clip-segment
     content: "Phase 5: LLM segment detection + review mode (commits 8-9)"
-    status: pending
+    status: completed
   - id: clip-produce
     content: "Phase 6: FFmpeg clipping + 9:16 reframing (commits 10-11)"
-    status: pending
+    status: completed
   - id: clip-captions
     content: "Phase 7: ASS caption generation + burn-in (commits 12-13)"
-    status: pending
+    status: completed
   - id: clip-upload
     content: "Phase 8: R2 upload + Supabase metadata write (commits 14-15)"
-    status: pending
+    status: completed
   - id: clip-orchestrate
     content: "Phase 9: Orchestrator, retry logic, logging (commits 16-18)"
-    status: pending
+    status: completed
   - id: clip-first-batch
     content: "Phase 10: Process first real batch, tune prompts and crop strategy (commits 19-20)"
     status: pending

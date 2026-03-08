@@ -4,22 +4,22 @@ overview: "A full mobile code editor accessible from the right sidebar of any cl
 todos:
   - id: editor-backend
     content: "Phase 1: Set up Judge0 code execution backend and Supabase Edge Function proxy (commits 1-4)"
-    status: pending
+    status: completed
   - id: editor-data
     content: "Phase 2: Test case data model -- store problems with starter code, test cases, and constraints (commits 5-6)"
-    status: pending
+    status: completed
   - id: editor-ui
     content: "Phase 3: Build the code editor bottom sheet with syntax highlighting, tabs, and symbol toolbar (commits 7-12)"
-    status: pending
+    status: completed
   - id: editor-exec
     content: "Phase 4: Wire up code submission, execution, and results display (commits 13-16)"
-    status: pending
+    status: completed
   - id: editor-sidebar
     content: "Phase 5: Add code icon to right sidebar, wire open/close with video state (commits 17-18)"
-    status: pending
+    status: completed
   - id: editor-polish
     content: "Phase 6: Language picker, solution history, and editorial solutions (commits 19-22)"
-    status: pending
+    status: completed
 isProject: false
 ---
 

@@ -4,25 +4,25 @@ overview: "A hybrid recommendation engine powering the For You feed and all pers
 todos:
   - id: reco-signals
     content: "Phase 1: Instrument engagement tracking -- record all user signals (watch time, likes, skips, MadLeets results) into an interactions table (commits 1-3)"
-    status: pending
+    status: completed
   - id: reco-scoring
     content: "Phase 2: Build clip scoring engine -- engagement score, freshness decay, Wilson score for trending (commits 4-6)"
-    status: pending
+    status: completed
   - id: reco-user-profile
     content: "Phase 3: Build user interest/skill profile from interaction history (commits 7-9)"
-    status: pending
+    status: completed
   - id: reco-embeddings
     content: "Phase 4: Add pgvector embeddings for content-based similarity (commits 10-12)"
-    status: pending
+    status: completed
   - id: reco-feed
     content: "Phase 5: Build the feed assembly algorithm -- blend scoring, diversity, exploration (commits 13-16)"
-    status: pending
+    status: completed
   - id: reco-adaptive
     content: "Phase 6: Add adaptive difficulty + spaced repetition from MadLeets data (commits 17-19)"
-    status: pending
+    status: completed
   - id: reco-iterate
     content: "Phase 7: A/B testing, metrics dashboard, iteration (commits 20-22)"
-    status: pending
+    status: completed
 isProject: false
 ---
 

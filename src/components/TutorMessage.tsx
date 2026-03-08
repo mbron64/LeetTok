@@ -40,7 +40,7 @@ export default function TutorMessage({ message }: Props) {
   if (isUser) {
     return (
       <View className="mb-3 flex-row justify-end">
-        <View className="max-w-[85%] rounded-2xl rounded-br-md bg-[#1e1e1e] px-4 py-3">
+        <View className="max-w-[85%] rounded-2xl rounded-br-md bg-[#1a1a1a] px-4 py-3">
           <Text className="text-[15px] leading-[22px] text-white">
             {message.content}
           </Text>
@@ -53,12 +53,12 @@ export default function TutorMessage({ message }: Props) {
 
   return (
     <View className="mb-3 flex-row justify-start">
-      <View className="max-w-[85%] rounded-2xl rounded-bl-md bg-[#2a2a2a] px-4 py-3">
+      <View className="max-w-[85%] rounded-2xl rounded-bl-md bg-[#222] px-4 py-3">
         {segments.map((seg, i) =>
           seg.type === "code" ? (
             <View
               key={i}
-              className="my-1.5 overflow-hidden rounded-lg bg-[#1e1e1e] px-3 py-2"
+              className="my-1.5 overflow-hidden rounded-lg bg-[#1a1a1a] px-3 py-2"
             >
               <Text
                 className="font-mono text-[13px] leading-[20px] text-white"

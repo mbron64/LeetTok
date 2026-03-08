@@ -32,10 +32,10 @@ export default function QuickActionChips({
         onPress={onToggle}
         className="mb-2 flex-row items-center gap-2"
       >
-        <View className="h-8 w-8 items-center justify-center rounded-full bg-[#2a2a2a]">
-          <Ionicons name="add" size={18} color="#a0a0a0" />
+        <View className="h-8 w-8 items-center justify-center rounded-full bg-[#222]">
+          <Ionicons name="add" size={18} color="#afb3b6" />
         </View>
-        <Text className="text-sm text-[#a0a0a0]">Quick actions</Text>
+        <Text className="text-sm text-[#afb3b6]">Quick actions</Text>
       </Pressable>
     );
   }
@@ -43,12 +43,12 @@ export default function QuickActionChips({
   return (
     <View className="mb-3">
       <View className="mb-2 flex-row items-center justify-between">
-        <Text className="text-xs text-[#a0a0a0]">Quick actions</Text>
+        <Text className="text-xs text-[#afb3b6]">Quick actions</Text>
         <Pressable
           onPress={onToggle}
-          className="h-6 w-6 items-center justify-center rounded-full bg-[#2a2a2a]"
+          className="h-6 w-6 items-center justify-center rounded-full bg-[#222]"
         >
-          <Ionicons name="chevron-up" size={14} color="#a0a0a0" />
+          <Ionicons name="chevron-up" size={14} color="#afb3b6" />
         </Pressable>
       </View>
       <ScrollView
@@ -60,7 +60,7 @@ export default function QuickActionChips({
           <Pressable
             key={label}
             onPress={() => onSend(label)}
-            className="rounded-full bg-[#2a2a2a] px-4 py-2"
+            className="rounded-full bg-[#222] px-4 py-2"
           >
             <Text className="text-sm text-white">{label}</Text>
           </Pressable>

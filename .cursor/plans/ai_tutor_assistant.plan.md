@@ -4,19 +4,19 @@ overview: "An AI-powered contextual tutor accessible from the right sidebar of a
 todos:
   - id: tutor-backend
     content: "Phase 1: Supabase Edge Function proxy for OpenAI chat completions with streaming (commits 1-3)"
-    status: pending
+    status: completed
   - id: tutor-context
     content: "Phase 2: Context assembly -- build system prompt from clip transcript + problem metadata (commits 4-5)"
-    status: pending
+    status: completed
   - id: tutor-sheet
     content: "Phase 3: Bottom sheet chat UI with message list, input, and streaming display (commits 6-9)"
-    status: pending
+    status: completed
   - id: tutor-sidebar
     content: "Phase 4: Add AI icon to right sidebar, wire up open/close, pause/resume video (commits 10-11)"
-    status: pending
+    status: completed
   - id: tutor-persist
     content: "Phase 5: Chat history persistence, rate limiting, and quick-action buttons (commits 12-15)"
-    status: pending
+    status: completed
 isProject: false
 ---
 

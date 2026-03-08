@@ -211,7 +211,7 @@ export default function InlineChallenge({
   );
 
   return (
-    <View className="rounded-2xl p-4" style={{ backgroundColor: "#0f0f1a" }}>
+    <View className="rounded-2xl p-4" style={{ backgroundColor: "#111111" }}>
       <View className="mb-3 flex-row items-center gap-2">
         <View
           className="rounded-full px-2.5 py-0.5"
@@ -220,7 +220,7 @@ export default function InlineChallenge({
               challenge.difficulty === "Easy"
                 ? "rgba(34,197,94,0.15)"
                 : challenge.difficulty === "Medium"
-                  ? "rgba(234,179,8,0.15)"
+                  ? "rgba(251,184,98,0.15)"
                   : "rgba(239,68,68,0.15)",
           }}
         >
@@ -231,7 +231,7 @@ export default function InlineChallenge({
                 challenge.difficulty === "Easy"
                   ? "#22c55e"
                   : challenge.difficulty === "Medium"
-                    ? "#eab308"
+                    ? "#fbb862"
                     : "#ef4444",
             }}
           >
@@ -243,14 +243,14 @@ export default function InlineChallenge({
             +{Math.round(challenge.xpValue * xpMultiplierBonus)} XP
           </Text>
         </View>
-        <Text className="text-xs" style={{ color: "#555" }}>
+        <Text className="text-xs" style={{ color: "#5c6370" }}>
           {challenge.language}
         </Text>
       </View>
 
       <View
         className="mb-4 overflow-hidden rounded-xl"
-        style={{ backgroundColor: "#1a1a2e" }}
+        style={{ backgroundColor: "#1a1a1a" }}
       >
         {challenge.codeBlock.map((line, idx) => {
           const isBlank = idx === challenge.blankLineIndex;
@@ -272,7 +272,7 @@ export default function InlineChallenge({
                 style={{
                   fontFamily: MONO_FONT,
                   fontSize: 11,
-                  color: "#444",
+                  color: "#5c6370",
                   width: 36,
                   textAlign: "right",
                   paddingRight: 10,
@@ -320,7 +320,7 @@ export default function InlineChallenge({
                   style={{
                     fontFamily: MONO_FONT,
                     fontSize: 13,
-                    color: "#c9d1d9",
+                    color: "#afb3b6",
                     lineHeight: 20,
                   }}
                 >
@@ -387,7 +387,7 @@ export default function InlineChallenge({
             {result.message}
           </Text>
           {computedXP > 0 && (
-            <Text className="text-xs" style={{ color: "#555" }}>
+            <Text className="text-xs" style={{ color: "#5c6370" }}>
               (+{computedXP} XP)
             </Text>
           )}
@@ -404,7 +404,7 @@ export default function InlineChallenge({
             className="mb-3 rounded-lg p-3"
             style={{ backgroundColor: "rgba(239,68,68,0.08)" }}
           >
-            <Text className="mb-1 text-xs" style={{ color: "#888" }}>
+            <Text className="mb-1 text-xs" style={{ color: "#afb3b6" }}>
               Correct answer:
             </Text>
             <Text
@@ -423,8 +423,8 @@ export default function InlineChallenge({
       {showHint && !submitted && (
         <Animated.View entering={FadeIn.duration(300)} className="mb-3">
           <View className="flex-row items-center gap-1.5">
-            <Ionicons name="bulb-outline" size={14} color="#eab308" />
-            <Text className="text-xs" style={{ color: "#eab308" }}>
+            <Ionicons name="bulb-outline" size={14} color="#fbb862" />
+            <Text className="text-xs" style={{ color: "#fbb862" }}>
               {challenge.hint}
             </Text>
           </View>
@@ -435,9 +435,9 @@ export default function InlineChallenge({
         <Animated.View
           entering={FadeIn.delay(600).duration(400)}
           className="mb-3 rounded-lg p-3"
-          style={{ backgroundColor: "rgba(99,102,241,0.08)" }}
+          style={{ backgroundColor: "rgba(251,184,98,0.08)" }}
         >
-          <Text className="text-xs leading-4" style={{ color: "#a0a0a0" }}>
+          <Text className="text-xs leading-4" style={{ color: "#afb3b6" }}>
             {challenge.explanation}
           </Text>
         </Animated.View>
@@ -451,7 +451,7 @@ export default function InlineChallenge({
             style={{ backgroundColor: "rgba(255,255,255,0.06)" }}
           >
             <Ionicons name="play-skip-forward" size={16} color="#888" />
-            <Text className="text-sm font-medium" style={{ color: "#888" }}>
+            <Text className="text-sm font-medium" style={{ color: "#afb3b6" }}>
               Skip
             </Text>
           </Pressable>

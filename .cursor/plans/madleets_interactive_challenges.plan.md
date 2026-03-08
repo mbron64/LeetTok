@@ -4,22 +4,22 @@ overview: "An interactive fill-in-the-blank coding challenge mode within LeetTok
 todos:
   - id: madleets-pipeline
     content: "Phase 1: Extend clipping pipeline to generate MadLeets challenge data from video transcripts (commits 1-4)"
-    status: pending
+    status: completed
   - id: madleets-schema
     content: "Phase 2: Add challenges table to Supabase schema + seed data (commits 5-6)"
-    status: pending
+    status: completed
   - id: madleets-ui-core
     content: "Phase 3: Build the core challenge UI -- video pause, code display, input, validation (commits 7-12)"
-    status: pending
+    status: completed
   - id: madleets-keyboard
     content: "Phase 4: Build custom code keyboard with token suggestions (commits 13-14)"
-    status: pending
+    status: completed
   - id: madleets-gamification
     content: "Phase 5: Add gamification -- XP, streaks, difficulty progression, stats (commits 15-18)"
-    status: pending
+    status: completed
   - id: madleets-modes
     content: "Phase 6: Add challenge modes -- daily challenge, topic drill, review queue (commits 19-21)"
-    status: pending
+    status: completed
 isProject: false
 ---
 

@@ -4,13 +4,13 @@ overview: "Add GitHub and Google social login to LeetTok alongside the existing 
 todos:
   - id: oauth-deps
     content: "Phase 1: Install deps, configure deep linking scheme, set up Supabase OAuth providers (commits 1-3)"
-    status: pending
+    status: completed
   - id: oauth-flow
     content: "Phase 2: Build the OAuth flow -- performOAuth helper, session extraction from redirect URL (commits 4-5)"
-    status: pending
+    status: completed
   - id: oauth-ui
     content: "Phase 3: Redesign login/register screens with social auth buttons (commits 6-8)"
-    status: pending
+    status: completed
   - id: oauth-test
     content: "Phase 4: Test on dev build, handle edge cases (commits 9-10)"
     status: pending
