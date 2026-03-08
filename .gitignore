@@ -45,3 +45,4 @@ app-example
 
 # local media and generated caches
 /videos/
+.cursor/debug-*.log
