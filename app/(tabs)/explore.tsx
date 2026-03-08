@@ -105,7 +105,7 @@ export default function ExploreScreen() {
           data={filtered}
           numColumns={2}
           keyExtractor={(item) => String(item.number)}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
           columnWrapperStyle={{ gap: 16, marginTop: 16 }}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={

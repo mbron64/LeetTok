@@ -24,12 +24,13 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: "#000",
+          backgroundColor: "rgba(0,0,0,0.85)",
           borderTopColor: "rgba(255,255,255,0.08)",
           borderTopWidth: StyleSheet.hairlineWidth,
           height: 80,
           paddingBottom: 24,
           paddingTop: 6,
+          position: "absolute",
         },
         tabBarActiveTintColor: "#fff",
         tabBarInactiveTintColor: "#5c6370",

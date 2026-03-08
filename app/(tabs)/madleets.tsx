@@ -165,7 +165,7 @@ export default function MadLeetsScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }} edges={["top"]}>
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 32 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}

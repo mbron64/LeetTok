@@ -17,7 +17,7 @@ import {
   type TextInputSelectionChangeEventData,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet from "@gorhom/bottom-sheet";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../lib/auth";
 import { submitCode, LANGUAGE_IDS } from "../lib/codeExecution";
@@ -254,143 +254,140 @@ function CodeEditorSheetInner(
         backgroundStyle={{ backgroundColor: theme.colors.surface }}
         handleIndicatorStyle={{ backgroundColor: theme.colors.textMuted }}
       >
-        <BottomSheetView style={{ flex: 1, backgroundColor: "#111111" }}>
-          {/* Header: tabs + language + Run + Submit */}
-          <View style={{ flexDirection: "row", alignItems: "center", borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.1)", paddingHorizontal: 8 }}>
-            <View style={{ flexDirection: "row", flex: 1 }}>
+        {/* Fixed header: tabs + language + Run + Submit */}
+        <View style={{ backgroundColor: "#111111", flexDirection: "row", alignItems: "center", borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.1)", paddingHorizontal: 8 }}>
+          <View style={{ flexDirection: "row", flex: 1 }}>
+            <Pressable
+              onPress={() => setActiveTab("problem")}
+              style={{ paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: activeTab === "problem" ? 2 : 0, borderBottomColor: "#fff" }}
+            >
+              <Text style={{ color: activeTab === "problem" ? "#fff" : "#5c6370", fontWeight: activeTab === "problem" ? "500" : "400" }}>
+                Problem
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setActiveTab("code")}
+              style={{ paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: activeTab === "code" ? 2 : 0, borderBottomColor: "#fff" }}
+            >
+              <Text style={{ color: activeTab === "code" ? "#fff" : "#5c6370", fontWeight: activeTab === "code" ? "500" : "400" }}>
+                Code
+              </Text>
+            </Pressable>
+          </View>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <Pressable
+              onPress={() => setShowLangPicker(!showLangPicker)}
+              style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: "rgba(255,255,255,0.1)" }}
+            >
+              <Text style={{ color: "#fff", fontSize: 14 }}>
+                {effectiveLanguages.find((l) => l.key === language.key)?.label ?? language.label}
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={handleRun}
+              disabled={loading}
+              style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: "rgba(6,182,212,0.2)", borderWidth: 1, borderColor: "rgba(6,182,212,0.4)" }}
+            >
+              <Text style={{ color: "#22d3ee", fontWeight: "500", fontSize: 14 }}>Run</Text>
+            </Pressable>
+            <Pressable
+              onPress={handleSubmit}
+              disabled={loading}
+              style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: "rgba(34,197,94,0.2)", borderWidth: 1, borderColor: "rgba(34,197,94,0.4)" }}
+            >
+              <Text style={{ color: "#4ade80", fontWeight: "500", fontSize: 14 }}>Submit</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        {showLangPicker && (
+          <View style={{ position: "absolute", top: 56, right: 8, zIndex: 10, borderRadius: 8, backgroundColor: "#1a1a1a", borderWidth: 1, borderColor: "rgba(255,255,255,0.1)", paddingVertical: 4 }}>
+            {effectiveLanguages.map((lang) => (
               <Pressable
-                onPress={() => setActiveTab("problem")}
-                style={{ paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: activeTab === "problem" ? 2 : 0, borderBottomColor: "#fff" }}
+                key={lang.key}
+                onPress={() => handleLangSelect(lang)}
+                style={{ paddingHorizontal: 16, paddingVertical: 8 }}
               >
-                <Text style={{ color: activeTab === "problem" ? "#fff" : "#5c6370", fontWeight: activeTab === "problem" ? "500" : "400" }}>
-                  Problem
-                </Text>
+                <Text style={{ color: "#fff", fontSize: 14 }}>{lang.label}</Text>
               </Pressable>
-              <Pressable
-                onPress={() => setActiveTab("code")}
-                style={{ paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: activeTab === "code" ? 2 : 0, borderBottomColor: "#fff" }}
-              >
-                <Text style={{ color: activeTab === "code" ? "#fff" : "#5c6370", fontWeight: activeTab === "code" ? "500" : "400" }}>
-                  Code
-                </Text>
-              </Pressable>
-            </View>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-              <Pressable
-                onPress={() => setShowLangPicker(!showLangPicker)}
-                style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: "rgba(255,255,255,0.1)" }}
-              >
-                <Text style={{ color: "#fff", fontSize: 14 }}>
-                  {effectiveLanguages.find((l) => l.key === language.key)?.label ?? language.label}
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={handleRun}
-                disabled={loading}
-                style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: "rgba(6,182,212,0.2)", borderWidth: 1, borderColor: "rgba(6,182,212,0.4)" }}
-              >
-                <Text style={{ color: "#22d3ee", fontWeight: "500", fontSize: 14 }}>Run</Text>
-              </Pressable>
-              <Pressable
-                onPress={handleSubmit}
-                disabled={loading}
-                style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: "rgba(34,197,94,0.2)", borderWidth: 1, borderColor: "rgba(34,197,94,0.4)" }}
-              >
-                <Text style={{ color: "#4ade80", fontWeight: "500", fontSize: 14 }}>Submit</Text>
-              </Pressable>
+            ))}
+          </View>
+        )}
+
+        {activeTab === "problem" && problem && (
+          <ProblemDescription problem={problem} />
+        )}
+
+        {activeTab === "code" && (
+          <View style={{ flex: 1, backgroundColor: "#111111" }}>
+            {(results !== null || error) && (
+              <View style={{ paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.1)", maxHeight: "40%" }}>
+                <TestResults
+                  results={results}
+                  error={error}
+                  loading={loading}
+                  isSubmit={!!problem && results?.length === problem.testCases.length}
+                />
+                {onAskTutor && !loading && (error || (results && results.some((r) => !r.passed))) && (
+                  <Pressable
+                    onPress={() => {
+                      const msg = error
+                        ? `My code failed with error: ${error}. Problem: ${problem?.title ?? ""}.`
+                        : results
+                          ? `My code failed ${results.filter((r) => !r.passed).length} test(s). Problem: ${problem?.title ?? ""}. Failed cases: ${results
+                              .filter((r) => !r.passed)
+                              .map((r) => `expected ${r.expected_output}, got ${r.actual_output}`)
+                              .join("; ")}` 
+                          : "";
+                      onAskTutor(msg);
+                    }}
+                    style={{ marginTop: 8, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 8, backgroundColor: "rgba(255,255,255,0.1)", paddingVertical: 8, paddingHorizontal: 12, borderWidth: 1, borderColor: "rgba(255,255,255,0.2)" }}
+                  >
+                    <Ionicons name="sparkles" size={18} color="#fbb862" />
+                    <Text style={{ color: "#fff", fontWeight: "500", fontSize: 14 }}>Ask Tutor</Text>
+                  </Pressable>
+                )}
+              </View>
+            )}
+            <View style={{ flex: 1, flexDirection: "row" }}>
+              <View style={{ width: 40, paddingTop: 12, paddingBottom: 92, backgroundColor: "#0a0a0a", borderRightWidth: 1, borderRightColor: "rgba(255,255,255,0.05)", alignItems: "flex-end", paddingRight: 8 }}>
+                {lineNumbers.map((n) => (
+                  <Text
+                    key={n}
+                    style={{ fontFamily: MONO_FONT, fontSize: 12, color: "#5c6370" }}
+                  >
+                    {n}
+                  </Text>
+                ))}
+              </View>
+              <TextInput
+                ref={codeInputRef}
+                value={code}
+                onChangeText={setCode}
+                onSelectionChange={handleSelectionChange}
+                multiline
+                inputAccessoryViewID={Platform.OS === "ios" ? CODE_SYMBOL_BAR_ID : undefined}
+                style={{
+                  flex: 1,
+                  fontFamily: MONO_FONT,
+                  fontSize: 14,
+                  lineHeight: 22,
+                  color: "#e4e4e7",
+                  backgroundColor: "#1a1a1a",
+                  paddingHorizontal: 12,
+                  paddingTop: 8,
+                  paddingBottom: 92,
+                  textAlignVertical: "top",
+                }}
+                placeholderTextColor="#5c6370"
+                keyboardAppearance="dark"
+                autoCorrect={false}
+                spellCheck={false}
+                autoCapitalize="none"
+              />
             </View>
           </View>
-
-          {showLangPicker && (
-            <View style={{ position: "absolute", top: 56, right: 8, zIndex: 10, borderRadius: 8, backgroundColor: "#1a1a1a", borderWidth: 1, borderColor: "rgba(255,255,255,0.1)", paddingVertical: 4 }}>
-              {effectiveLanguages.map((lang) => (
-                <Pressable
-                  key={lang.key}
-                  onPress={() => handleLangSelect(lang)}
-                  style={{ paddingHorizontal: 16, paddingVertical: 8 }}
-                >
-                  <Text style={{ color: "#fff", fontSize: 14 }}>{lang.label}</Text>
-                </Pressable>
-              ))}
-            </View>
-          )}
-
-          {activeTab === "problem" && problem && (
-            <View style={{ flex: 1 }}>
-              <ProblemDescription problem={problem} />
-            </View>
-          )}
-
-          {activeTab === "code" && (
-            <View style={{ flex: 1 }}>
-              {(results !== null || error) && (
-                <View style={{ paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.1)", maxHeight: "40%" }}>
-                  <TestResults
-                    results={results}
-                    error={error}
-                    loading={loading}
-                    isSubmit={!!problem && results?.length === problem.testCases.length}
-                  />
-                  {onAskTutor && !loading && (error || (results && results.some((r) => !r.passed))) && (
-                    <Pressable
-                      onPress={() => {
-                        const msg = error
-                          ? `My code failed with error: ${error}. Problem: ${problem?.title ?? ""}.`
-                          : results
-                            ? `My code failed ${results.filter((r) => !r.passed).length} test(s). Problem: ${problem?.title ?? ""}. Failed cases: ${results
-                                .filter((r) => !r.passed)
-                                .map((r) => `expected ${r.expected_output}, got ${r.actual_output}`)
-                                .join("; ")}` 
-                            : "";
-                        onAskTutor(msg);
-                      }}
-                      style={{ marginTop: 8, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 8, backgroundColor: "rgba(255,255,255,0.1)", paddingVertical: 8, paddingHorizontal: 12, borderWidth: 1, borderColor: "rgba(255,255,255,0.2)" }}
-                    >
-                      <Ionicons name="sparkles" size={18} color="#fbb862" />
-                      <Text style={{ color: "#fff", fontWeight: "500", fontSize: 14 }}>Ask Tutor</Text>
-                    </Pressable>
-                  )}
-                </View>
-              )}
-              <View style={{ flex: 1, flexDirection: "row" }}>
-                <View style={{ width: 40, paddingVertical: 12, backgroundColor: "#0a0a0a", borderRightWidth: 1, borderRightColor: "rgba(255,255,255,0.05)", alignItems: "flex-end", paddingRight: 8 }}>
-                  {lineNumbers.map((n) => (
-                    <Text
-                      key={n}
-                      style={{ fontFamily: MONO_FONT, fontSize: 12, color: "#5c6370" }}
-                    >
-                      {n}
-                    </Text>
-                  ))}
-                </View>
-                <TextInput
-                  ref={codeInputRef}
-                  value={code}
-                  onChangeText={setCode}
-                  onSelectionChange={handleSelectionChange}
-                  multiline
-                  inputAccessoryViewID={Platform.OS === "ios" ? CODE_SYMBOL_BAR_ID : undefined}
-                  style={{
-                    flex: 1,
-                    fontFamily: MONO_FONT,
-                    fontSize: 14,
-                    lineHeight: 22,
-                    color: "#e4e4e7",
-                    backgroundColor: "#1a1a1a",
-                    paddingHorizontal: 12,
-                    paddingVertical: 8,
-                    textAlignVertical: "top",
-                  }}
-                  placeholderTextColor="#5c6370"
-                  keyboardAppearance="dark"
-                  autoCorrect={false}
-                  spellCheck={false}
-                  autoCapitalize="none"
-                />
-              </View>
-            </View>
-          )}
-        </BottomSheetView>
+        )}
       </BottomSheet>
 
       <CodeSymbolBar

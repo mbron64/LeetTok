@@ -1,5 +1,6 @@
 import React from "react";
-import { Linking, Pressable, ScrollView, Text, View } from "react-native";
+import { Linking, Pressable, Text, View } from "react-native";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { Ionicons } from "@expo/vector-icons";
 import type { Problem } from "../constants/sampleProblems";
 import { theme } from "../constants/theme";
@@ -28,9 +29,9 @@ export default function ProblemDescription({ problem }: Props) {
   const description = `Implement the ${problem.functionSignature.name} function. Given ${problem.functionSignature.params.map((p) => p.name).join(", ")}, return the expected result.`;
 
   return (
-    <ScrollView
+    <BottomSheetScrollView
       style={{ flex: 1 }}
-      contentContainerStyle={{ paddingBottom: 32 }}
+      contentContainerStyle={{ paddingBottom: 100 }}
       showsVerticalScrollIndicator={false}
     >
       <View className="px-4 pt-2">
@@ -103,6 +104,6 @@ export default function ProblemDescription({ problem }: Props) {
           <Text className="text-white font-medium">Solve on LeetCode</Text>
         </Pressable>
       </View>
-    </ScrollView>
+    </BottomSheetScrollView>
   );
 }

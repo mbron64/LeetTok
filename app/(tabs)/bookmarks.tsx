@@ -63,7 +63,7 @@ export default function BookmarksScreen() {
         data={bookmarkedClips}
         numColumns={2}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
         columnWrapperStyle={{ gap: 16, marginTop: 16 }}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (

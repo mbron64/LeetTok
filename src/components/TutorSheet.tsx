@@ -274,7 +274,7 @@ const TutorSheet = forwardRef<TutorSheetRef, Props>(function TutorSheet(
         )}
 
         {/* Input */}
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8, borderTopWidth: 1, borderTopColor: "#1a1a1a", paddingHorizontal: 16, paddingVertical: 12 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8, borderTopWidth: 1, borderTopColor: "#1a1a1a", paddingHorizontal: 16, paddingTop: 12, paddingBottom: 92 }}>
           <BottomSheetTextInput
             value={inputText}
             onChangeText={setInputText}

@@ -239,7 +239,7 @@ function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true
       />
 
       {/* Bottom-left overlay text */}
-      <View className="absolute bottom-5 left-3 right-20">
+      <View style={{ position: "absolute", bottom: 96, left: 12, right: 80 }}>
         <Text className="text-[15px] font-bold text-white">
           @{clip.creator}
         </Text>
@@ -267,7 +267,7 @@ function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true
       </View>
 
       {/* Right-side action column */}
-      <View className="absolute bottom-24 right-3 items-center gap-4">
+      <View style={{ position: "absolute", bottom: 96, right: 12, alignItems: "center", gap: 16 }}>
         {/* AI Tutor */}
         <Pressable onPress={handleTutorOpen} className="items-center">
           <View className="h-12 w-12 items-center justify-center rounded-full bg-white/20">
@@ -329,7 +329,7 @@ function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true
       </View>
 
       {/* Progress bar */}
-      <View className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/20">
+      <View style={{ position: "absolute", bottom: 84, left: 0, right: 0, height: 3, backgroundColor: "rgba(255,255,255,0.2)" }}>
         <View
           style={{ width: `${progress * 100}%` }}
           className="h-full bg-white"
