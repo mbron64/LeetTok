@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  Dimensions,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -24,6 +25,7 @@ import Animated, {
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { Challenge } from "../types";
 import { validateAnswer, type ValidationResult } from "../lib/validate-answer";
 import { calculateXP } from "../lib/xp";
@@ -46,6 +48,7 @@ const MONO_FONT = Platform.select({
   ios: "Courier New" as const,
   default: "monospace" as const,
 });
+const TAB_BAR_CLEARANCE = 80;
 
 export default function MadLeetsOverlay({
   challenge,
@@ -54,6 +57,8 @@ export default function MadLeetsOverlay({
   onSkip,
   onDismiss,
 }: Props) {
+  const insets = useSafeAreaInsets();
+  const panelBottomOffset = Math.max(TAB_BAR_CLEARANCE, insets.bottom + 46);
   const [answer, setAnswer] = useState("");
   const [result, setResult] = useState<ValidationResult | null>(null);
   const [showHint, setShowHint] = useState(false);
@@ -115,6 +120,12 @@ export default function MadLeetsOverlay({
 
   useEffect(() => {
     if (visible) {
+      // #region agent log
+      fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'madleets-overlay-bottom-overlap',hypothesisId:'O1',location:'MadLeetsOverlay.tsx:visibleEffect',message:'MadLeets overlay became visible',data:{clipProblemId:challenge.problemId,insetBottom:insets.bottom,platform:Platform.OS},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
+      // #region agent log
+      fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'madleets-overlay-post-fix',hypothesisId:'F1',location:'MadLeetsOverlay.tsx:visibleEffect',message:'Computed MadLeets panel bottom offset',data:{clipProblemId:challenge.problemId,insetBottom:insets.bottom,panelBottomOffset},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       setAnswer("");
       setResult(null);
       setShowHint(false);
@@ -132,7 +143,7 @@ export default function MadLeetsOverlay({
     return () => {
       if (hintTimer.current) clearTimeout(hintTimer.current);
     };
-  }, [visible, blankPulse]);
+  }, [visible, blankPulse, challenge.problemId, insets.bottom, panelBottomOffset]);
 
   const blankLineStyle = useAnimatedStyle(() => ({
     borderColor: `rgba(6,182,212,${blankPulse.value})`,
@@ -264,6 +275,11 @@ export default function MadLeetsOverlay({
       entering={FadeIn.duration(250)}
       exiting={FadeOut.duration(200)}
       style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 50, backgroundColor: "rgba(0,0,0,0.7)" }}
+      onLayout={(event) => {
+        // #region agent log
+        fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'madleets-overlay-position-check',hypothesisId:'N1',location:'MadLeetsOverlay.tsx:rootLayout',message:'Measured overlay root layout',data:{x:event.nativeEvent.layout.x,y:event.nativeEvent.layout.y,height:event.nativeEvent.layout.height,width:event.nativeEvent.layout.width,windowHeight:Dimensions.get("window").height,insetBottom:insets.bottom,panelBottomOffset},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
+      }}
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -273,7 +289,12 @@ export default function MadLeetsOverlay({
           entering={SlideInDown.springify().damping(18).stiffness(140)}
           exiting={SlideOutDown.duration(250)}
           className="rounded-t-3xl"
-          style={{ backgroundColor: "#111111" }}
+          style={{ backgroundColor: "#111111", marginBottom: panelBottomOffset }}
+          onLayout={(event) => {
+            // #region agent log
+            fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'madleets-overlay-position-check',hypothesisId:'N2',location:'MadLeetsOverlay.tsx:panelLayout',message:'Measured MadLeets panel layout',data:{x:event.nativeEvent.layout.x,y:event.nativeEvent.layout.y,height:event.nativeEvent.layout.height,width:event.nativeEvent.layout.width,panelBottom:event.nativeEvent.layout.y + event.nativeEvent.layout.height,windowHeight:Dimensions.get("window").height,panelBottomOffset,insetBottom:insets.bottom},timestamp:Date.now()})}).catch(()=>{});
+            // #endregion
+          }}
         >
           <View className="px-5 pb-10 pt-5">
             {/* Drag handle */}

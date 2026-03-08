@@ -14,6 +14,7 @@ type Props = {
   clips: Clip[];
   challengeMap?: Map<string, Challenge>;
   challengesEnabled?: boolean;
+  screenFocused?: boolean;
 };
 
 const viewabilityConfig: ViewabilityConfig = {
@@ -22,7 +23,12 @@ const viewabilityConfig: ViewabilityConfig = {
 
 const SKIP_THRESHOLD_MS = 2000;
 
-export default function VideoFeed({ clips, challengeMap, challengesEnabled = true }: Props) {
+export default function VideoFeed({
+  clips,
+  challengeMap,
+  challengesEnabled = true,
+  screenFocused = true,
+}: Props) {
   const { height: screenHeight } = useWindowDimensions();
   const { user } = useAuth();
   const [activeIndex, setActiveIndex] = useState(0);
@@ -64,13 +70,13 @@ export default function VideoFeed({ clips, challengeMap, challengesEnabled = tru
     ({ item, index }: { item: Clip; index: number }) => (
       <VideoCard
         clip={item}
-        isActive={index === activeIndex}
+        isActive={screenFocused && index === activeIndex}
         height={screenHeight}
         challenge={challengeMap?.get(item.id)}
         challengesEnabled={challengesEnabled}
       />
     ),
-    [activeIndex, screenHeight, challengeMap, challengesEnabled],
+    [activeIndex, screenHeight, challengeMap, challengesEnabled, screenFocused],
   );
 
   const getItemLayout = useCallback(
