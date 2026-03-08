@@ -1,10 +1,13 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
   Text,
+  TextInput,
   View,
+  type NativeSyntheticEvent,
+  type TextInputSelectionChangeEventData,
 } from "react-native";
 import Animated, {
   Easing,
@@ -24,7 +27,13 @@ import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import type { Challenge } from "../types";
 import { validateAnswer, type ValidationResult } from "../lib/validate-answer";
+import { calculateXP } from "../lib/xp";
+import { updateStreak, getStreakData } from "../lib/streak";
+import { recordAttempt } from "../lib/progress";
+import { addToReviewQueue } from "../lib/review-queue";
+import { suggestTokens, getLanguageTokens } from "../lib/suggest-tokens";
 import CodeInput from "./CodeInput";
+import CodeKeyboardBar, { CODE_KEYBOARD_BAR_ID } from "./CodeKeyboardBar";
 
 type Props = {
   challenge: Challenge;
@@ -50,7 +59,54 @@ export default function MadLeetsOverlay({
   const [result, setResult] = useState<ValidationResult | null>(null);
   const [showHint, setShowHint] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [inputFocused, setInputFocused] = useState(false);
+  const selectionRef = useRef<{ start: number; end: number }>({ start: 0, end: 0 });
+  const inputRef = useRef<TextInput>(null);
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const tokens = useMemo(() => {
+    const suggested = suggestTokens(
+      challenge.codeBlock,
+      challenge.blankLineIndex,
+      challenge.language,
+    );
+    const defaults = getLanguageTokens(challenge.language);
+    const seen = new Set(suggested);
+    const merged = [...suggested];
+    for (const t of defaults) {
+      if (!seen.has(t)) {
+        seen.add(t);
+        merged.push(t);
+      }
+    }
+    return merged;
+  }, [challenge]);
+
+  const handleInsertToken = useCallback(
+    (token: string) => {
+      const { start, end } = selectionRef.current;
+      const before = answer.slice(0, start);
+      const after = answer.slice(end);
+      const newValue = before + token + after;
+      const newCursor = start + token.length;
+      setAnswer(newValue);
+      selectionRef.current = { start: newCursor, end: newCursor };
+
+      requestAnimationFrame(() => {
+        inputRef.current?.setNativeProps({
+          selection: { start: newCursor, end: newCursor },
+        });
+      });
+    },
+    [answer],
+  );
+
+  const handleSelectionChange = useCallback(
+    (e: NativeSyntheticEvent<TextInputSelectionChangeEventData>) => {
+      selectionRef.current = e.nativeEvent.selection;
+    },
+    [],
+  );
 
   const inputBorderColor = useSharedValue("rgba(6,182,212,0.6)");
   const shakeX = useSharedValue(0);
@@ -128,7 +184,9 @@ export default function MadLeetsOverlay({
     });
   }, [inputBorderColor]);
 
-  const handleSubmit = useCallback(() => {
+  const [computedXP, setComputedXP] = useState(0);
+
+  const handleSubmit = useCallback(async () => {
     if (submitted) return;
     setSubmitted(true);
 
@@ -139,16 +197,31 @@ export default function MadLeetsOverlay({
     );
     setResult(validation);
 
-    const xpEarned = Math.round(challenge.xpValue * validation.xpMultiplier);
-
-    if (
+    const isCorrect =
       validation.tier === "perfect" ||
       validation.tier === "correct" ||
-      validation.tier === "close"
-    ) {
+      validation.tier === "close";
+
+    const streakData = await getStreakData();
+    const xpEarned = isCorrect
+      ? calculateXP(
+          challenge.difficulty,
+          challenge.xpValue,
+          validation.xpMultiplier,
+          streakData.currentStreak,
+          true,
+        )
+      : 0;
+    setComputedXP(xpEarned);
+
+    if (isCorrect) {
+      updateStreak().catch(() => {});
+      recordAttempt(challenge, true, xpEarned).catch(() => {});
       triggerCorrectFeedback(xpEarned);
       setTimeout(() => onSubmit(answer), 1800);
     } else {
+      addToReviewQueue(challenge.id).catch(() => {});
+      recordAttempt(challenge, false, 0).catch(() => {});
       triggerWrongFeedback();
       setTimeout(() => onSubmit(answer), 2500);
     }
@@ -169,9 +242,12 @@ export default function MadLeetsOverlay({
       message: "Skipped",
       xpMultiplier: 0,
     });
+    setComputedXP(0);
+    addToReviewQueue(challenge.id).catch(() => {});
+    recordAttempt(challenge, false, 0).catch(() => {});
     triggerSkipFeedback();
     setTimeout(() => onSkip(), 1800);
-  }, [submitted, onSkip, triggerSkipFeedback]);
+  }, [submitted, challenge, onSkip, triggerSkipFeedback]);
 
   if (!visible) return null;
 
@@ -182,9 +258,7 @@ export default function MadLeetsOverlay({
     ),
   );
 
-  const xpEarned = result
-    ? Math.round(challenge.xpValue * result.xpMultiplier)
-    : 0;
+  const xpEarned = computedXP;
 
   return (
     <Animated.View
@@ -356,11 +430,17 @@ export default function MadLeetsOverlay({
             {/* Input area */}
             <Animated.View style={inputAnimStyle} className="mb-3 rounded-lg">
               <CodeInput
+                ref={inputRef}
                 value={answer}
                 onChangeText={setAnswer}
                 placeholder="Type the missing line..."
                 indentLevel={indentLevel}
                 editable={!submitted}
+                inputAccessoryViewID={
+                  Platform.OS === "ios" ? CODE_KEYBOARD_BAR_ID : undefined
+                }
+                onFocusChange={setInputFocused}
+                onSelectionChange={handleSelectionChange}
                 style={[
                   {
                     borderWidth: 0,
@@ -420,9 +500,9 @@ export default function MadLeetsOverlay({
                 >
                   {result.message}
                 </Text>
-                {result.xpMultiplier > 0 && (
+                {computedXP > 0 && (
                   <Text className="text-xs" style={{ color: "#555" }}>
-                    (+{Math.round(challenge.xpValue * result.xpMultiplier)} XP)
+                    (+{computedXP} XP)
                   </Text>
                 )}
               </Animated.View>
@@ -537,6 +617,11 @@ export default function MadLeetsOverlay({
           </View>
         </Animated.View>
       </KeyboardAvoidingView>
+
+      {/* Code keyboard bar — iOS uses InputAccessoryView, Android absolute positioning */}
+      {!submitted && (
+        <CodeKeyboardBar tokens={tokens} onInsertToken={handleInsertToken} />
+      )}
     </Animated.View>
   );
 }

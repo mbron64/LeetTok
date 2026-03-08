@@ -1,5 +1,11 @@
-import React from "react";
-import { Platform, TextInput, type TextInputProps } from "react-native";
+import React, { forwardRef, useCallback } from "react";
+import {
+  Platform,
+  TextInput,
+  type NativeSyntheticEvent,
+  type TextInputProps,
+  type TextInputSelectionChangeEventData,
+} from "react-native";
 
 const MONO_FONT = Platform.select({
   ios: "Courier New",
@@ -11,20 +17,38 @@ type Props = {
   onChangeText: (text: string) => void;
   placeholder?: string;
   indentLevel?: number;
-} & Omit<TextInputProps, "value" | "onChangeText" | "placeholder">;
+  inputAccessoryViewID?: string;
+  onFocusChange?: (focused: boolean) => void;
+  onSelectionChange?: (
+    e: NativeSyntheticEvent<TextInputSelectionChangeEventData>,
+  ) => void;
+} & Omit<
+  TextInputProps,
+  "value" | "onChangeText" | "placeholder" | "onSelectionChange"
+>;
 
-export default function CodeInput({
-  value,
-  onChangeText,
-  placeholder = "Type your answer...",
-  indentLevel = 0,
-  style,
-  ...rest
-}: Props) {
+const CodeInput = forwardRef<TextInput, Props>(function CodeInput(
+  {
+    value,
+    onChangeText,
+    placeholder = "Type your answer...",
+    indentLevel = 0,
+    inputAccessoryViewID,
+    onFocusChange,
+    onSelectionChange,
+    style,
+    ...rest
+  },
+  ref,
+) {
   const indent = "  ".repeat(indentLevel);
+
+  const handleFocus = useCallback(() => onFocusChange?.(true), [onFocusChange]);
+  const handleBlur = useCallback(() => onFocusChange?.(false), [onFocusChange]);
 
   return (
     <TextInput
+      ref={ref}
       value={value}
       onChangeText={onChangeText}
       placeholder={`${indent}${placeholder}`}
@@ -35,6 +59,10 @@ export default function CodeInput({
       autoComplete="off"
       keyboardType="ascii-capable"
       keyboardAppearance="dark"
+      inputAccessoryViewID={inputAccessoryViewID}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      onSelectionChange={onSelectionChange}
       style={[
         {
           fontFamily: MONO_FONT,
@@ -54,4 +82,6 @@ export default function CodeInput({
       {...rest}
     />
   );
-}
+});
+
+export default CodeInput;
