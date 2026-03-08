@@ -1,6 +1,6 @@
 ---
 name: NeetCode Clipping Engine
-overview: "Standalone Python pipeline that discovers NeetCode YouTube videos, downloads them, transcribes, uses an LLM to detect the best 30-90s segments, clips and reframes to 9:16 vertical with TikTok-style captions, and uploads to Cloudflare R2. Built independently from the mobile app."
+overview: Standalone Python pipeline that discovers NeetCode YouTube videos, downloads them, transcribes, uses an LLM to detect the best 30-90s segments, clips and reframes to 9:16 vertical with TikTok-style captions, and uploads to Cloudflare R2. Built independently from the mobile app.
 todos:
   - id: clip-scaffold
     content: "Phase 1: Initialize pipeline project structure, CLI entry point, config module (commits 1-2)"
@@ -80,6 +80,8 @@ flowchart LR
     R2 --> DB
 ```
 
+
+
 ---
 
 ## Phase 1: Project Scaffold
@@ -87,6 +89,7 @@ flowchart LR
 ### Commit 1: Initialize pipeline project structure
 
 Create `pipeline/` with:
+
 - `pyproject.toml` with project metadata and dependencies
 - `requirements.txt` pinned deps:
   - `yt-dlp>=2026.3` (video download + caption extraction)
@@ -228,13 +231,17 @@ TRANSCRIPT:
 - Use FFmpeg via `subprocess` (more reliable than ffmpeg-python for complex filter chains)
 - For each segment, cut the source video at the detected timestamps
 - Re-encode for frame-accurate cuts (keyframe-only cuts lose precision):
-  ```
+
+```
   ffmpeg -ss {start} -i input.mp4 -t {duration} -c:v libx264 -c:a aac segment.mp4
-  ```
+  
+
+```
 
 ### Commit 11: Build vertical reframing (16:9 -> 9:16)
 
 This is specific to coding content and needs a thoughtful crop strategy. NeetCode videos typically have:
+
 - Speaker webcam (small, usually top-right or bottom-right corner)
 - Code editor / whiteboard (takes up most of the frame)
 - Sometimes a split with problem description on one side
@@ -242,18 +249,24 @@ This is specific to coding content and needs a thoughtful crop strategy. NeetCod
 **Crop strategies** (configurable per segment):
 
 1. **Code-focused crop**: Center crop on the code area. Best for code walkthrough segments.
-   ```
-   crop=in_h*9/16:in_h:in_w/2-in_h*9/32:0, scale=1080:1920
-   ```
 
-2. **Split layout**: Speaker cam on top third, code on bottom two-thirds. Composited with FFmpeg overlay filter. Best for explanation segments.
-   ```
+```
+   crop=in_h*9/16:in_h:in_w/2-in_h*9/32:0, scale=1080:1920
+   
+
+```
+
+1. **Split layout**: Speaker cam on top third, code on bottom two-thirds. Composited with FFmpeg overlay filter. Best for explanation segments.
+
+```
    [0:v]crop=iw/3:ih/3:iw*2/3:0,scale=1080:640[cam];
    [0:v]crop=iw*9/16:ih:iw/2-iw*9/32:0,scale=1080:1280[code];
    [cam][code]vstack[out]
-   ```
+   
 
-3. **Full-width with blur background**: Shrink the full 16:9 frame to fit in the center of a 9:16 frame, fill top/bottom with a blurred version. Preserves everything but wastes vertical space.
+```
+
+1. **Full-width with blur background**: Shrink the full 16:9 frame to fit in the center of a 9:16 frame, fill top/bottom with a blurred version. Preserves everything but wastes vertical space.
 
 - Default to strategy 1 (code-focused) initially. We can add smart detection later.
 - Output: `pipeline/tmp/{video_id}/clips/{segment_index}.mp4`
@@ -271,19 +284,27 @@ This is specific to coding content and needs a thoughtful crop strategy. NeetCod
   - Font: Bold, large (e.g., 60px), white fill with black outline (3px)
   - Position: Centered, bottom third of frame
   - Animation: Each word appears highlighted as it's spoken using ASS alpha tags:
-    ```
+
+```
     Dialogue: 0,0:00:00.00,0:00:01.50,Default,,0,0,0,,{\c&H00FFFF&}Two {\c&HFFFFFF&}pointers approach
     Dialogue: 0,0:00:01.50,0:00:03.00,Default,,0,0,0,,Two {\c&H00FFFF&}pointers {\c&HFFFFFF&}approach
-    ```
-  - Max ~4 words per line, auto-wrap to keep text readable on mobile
+    
+
+```
+
+- Max ~4 words per line, auto-wrap to keep text readable on mobile
 - Output: `pipeline/tmp/{video_id}/clips/{segment_index}.ass`
 
 ### Commit 13: Burn captions into video
 
 - FFmpeg ass filter to composite captions onto the clipped video:
-  ```
+
+```
   ffmpeg -i clip.mp4 -vf "ass=clip.ass" -c:a copy output.mp4
-  ```
+  
+
+```
+
 - Output: final clip ready for upload at `pipeline/tmp/{video_id}/final/{segment_index}.mp4`
 
 ---
@@ -353,17 +374,19 @@ This is specific to coding content and needs a thoughtful crop strategy. NeetCod
 
 ## Cost Per Video Processed
 
-| Component | Tool | Cost |
-|-----------|------|------|
-| Video discovery | YouTube Data API v3 | Free tier: 10k units/day |
-| Video download | yt-dlp v2026.3+ | Free (open source) |
-| Transcription (primary) | YouTube's own captions via yt-dlp | Free |
-| Transcription (fallback) | faster-whisper v1.2.1 (local) | Free (needs GPU for speed) |
-| Transcription (cloud fallback) | OpenAI gpt-4o-mini-transcribe | ~$0.01 per 10-min video |
-| Segment detection | GPT-4.1-mini or Claude Haiku 4.5 | ~$0.001-0.005 per video |
-| Video processing | FFmpeg (subprocess) | Free |
-| Storage | Cloudflare R2 | $0.015/GB/mo, zero egress |
-| Database | Supabase (Postgres) | Free tier available |
+
+| Component                      | Tool                              | Cost                       |
+| ------------------------------ | --------------------------------- | -------------------------- |
+| Video discovery                | YouTube Data API v3               | Free tier: 10k units/day   |
+| Video download                 | yt-dlp v2026.3+                   | Free (open source)         |
+| Transcription (primary)        | YouTube's own captions via yt-dlp | Free                       |
+| Transcription (fallback)       | faster-whisper v1.2.1 (local)     | Free (needs GPU for speed) |
+| Transcription (cloud fallback) | OpenAI gpt-4o-mini-transcribe     | ~$0.01 per 10-min video    |
+| Segment detection              | GPT-4.1-mini or Claude Haiku 4.5  | ~$0.001-0.005 per video    |
+| Video processing               | FFmpeg (subprocess)               | Free                       |
+| Storage                        | Cloudflare R2                     | $0.015/GB/mo, zero egress  |
+| Database                       | Supabase (Postgres)               | Free tier available        |
+
 
 **Estimated total cost per video**: < $0.01 if YouTube captions are available, ~$0.02-0.05 if Whisper fallback is needed.
 
@@ -402,3 +425,4 @@ pipeline/
 3. **Crop strategy** -- NeetCode's video layout isn't 100% consistent. Some videos are whiteboard-style, some are IDE screenshares, some have picture-in-picture. We may need multiple crop strategies and a way to detect which to use.
 4. **yt-dlp breakage** -- YouTube frequently changes their API. yt-dlp updates frequently to keep up, but downloads can break temporarily.
 5. **Copyright** -- Addressed in the main app plan. The pipeline itself is just a tool; the legal question is about distribution.
+
