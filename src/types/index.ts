@@ -1,6 +1,14 @@
-export type Problem = {
+export type Difficulty = "Easy" | "Medium" | "Hard";
+
+export type Clip = {
   id: string;
   title: string;
-  difficulty: "Easy" | "Medium" | "Hard";
-  tags: string[];
+  problemNumber: number;
+  difficulty: Difficulty;
+  topics: string[];
+  videoUrl: string;
+  creator: string;
+  hook: string;
+  likes: number;
+  bookmarks: number;
 };

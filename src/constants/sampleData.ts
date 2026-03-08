@@ -1,0 +1,108 @@
+import { Clip } from "../types";
+
+export const sampleClips: Clip[] = [
+  {
+    id: "1",
+    title: "Two Sum",
+    problemNumber: 1,
+    difficulty: "Easy",
+    topics: ["Array", "Hash Table"],
+    videoUrl:
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    creator: "NeetCode",
+    hook: "The classic interview opener — here's the O(n) trick",
+    likes: 14200,
+    bookmarks: 3400,
+  },
+  {
+    id: "2",
+    title: "Longest Substring Without Repeating Characters",
+    problemNumber: 3,
+    difficulty: "Medium",
+    topics: ["String", "Sliding Window", "Hash Table"],
+    videoUrl:
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    creator: "NeetCode",
+    hook: "Sliding window pattern you'll use in 20+ problems",
+    likes: 9800,
+    bookmarks: 2100,
+  },
+  {
+    id: "3",
+    title: "Median of Two Sorted Arrays",
+    problemNumber: 4,
+    difficulty: "Hard",
+    topics: ["Array", "Binary Search", "Divide and Conquer"],
+    videoUrl:
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    creator: "NeetCode",
+    hook: "Binary search on the partition — not the arrays",
+    likes: 7300,
+    bookmarks: 1850,
+  },
+  {
+    id: "4",
+    title: "Valid Parentheses",
+    problemNumber: 20,
+    difficulty: "Easy",
+    topics: ["String", "Stack"],
+    videoUrl:
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+    creator: "NeetCode",
+    hook: "Stack basics — if you can't solve this, keep grinding",
+    likes: 11500,
+    bookmarks: 2900,
+  },
+  {
+    id: "5",
+    title: "Merge Two Sorted Lists",
+    problemNumber: 21,
+    difficulty: "Easy",
+    topics: ["Linked List", "Recursion"],
+    videoUrl:
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+    creator: "NeetCode",
+    hook: "Dummy node technique saves you from edge cases",
+    likes: 8700,
+    bookmarks: 1600,
+  },
+  {
+    id: "6",
+    title: "LRU Cache",
+    problemNumber: 146,
+    difficulty: "Medium",
+    topics: ["Hash Table", "Linked List", "Design"],
+    videoUrl:
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
+    creator: "NeetCode",
+    hook: "HashMap + doubly linked list = O(1) everything",
+    likes: 12400,
+    bookmarks: 3800,
+  },
+  {
+    id: "7",
+    title: "Word Break",
+    problemNumber: 139,
+    difficulty: "Medium",
+    topics: ["Dynamic Programming", "Trie", "Memoization"],
+    videoUrl:
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+    creator: "NeetCode",
+    hook: "Bottom-up DP with a twist — think backwards",
+    likes: 6100,
+    bookmarks: 1450,
+  },
+  {
+    id: "8",
+    title: "Trapping Rain Water",
+    problemNumber: 42,
+    difficulty: "Hard",
+    topics: ["Array", "Two Pointers", "Stack", "Dynamic Programming"],
+    videoUrl:
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4",
+    creator: "NeetCode",
+    hook: "Two pointer approach makes this a one-pass solution",
+    likes: 15800,
+    bookmarks: 4200,
+  },
+];
