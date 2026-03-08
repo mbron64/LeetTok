@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import shutil
 import time
 from pathlib import Path
 
@@ -15,12 +14,16 @@ from pipeline.challenges import (
     save_challenge,
 )
 from pipeline.clip import clip_and_reframe
+from pipeline.code_extract import extract_code_from_transcript
 from pipeline.config import Config
 from pipeline.db import (
+    ClipRecord,
     _init_client,
+    cleanup_tmp,
     get_known_video_ids,
     insert_clip_metadata,
     insert_discovered_videos,
+    mark_video_done,
     update_video_status,
 )
 from pipeline.discover import discover, extract_problem_number, filter_new_videos
@@ -165,6 +168,19 @@ def process_video(
             )
             final_clips.append(final_path)
 
+        # Extract code from transcript for challenge generation
+        extracted_code = _timed(
+            f"Extracted code from transcript for {video_id}",
+            extract_code_from_transcript,
+            transcript,
+            video_title,
+            problem_number or 0,
+            config,
+            provider,
+        )
+        if extracted_code:
+            log.info("Extracted %d chars of code for %s", len(extracted_code), video_id)
+
         # Generate MadLeets challenges for each clip
         challenges_dir = output_dir / "challenges"
         challenges: list[MadLeetsChallenge | None] = []
@@ -208,24 +224,29 @@ def process_video(
 
         # Persist clip metadata
         for i, (seg, url) in enumerate(zip(segments, urls)):
-            insert_clip_metadata(client, {
-                "video_id": video_id,
-                "segment_index": i,
-                "title": seg.title,
-                "hook": seg.hook,
-                "difficulty": seg.difficulty,
-                "topics": seg.topics,
-                "start_time": seg.start_time,
-                "end_time": seg.end_time,
-                "url": url,
-            })
+            transcript_text = " ".join(
+                s.text for s in transcript
+                if s.start >= seg.start_time and s.end <= seg.end_time
+            )
+            clip_record = ClipRecord(
+                video_url=url,
+                title=seg.title,
+                hook=seg.hook,
+                duration=seg.end_time - seg.start_time,
+                difficulty=seg.difficulty,
+                topics=seg.topics,
+                problem_number=problem_number,
+                source_video_id=video_id,
+                transcript=transcript_text,
+                start_time=seg.start_time,
+                end_time=seg.end_time,
+            )
+            insert_clip_metadata(client, clip_record)
 
-        update_video_status(client, video_id, "done")
+        mark_video_done(client, video_id)
         log.info("Video %s complete — %d clips published", video_id, len(urls))
 
-        # Cleanup
-        shutil.rmtree(output_dir, ignore_errors=True)
-        log.info("Cleaned up %s", output_dir)
+        cleanup_tmp(video_id, Path("."))
 
     except Exception as exc:
         log.exception("Failed processing video %s", video_id)

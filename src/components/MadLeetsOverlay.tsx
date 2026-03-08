@@ -21,7 +21,6 @@ import Animated, {
   withSequence,
   withSpring,
   withTiming,
-  runOnJS,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
