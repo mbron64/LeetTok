@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 from pipeline.captions_extract import TranscriptSegment, extract_captions
+from pipeline.clip import CropStrategy, clip_and_reframe
 from pipeline.config import load_config
 from pipeline.db import _init_client, get_known_video_ids, insert_discovered_videos
 from pipeline.discover import discover, extract_problem_number, filter_new_videos
@@ -145,6 +146,13 @@ def _cmd_process(args: argparse.Namespace) -> None:
     print(f"\nDetected {len(detected)} segments:")
     _print_segment_review(detected, segments)
 
+    strategy = getattr(args, "crop_strategy", "code_focused")
+    print(f"\nClipping & reframing (strategy={strategy})...")
+    vertical_clips = clip_and_reframe(result.video_path, detected, output_dir, strategy=strategy)
+    print(f"\n{len(vertical_clips)} vertical clips created:")
+    for clip in vertical_clips:
+        print(f"  • {clip}")
+
 
 def _cmd_batch(args: argparse.Namespace) -> None:
     print("Batch processing not yet implemented")
@@ -192,6 +200,12 @@ def build_parser() -> argparse.ArgumentParser:
         choices=["openai", "anthropic"],
         default="openai",
         help="LLM provider for segment detection (default: openai)",
+    )
+    process_p.add_argument(
+        "--crop-strategy",
+        choices=[s.value for s in CropStrategy],
+        default="code_focused",
+        help="Vertical reframing strategy (default: code_focused)",
     )
 
     batch_p = sub.add_parser("batch", help="Discover new videos and process all of them")
