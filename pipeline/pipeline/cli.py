@@ -12,6 +12,8 @@ from pipeline.config import load_config
 from pipeline.db import _init_client, get_known_video_ids, insert_discovered_videos
 from pipeline.discover import discover, extract_problem_number, filter_new_videos
 from pipeline.download import download_video, video_id_from_url
+from pipeline.log import setup_logging
+from pipeline.main import process_batch
 from pipeline.segment import DetectedSegment, detect_segments, load_segments, save_segments
 from pipeline.transcribe import transcribe
 
@@ -24,10 +26,6 @@ def _fmt_time(seconds: float) -> str:
 
 
 def _cmd_discover(args: argparse.Namespace) -> None:
-    logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
-    )
-
     config = load_config()
     videos = discover(config)
 
@@ -95,10 +93,6 @@ def _load_transcript(output_dir: Path) -> list[TranscriptSegment] | None:
 
 
 def _cmd_process(args: argparse.Namespace) -> None:
-    logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
-    )
-
     config = load_config()
 
     video_id = video_id_from_url(args.youtube_url)
@@ -155,14 +149,17 @@ def _cmd_process(args: argparse.Namespace) -> None:
 
 
 def _cmd_batch(args: argparse.Namespace) -> None:
-    print("Batch processing not yet implemented")
+    config = load_config()
+    process_batch(
+        config,
+        provider=getattr(args, "provider", "openai"),
+        crop_strategy=getattr(args, "crop_strategy", "code_focused"),
+        cloud_transcribe=getattr(args, "cloud_transcribe", False),
+        dry_run=getattr(args, "dry_run", False),
+    )
 
 
 def _cmd_review(args: argparse.Namespace) -> None:
-    logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
-    )
-
     output_dir = Path("tmp") / args.video_id
 
     try:
@@ -210,10 +207,28 @@ def build_parser() -> argparse.ArgumentParser:
 
     batch_p = sub.add_parser("batch", help="Discover new videos and process all of them")
     batch_p.add_argument(
-        "--auto-approve",
+        "--provider",
+        choices=["openai", "anthropic"],
+        default="openai",
+        help="LLM provider for segment detection (default: openai)",
+    )
+    batch_p.add_argument(
+        "--crop-strategy",
+        choices=[s.value for s in CropStrategy],
+        default="code_focused",
+        help="Vertical reframing strategy (default: code_focused)",
+    )
+    batch_p.add_argument(
+        "--cloud-transcribe",
         action="store_true",
         default=False,
-        help="Automatically approve all detected segments without review",
+        help="Use OpenAI cloud transcription instead of local Whisper",
+    )
+    batch_p.add_argument(
+        "--dry-run",
+        action="store_true",
+        default=False,
+        help="Run discovery + transcription + segmentation only (no clipping or upload)",
     )
 
     review_p = sub.add_parser("review", help="Review detected segments for a video")
@@ -225,6 +240,8 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> None:
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    setup_logging()
 
     dispatch = {
         "discover": _cmd_discover,

@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import logging
+import shutil
+from dataclasses import dataclass
 from datetime import datetime, timezone
+from pathlib import Path
 
 from supabase import create_client, Client
 
@@ -19,6 +22,21 @@ VALID_STATUSES = {
     "done",
     "failed",
 }
+
+
+@dataclass(frozen=True, slots=True)
+class ClipRecord:
+    video_url: str
+    title: str
+    hook: str
+    duration: float
+    difficulty: str
+    topics: list[str]
+    problem_number: int | None
+    source_video_id: str
+    transcript: str
+    start_time: float
+    end_time: float
 
 
 def _init_client(config: Config) -> Client:
@@ -83,9 +101,73 @@ def update_video_status(
         log.exception("Failed to update status for video %s", video_id)
 
 
-def insert_clip_metadata(client: Client, clip: dict) -> None:
+def _upsert_problem(client: Client, clip: ClipRecord) -> int:
+    if clip.problem_number is None:
+        resp = (
+            client.table("problems")
+            .insert({"title": clip.title, "difficulty": clip.difficulty, "topics": clip.topics})
+            .execute()
+        )
+        return resp.data[0]["id"]
+
+    existing = (
+        client.table("problems")
+        .select("id")
+        .eq("problem_number", clip.problem_number)
+        .limit(1)
+        .execute()
+    )
+    if existing.data:
+        return existing.data[0]["id"]
+
+    resp = (
+        client.table("problems")
+        .insert({
+            "problem_number": clip.problem_number,
+            "title": clip.title,
+            "difficulty": clip.difficulty,
+            "topics": clip.topics,
+        })
+        .execute()
+    )
+    return resp.data[0]["id"]
+
+
+def insert_clip_metadata(client: Client, clip: ClipRecord) -> None:
     try:
-        client.table("clips").insert(clip).execute()
-        log.info("Inserted clip for video %s", clip.get("video_id", "?"))
+        problem_id = _upsert_problem(client, clip)
+
+        row = {
+            "problem_id": problem_id,
+            "source_video_id": clip.source_video_id,
+            "video_url": clip.video_url,
+            "title": clip.title,
+            "hook": clip.hook,
+            "duration": clip.duration,
+            "difficulty": clip.difficulty,
+            "topics": clip.topics,
+            "transcript": clip.transcript,
+            "start_time": clip.start_time,
+            "end_time": clip.end_time,
+        }
+        client.table("clips").insert(row).execute()
+        log.info(
+            "Inserted clip '%s' for video %s (problem_id=%d)",
+            clip.title, clip.source_video_id, problem_id,
+        )
     except Exception:
-        log.exception("Failed to insert clip metadata")
+        log.exception("Failed to insert clip metadata for '%s'", clip.title)
+        raise
+
+
+def mark_video_done(client: Client, video_id: str) -> None:
+    update_video_status(client, video_id, "done")
+
+
+def cleanup_tmp(video_id: str, base_dir: Path) -> None:
+    tmp_dir = base_dir / "tmp" / video_id
+    if tmp_dir.exists():
+        shutil.rmtree(tmp_dir)
+        log.info("Cleaned up %s", tmp_dir)
+    else:
+        log.debug("No tmp directory to clean for %s", video_id)
