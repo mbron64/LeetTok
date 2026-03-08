@@ -17,8 +17,8 @@ export default function RootLayout() {
   const router = useRouter();
 
   useEffect(() => {
-    AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY).then((value) => {
-      setNeedsOnboarding(value !== "true");
+    AsyncStorage.removeItem(ONBOARDING_COMPLETE_KEY).then(() => {
+      setNeedsOnboarding(true);
       setReady(true);
     });
   }, []);

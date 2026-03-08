@@ -49,12 +49,14 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }}>
-      <Pressable
-        onPress={() => router.back()}
-        style={{ position: "absolute", top: 60, left: 16, zIndex: 10, height: 36, width: 36, alignItems: "center", justifyContent: "center", borderRadius: 18, backgroundColor: "rgba(255,255,255,0.1)" }}
-      >
-        <Ionicons name="arrow-back" size={20} color="#fff" />
-      </Pressable>
+      {router.canGoBack() && (
+        <Pressable
+          onPress={() => router.back()}
+          style={{ position: "absolute", top: 60, left: 16, zIndex: 10, height: 36, width: 36, alignItems: "center", justifyContent: "center", borderRadius: 18, backgroundColor: "rgba(255,255,255,0.1)" }}
+        >
+          <Ionicons name="arrow-back" size={20} color="#fff" />
+        </Pressable>
+      )}
 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
