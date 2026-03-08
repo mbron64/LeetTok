@@ -64,13 +64,13 @@ export default function TopicDrillScreen() {
 
   if (challenges.length === 0 && !isReviewMode) {
     return (
-      <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
-        <View className="flex-1 items-center justify-center px-8">
-          <Ionicons name="search-outline" size={48} color="#333" />
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }} edges={["top"]}>
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 }}>
+          <Ionicons name="search-outline" size={48} color="#5c6370" />
           <Text className="mt-4 text-center text-base font-bold text-white">
             No challenges found
           </Text>
-          <Text className="mt-1 text-center text-sm" style={{ color: "#666" }}>
+          <Text className="mt-1 text-center text-sm" style={{ color: "#5c6370" }}>
             No challenges match the topic "{topic}"
           </Text>
           <Pressable
@@ -91,8 +91,8 @@ export default function TopicDrillScreen() {
         ? Math.round((correctCount / challenges.length) * 100)
         : 0;
     return (
-      <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
-        <View className="flex-1 items-center justify-center px-8">
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }} edges={["top"]}>
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 }}>
           <Animated.View entering={FadeIn.duration(600)} className="items-center">
             <View
               className="mb-4 h-20 w-20 items-center justify-center rounded-full"
@@ -103,7 +103,7 @@ export default function TopicDrillScreen() {
             <Text className="text-2xl font-bold text-white">
               {isReviewMode ? "Review Complete!" : "Drill Complete!"}
             </Text>
-            <Text className="mt-1 text-sm" style={{ color: "#666" }}>
+            <Text className="mt-1 text-sm" style={{ color: "#5c6370" }}>
               {displayTopic}
             </Text>
 
@@ -112,7 +112,7 @@ export default function TopicDrillScreen() {
                 <Text className="text-2xl font-bold" style={{ color: "#06b6d4" }}>
                   {totalXP}
                 </Text>
-                <Text className="text-xs" style={{ color: "#666" }}>
+                <Text className="text-xs" style={{ color: "#5c6370" }}>
                   XP Earned
                 </Text>
               </View>
@@ -120,15 +120,15 @@ export default function TopicDrillScreen() {
                 <Text className="text-2xl font-bold" style={{ color: "#22c55e" }}>
                   {correctCount}/{challenges.length}
                 </Text>
-                <Text className="text-xs" style={{ color: "#666" }}>
+                <Text className="text-xs" style={{ color: "#5c6370" }}>
                   Correct
                 </Text>
               </View>
               <View className="items-center">
-                <Text className="text-2xl font-bold" style={{ color: "#eab308" }}>
+                <Text className="text-2xl font-bold" style={{ color: "#fbb862" }}>
                   {accuracy}%
                 </Text>
-                <Text className="text-xs" style={{ color: "#666" }}>
+                <Text className="text-xs" style={{ color: "#5c6370" }}>
                   Accuracy
                 </Text>
               </View>
@@ -148,7 +148,7 @@ export default function TopicDrillScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }} edges={["top"]}>
       {/* Header */}
       <Animated.View entering={FadeIn.duration(300)} className="px-5 pb-3 pt-2">
         <View className="flex-row items-center justify-between">
@@ -158,14 +158,14 @@ export default function TopicDrillScreen() {
             className="flex-row items-center gap-1"
           >
             <Ionicons name="chevron-back" size={22} color="#888" />
-            <Text className="text-sm" style={{ color: "#888" }}>
+            <Text className="text-sm" style={{ color: "#afb3b6" }}>
               Back
             </Text>
           </Pressable>
 
           <View className="items-center">
             <Text className="text-sm font-bold text-white">{displayTopic}</Text>
-            <Text className="text-[10px]" style={{ color: "#666" }}>
+            <Text className="text-[10px]" style={{ color: "#5c6370" }}>
               {isReviewMode ? "Spaced Repetition" : "Topic Drill"}
             </Text>
           </View>
@@ -203,7 +203,7 @@ export default function TopicDrillScreen() {
 
       {/* Challenge Area */}
       <ScrollView
-        className="flex-1"
+        style={{ flex: 1 }}
         contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
         key={currentChallenge?.id}

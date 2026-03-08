@@ -17,7 +17,7 @@ import {
   type TextInputSelectionChangeEventData,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import BottomSheet from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../lib/auth";
 import { submitCode, LANGUAGE_IDS } from "../lib/codeExecution";
@@ -249,89 +249,82 @@ function CodeEditorSheetInner(
         index={-1}
         snapPoints={snapPoints}
         enablePanDownToClose
+        enableDynamicSizing={false}
         onClose={onClose}
         backgroundStyle={{ backgroundColor: theme.colors.surface }}
         handleIndicatorStyle={{ backgroundColor: theme.colors.textMuted }}
       >
-        <View className="flex-1 bg-[#0a0a0a]">
+        <BottomSheetView style={{ flex: 1, backgroundColor: "#111111" }}>
           {/* Header: tabs + language + Run + Submit */}
-          <View className="flex-row items-center border-b border-white/10 px-2">
-            <View className="flex-row flex-1">
+          <View style={{ flexDirection: "row", alignItems: "center", borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.1)", paddingHorizontal: 8 }}>
+            <View style={{ flexDirection: "row", flex: 1 }}>
               <Pressable
                 onPress={() => setActiveTab("problem")}
-                className={`px-4 py-3 ${activeTab === "problem" ? "border-b-2 border-indigo-500" : ""}`}
+                style={{ paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: activeTab === "problem" ? 2 : 0, borderBottomColor: "#fff" }}
               >
-                <Text
-                  className={
-                    activeTab === "problem" ? "text-white font-medium" : "text-[#666]"
-                  }
-                >
+                <Text style={{ color: activeTab === "problem" ? "#fff" : "#5c6370", fontWeight: activeTab === "problem" ? "500" : "400" }}>
                   Problem
                 </Text>
               </Pressable>
               <Pressable
                 onPress={() => setActiveTab("code")}
-                className={`px-4 py-3 ${activeTab === "code" ? "border-b-2 border-indigo-500" : ""}`}
+                style={{ paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: activeTab === "code" ? 2 : 0, borderBottomColor: "#fff" }}
               >
-                <Text
-                  className={
-                    activeTab === "code" ? "text-white font-medium" : "text-[#666]"
-                  }
-                >
+                <Text style={{ color: activeTab === "code" ? "#fff" : "#5c6370", fontWeight: activeTab === "code" ? "500" : "400" }}>
                   Code
                 </Text>
               </Pressable>
             </View>
-            <View className="flex-row items-center gap-2">
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
               <Pressable
                 onPress={() => setShowLangPicker(!showLangPicker)}
-                className="px-3 py-2 rounded-lg bg-white/10"
+                style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: "rgba(255,255,255,0.1)" }}
               >
-                <Text className="text-white text-sm">
+                <Text style={{ color: "#fff", fontSize: 14 }}>
                   {effectiveLanguages.find((l) => l.key === language.key)?.label ?? language.label}
                 </Text>
               </Pressable>
               <Pressable
                 onPress={handleRun}
                 disabled={loading}
-                className="px-3 py-2 rounded-lg bg-cyan-500/20 border border-cyan-500/40 active:bg-cyan-500/30"
+                style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: "rgba(6,182,212,0.2)", borderWidth: 1, borderColor: "rgba(6,182,212,0.4)" }}
               >
-                <Text className="text-cyan-400 font-medium text-sm">Run</Text>
+                <Text style={{ color: "#22d3ee", fontWeight: "500", fontSize: 14 }}>Run</Text>
               </Pressable>
               <Pressable
                 onPress={handleSubmit}
                 disabled={loading}
-                className="px-3 py-2 rounded-lg bg-green-500/20 border border-green-500/40 active:bg-green-500/30"
+                style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: "rgba(34,197,94,0.2)", borderWidth: 1, borderColor: "rgba(34,197,94,0.4)" }}
               >
-                <Text className="text-green-400 font-medium text-sm">Submit</Text>
+                <Text style={{ color: "#4ade80", fontWeight: "500", fontSize: 14 }}>Submit</Text>
               </Pressable>
             </View>
           </View>
 
           {showLangPicker && (
-            <View className="absolute top-14 right-2 z-10 rounded-lg bg-[#1a1a1a] border border-white/10 py-1">
+            <View style={{ position: "absolute", top: 56, right: 8, zIndex: 10, borderRadius: 8, backgroundColor: "#1a1a1a", borderWidth: 1, borderColor: "rgba(255,255,255,0.1)", paddingVertical: 4 }}>
               {effectiveLanguages.map((lang) => (
                 <Pressable
                   key={lang.key}
                   onPress={() => handleLangSelect(lang)}
-                  className="px-4 py-2 active:bg-white/10"
+                  style={{ paddingHorizontal: 16, paddingVertical: 8 }}
                 >
-                  <Text className="text-white text-sm">{lang.label}</Text>
+                  <Text style={{ color: "#fff", fontSize: 14 }}>{lang.label}</Text>
                 </Pressable>
               ))}
             </View>
           )}
 
           {activeTab === "problem" && problem && (
-            <View className="flex-1">
+            <View style={{ flex: 1 }}>
               <ProblemDescription problem={problem} />
             </View>
           )}
 
           {activeTab === "code" && (
-            <View className="flex-1">
+            <View style={{ flex: 1 }}>
               {(results !== null || error) && (
-                <View className="px-4 py-2 border-b border-white/10 max-h-[40%]">
+                <View style={{ paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.1)", maxHeight: "40%" }}>
                   <TestResults
                     results={results}
                     error={error}
@@ -351,21 +344,20 @@ function CodeEditorSheetInner(
                             : "";
                         onAskTutor(msg);
                       }}
-                      className="mt-2 flex-row items-center justify-center gap-2 rounded-lg bg-indigo-500/20 py-2 px-3 border border-indigo-500/40 active:bg-indigo-500/30"
+                      style={{ marginTop: 8, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 8, backgroundColor: "rgba(255,255,255,0.1)", paddingVertical: 8, paddingHorizontal: 12, borderWidth: 1, borderColor: "rgba(255,255,255,0.2)" }}
                     >
-                      <Ionicons name="sparkles" size={18} color="#818cf8" />
-                      <Text className="text-indigo-400 font-medium text-sm">Ask Tutor</Text>
+                      <Ionicons name="sparkles" size={18} color="#fbb862" />
+                      <Text style={{ color: "#fff", fontWeight: "500", fontSize: 14 }}>Ask Tutor</Text>
                     </Pressable>
                   )}
                 </View>
               )}
-              <View className="flex-1 flex-row">
-                <View className="w-10 py-3 bg-[#111] border-r border-white/5 items-end pr-2">
+              <View style={{ flex: 1, flexDirection: "row" }}>
+                <View style={{ width: 40, paddingVertical: 12, backgroundColor: "#0a0a0a", borderRightWidth: 1, borderRightColor: "rgba(255,255,255,0.05)", alignItems: "flex-end", paddingRight: 8 }}>
                   {lineNumbers.map((n) => (
                     <Text
                       key={n}
-                      style={{ fontFamily: MONO_FONT, fontSize: 12 }}
-                      className="text-[#666]"
+                      style={{ fontFamily: MONO_FONT, fontSize: 12, color: "#5c6370" }}
                     >
                       {n}
                     </Text>
@@ -389,7 +381,7 @@ function CodeEditorSheetInner(
                     paddingVertical: 8,
                     textAlignVertical: "top",
                   }}
-                  placeholderTextColor="#666"
+                  placeholderTextColor="#5c6370"
                   keyboardAppearance="dark"
                   autoCorrect={false}
                   spellCheck={false}
@@ -398,7 +390,7 @@ function CodeEditorSheetInner(
               </View>
             </View>
           )}
-        </View>
+        </BottomSheetView>
       </BottomSheet>
 
       <CodeSymbolBar

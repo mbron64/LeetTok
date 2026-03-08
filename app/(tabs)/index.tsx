@@ -42,32 +42,49 @@ export default function FeedScreen() {
     });
   }, []);
 
-  const recommended = useMemo(() => {
+  const filteredClips = useMemo(() => {
     if (!prefsLoaded || clips.length === 0) return clips;
-    return recommendClips({
-      allClips: clips,
-      likedClipIds: new Set(),
-      viewedClipIds: new Set(),
-      preferredDifficulties: prefDifficulties,
-      preferredTopics: prefTopics,
-    });
-  }, [clips, prefsLoaded, prefDifficulties, prefTopics]);
+    switch (activeCategory) {
+      case "For You":
+        return recommendClips({
+          allClips: clips,
+          likedClipIds: new Set(),
+          viewedClipIds: new Set(),
+          preferredDifficulties: prefDifficulties,
+          preferredTopics: prefTopics,
+        });
+      case "MadLeets": {
+        const challengeClipIds = new Set(
+          sampleChallenges.map((ch) => ch.clipId),
+        );
+        return clips.filter((c) => challengeClipIds.has(c.id));
+      }
+      case "NeetCode 150":
+        return clips.filter((c) => c.creator === "NeetCode");
+      case "Trending":
+        return [...clips].sort((a, b) => b.likes - a.likes);
+      case "New":
+        return [...clips].reverse();
+      default:
+        return clips;
+    }
+  }, [clips, prefsLoaded, prefDifficulties, prefTopics, activeCategory]);
 
   const handleCategoryChange = useCallback((cat: Category) => {
     setActiveCategory(cat);
   }, []);
 
   return (
-    <View className="flex-1 bg-black">
+    <View style={{ flex: 1, backgroundColor: "#000" }}>
       <StatusBar style="light" />
       {loading || !prefsLoaded ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color={theme.colors.accent} size="large" />
+          <ActivityIndicator color={theme.colors.textSecondary} size="large" />
         </View>
       ) : (
         <>
           <VideoFeed
-            clips={recommended}
+            clips={filteredClips}
             challengeMap={challengeMap}
             challengesEnabled={madLeetsEnabled}
           />

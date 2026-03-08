@@ -37,7 +37,7 @@ const TOPIC_COLORS: Record<string, string> = {
   Stack: "#ef4444",
   "Linked List": "#22c55e",
   Design: "#ec4899",
-  String: "#6366f1",
+  String: "#afb3b6",
   "Dynamic Programming": "#f97316",
   "Binary Search": "#14b8a6",
   Array: "#3b82f6",
@@ -46,7 +46,7 @@ const TOPIC_COLORS: Record<string, string> = {
   Sorting: "#e879f9",
   Recursion: "#10b981",
   Trie: "#06b6d4",
-  Memoization: "#eab308",
+  Memoization: "#fbb862",
   "Divide and Conquer": "#f43f5e",
 };
 
@@ -74,13 +74,13 @@ function DifficultyBadge({ difficulty }: { difficulty: string }) {
     difficulty === "Easy"
       ? "#22c55e"
       : difficulty === "Medium"
-        ? "#eab308"
+        ? "#fbb862"
         : "#ef4444";
   const bg =
     difficulty === "Easy"
       ? "rgba(34,197,94,0.15)"
       : difficulty === "Medium"
-        ? "rgba(234,179,8,0.15)"
+        ? "rgba(251,184,98,0.15)"
         : "rgba(239,68,68,0.15)";
   return (
     <View className="rounded-full px-2.5 py-0.5" style={{ backgroundColor: bg }}>
@@ -104,7 +104,7 @@ function CountdownTimer() {
   return (
     <View className="flex-row items-center gap-1">
       <Ionicons name="time-outline" size={12} color="#888" />
-      <Text className="text-xs font-mono" style={{ color: "#888" }}>
+      <Text className="text-xs font-mono" style={{ color: "#afb3b6" }}>
         {pad(time.hours)}:{pad(time.minutes)}:{pad(time.seconds)}
       </Text>
     </View>
@@ -162,9 +162,9 @@ export default function MadLeetsScreen() {
   }, [loadData]);
 
   return (
-    <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }} edges={["top"]}>
       <ScrollView
-        className="flex-1"
+        style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
       >
@@ -176,7 +176,7 @@ export default function MadLeetsScreen() {
             </View>
             <View>
               <Text className="text-xl font-bold text-white">MadLeets</Text>
-              <Text className="text-xs" style={{ color: "#666" }}>
+              <Text className="text-xs" style={{ color: "#5c6370" }}>
                 Challenge Hub
               </Text>
             </View>
@@ -188,7 +188,7 @@ export default function MadLeetsScreen() {
           <Animated.View
             entering={FadeInDown.delay(100).duration(400)}
             className="mx-5 mb-5 mt-3 flex-row items-center justify-around rounded-2xl py-3.5"
-            style={{ backgroundColor: "#111118" }}
+            style={{ backgroundColor: "#111111" }}
           >
             <View className="items-center">
               <View className="flex-row items-center gap-1">
@@ -197,7 +197,7 @@ export default function MadLeetsScreen() {
                   {progress.streak.currentStreak}
                 </Text>
               </View>
-              <Text className="text-[10px]" style={{ color: "#666" }}>
+              <Text className="text-[10px]" style={{ color: "#5c6370" }}>
                 Streak
               </Text>
             </View>
@@ -209,7 +209,7 @@ export default function MadLeetsScreen() {
                   {progress.totalXP}
                 </Text>
               </View>
-              <Text className="text-[10px]" style={{ color: "#666" }}>
+              <Text className="text-[10px]" style={{ color: "#5c6370" }}>
                 Total XP
               </Text>
             </View>
@@ -221,7 +221,7 @@ export default function MadLeetsScreen() {
                   {progress.accuracy}%
                 </Text>
               </View>
-              <Text className="text-[10px]" style={{ color: "#666" }}>
+              <Text className="text-[10px]" style={{ color: "#5c6370" }}>
                 Accuracy
               </Text>
             </View>
@@ -233,7 +233,7 @@ export default function MadLeetsScreen() {
           entering={FadeInDown.delay(200).duration(400)}
           className="mx-5 mb-5 overflow-hidden rounded-2xl"
           style={{
-            backgroundColor: "#0d1117",
+            backgroundColor: "#111111",
             borderWidth: 1,
             borderColor: "rgba(6,182,212,0.2)",
           }}
@@ -277,7 +277,7 @@ export default function MadLeetsScreen() {
                     className="rounded-md px-2 py-0.5"
                     style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
                   >
-                    <Text className="text-[10px]" style={{ color: "#888" }}>
+                    <Text className="text-[10px]" style={{ color: "#afb3b6" }}>
                       {tag}
                     </Text>
                   </View>
@@ -286,7 +286,7 @@ export default function MadLeetsScreen() {
 
               <View className="mb-3 flex-row items-center gap-1.5">
                 <Ionicons name="code" size={14} color="#666" />
-                <Text className="text-xs" style={{ color: "#666" }}>
+                <Text className="text-xs" style={{ color: "#5c6370" }}>
                   {dailyChallenge.language} · +{dailyChallenge.xpValue} XP
                 </Text>
               </View>
@@ -323,22 +323,22 @@ export default function MadLeetsScreen() {
           entering={FadeInDown.delay(300).duration(400)}
           className="mx-5 mb-5 rounded-2xl p-4"
           style={{
-            backgroundColor: "#111118",
+            backgroundColor: "#111111",
             borderWidth: reviewItems.length > 0 ? 1 : 0,
-            borderColor: "rgba(234,179,8,0.2)",
+            borderColor: "rgba(251,184,98,0.2)",
           }}
         >
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center gap-2">
               <View
                 className="h-8 w-8 items-center justify-center rounded-lg"
-                style={{ backgroundColor: "rgba(234,179,8,0.15)" }}
+                style={{ backgroundColor: "rgba(251,184,98,0.15)" }}
               >
-                <Ionicons name="refresh" size={16} color="#eab308" />
+                <Ionicons name="refresh" size={16} color="#fbb862" />
               </View>
               <View>
                 <Text className="text-sm font-bold text-white">Review Queue</Text>
-                <Text className="text-xs" style={{ color: "#666" }}>
+                <Text className="text-xs" style={{ color: "#5c6370" }}>
                   {reviewItems.length > 0
                     ? `${reviewItems.length} challenge${reviewItems.length === 1 ? "" : "s"} to review`
                     : "All caught up!"}
@@ -354,10 +354,10 @@ export default function MadLeetsScreen() {
                   })
                 }
                 className="flex-row items-center gap-1 rounded-lg px-3 py-2"
-                style={{ backgroundColor: "rgba(234,179,8,0.15)" }}
+                style={{ backgroundColor: "rgba(251,184,98,0.15)" }}
               >
-                <Ionicons name="play" size={14} color="#eab308" />
-                <Text className="text-xs font-bold" style={{ color: "#eab308" }}>
+                <Ionicons name="play" size={14} color="#fbb862" />
+                <Text className="text-xs font-bold" style={{ color: "#fbb862" }}>
                   Start Review
                 </Text>
               </Pressable>
@@ -367,7 +367,7 @@ export default function MadLeetsScreen() {
 
         {/* Mode Selection */}
         <Animated.View entering={FadeInDown.delay(400).duration(400)} className="px-5 mb-4">
-          <Text className="mb-3 text-sm font-bold" style={{ color: "#666" }}>
+          <Text className="mb-3 text-sm font-bold" style={{ color: "#5c6370" }}>
             PRACTICE MODES
           </Text>
 
@@ -376,7 +376,7 @@ export default function MadLeetsScreen() {
             onPress={() => router.push("/challenge-only")}
             className="mb-3 flex-row items-center rounded-2xl p-4"
             style={{
-              backgroundColor: "#111118",
+              backgroundColor: "#111111",
               borderWidth: 1,
               borderColor: "rgba(239,68,68,0.15)",
             }}
@@ -396,23 +396,23 @@ export default function MadLeetsScreen() {
                   </Text>
                 </View>
               </View>
-              <Text className="text-xs" style={{ color: "#666" }}>
+              <Text className="text-xs" style={{ color: "#5c6370" }}>
                 No hints, no video context — pure code
               </Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color="#444" />
+            <Ionicons name="chevron-forward" size={18} color="#5c6370" />
           </Pressable>
         </Animated.View>
 
         {/* Topic Drill Grid */}
         <Animated.View entering={FadeInDown.delay(500).duration(400)} className="px-5 mb-4">
-          <Text className="mb-3 text-sm font-bold" style={{ color: "#666" }}>
+          <Text className="mb-3 text-sm font-bold" style={{ color: "#5c6370" }}>
             TOPIC DRILL
           </Text>
 
           <View className="flex-row flex-wrap" style={{ gap: 10 }}>
             {topicMap.map(([topic, count], idx) => {
-              const color = TOPIC_COLORS[topic] ?? "#6366f1";
+              const color = TOPIC_COLORS[topic] ?? "#afb3b6";
               const icon = TOPIC_ICONS[topic] ?? "code-outline";
               return (
                 <Pressable
@@ -425,7 +425,7 @@ export default function MadLeetsScreen() {
                   }
                   className="items-center rounded-xl p-3"
                   style={{
-                    backgroundColor: "#111118",
+                    backgroundColor: "#111111",
                     width: "47%",
                     flexGrow: 1,
                     borderWidth: 1,
@@ -439,7 +439,7 @@ export default function MadLeetsScreen() {
                     <Ionicons name={icon} size={20} color={color} />
                   </View>
                   <Text className="text-xs font-bold text-white">{topic}</Text>
-                  <Text className="text-[10px]" style={{ color: "#555" }}>
+                  <Text className="text-[10px]" style={{ color: "#5c6370" }}>
                     {count} challenge{count === 1 ? "" : "s"}
                   </Text>
                 </Pressable>

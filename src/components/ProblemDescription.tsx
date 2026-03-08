@@ -29,8 +29,8 @@ export default function ProblemDescription({ problem }: Props) {
 
   return (
     <ScrollView
-      className="flex-1"
-      contentContainerClassName="pb-8"
+      style={{ flex: 1 }}
+      contentContainerStyle={{ paddingBottom: 32 }}
       showsVerticalScrollIndicator={false}
     >
       <View className="px-4 pt-2">
@@ -48,7 +48,7 @@ export default function ProblemDescription({ problem }: Props) {
           </View>
         </View>
 
-        <Text className="text-[#a0a0a0] text-sm leading-5 mt-2">{description}</Text>
+        <Text className="text-[#afb3b6] text-sm leading-5 mt-2">{description}</Text>
 
         {problem.topics.length > 0 && (
           <View className="flex-row flex-wrap gap-1.5 mt-3">
@@ -57,7 +57,7 @@ export default function ProblemDescription({ problem }: Props) {
                 key={t}
                 className="px-2 py-1 rounded bg-white/10"
               >
-                <Text className="text-[#a0a0a0] text-xs">{t}</Text>
+                <Text className="text-[#afb3b6] text-xs">{t}</Text>
               </View>
             ))}
           </View>
@@ -71,12 +71,12 @@ export default function ProblemDescription({ problem }: Props) {
                 key={idx}
                 className="mb-3 p-3 rounded-lg bg-[#1a1a1a] border border-white/5"
               >
-                <Text className="text-[#666] text-xs mb-1">Input:</Text>
-                <Text className="text-[#c9d1d9] text-xs font-mono break-all">
+                <Text className="text-[#5c6370] text-xs mb-1">Input:</Text>
+                <Text className="text-[#afb3b6] text-xs font-mono break-all">
                   {formatJsonForDisplay(tc.input)}
                 </Text>
-                <Text className="text-[#666] text-xs mt-2 mb-1">Output:</Text>
-                <Text className="text-[#c9d1d9] text-xs font-mono">{tc.expected_output}</Text>
+                <Text className="text-[#5c6370] text-xs mt-2 mb-1">Output:</Text>
+                <Text className="text-[#afb3b6] text-xs font-mono">{tc.expected_output}</Text>
               </View>
             ))}
           </View>
@@ -87,7 +87,7 @@ export default function ProblemDescription({ problem }: Props) {
             <Text className="text-white font-medium text-sm mb-2">Constraints</Text>
             <View className="gap-1">
               {problem.constraints.map((c, idx) => (
-                <Text key={idx} className="text-[#a0a0a0] text-sm">
+                <Text key={idx} className="text-[#afb3b6] text-sm">
                   • {c}
                 </Text>
               ))}
@@ -96,11 +96,11 @@ export default function ProblemDescription({ problem }: Props) {
         )}
 
         <Pressable
-          onPress={() => Linking.openURL(leetCodeUrl)}
-          className="mt-6 flex-row items-center gap-2 py-3 px-4 rounded-lg bg-indigo-500/20 border border-indigo-500/40 active:bg-indigo-500/30"
+          onPress={() => Linking.openURL(leetCodeUrl).catch(() => {})}
+          className="mt-6 flex-row items-center gap-2 py-3 px-4 rounded-lg bg-white/10 border border-white/20 active:bg-white/15"
         >
-          <Ionicons name="open-outline" size={18} color={theme.colors.accent} />
-          <Text className="text-indigo-400 font-medium">Solve on LeetCode</Text>
+          <Ionicons name="open-outline" size={18} color="#ffffff" />
+          <Text className="text-white font-medium">Solve on LeetCode</Text>
         </Pressable>
       </View>
     </ScrollView>

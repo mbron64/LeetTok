@@ -32,12 +32,12 @@ export default function BookmarksScreen() {
 
   if (bookmarkedClips.length === 0) {
     return (
-      <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }} edges={["top"]}>
         <View className="px-4 pb-2 pt-2">
           <Text className="text-2xl font-bold text-white">Bookmarks</Text>
         </View>
-        <View className="flex-1 items-center justify-center">
-          <Ionicons name="bookmark-outline" size={64} color="#333" />
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <Ionicons name="bookmark-outline" size={64} color="#5c6370" />
           <Text className="mt-4 text-base font-medium text-gray-500">
             No bookmarks yet
           </Text>
@@ -50,7 +50,7 @@ export default function BookmarksScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }} edges={["top"]}>
       <View className="px-4 pb-2 pt-2">
         <Text className="mb-1 text-2xl font-bold text-white">Bookmarks</Text>
         <Text className="mb-2 text-xs text-gray-500">
@@ -106,7 +106,7 @@ function BookmarkCard({
           backgroundColor: "#1a1a1a",
         }}
       >
-        <Ionicons name="play-circle" size={40} color="#333" />
+        <Ionicons name="play-circle" size={40} color="#5c6370" />
       </View>
 
       <View className="p-3">

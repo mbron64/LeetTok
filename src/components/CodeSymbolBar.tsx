@@ -46,12 +46,12 @@ function SymbolRow({ symbols, onInsert }: { symbols: string[]; onInsert: (t: str
   );
 
   return (
-    <View className="bg-[#1a1a2e]">
+    <View className="bg-[#1a1a1a]">
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         keyboardShouldPersistTaps="always"
-        contentContainerClassName="px-2 py-2 gap-1.5 items-center"
+        contentContainerStyle={{ paddingHorizontal: 8, paddingVertical: 8, gap: 6, alignItems: "center" }}
       >
         {symbols.map((sym, idx) => (
           <Pressable
@@ -59,7 +59,7 @@ function SymbolRow({ symbols, onInsert }: { symbols: string[]; onInsert: (t: str
             onPress={() => handlePress(sym)}
             className="rounded-lg px-3 py-1.5 min-w-[28px] items-center active:bg-cyan-500/25 border border-white/10 active:border-cyan-500/50"
           >
-            <Text style={{ fontFamily: MONO_FONT, fontSize: 13 }} className="text-[#c9d1d9]">
+            <Text style={{ fontFamily: MONO_FONT, fontSize: 13 }} className="text-[#afb3b6]">
               {sym}
             </Text>
           </Pressable>
@@ -85,7 +85,7 @@ export default function CodeSymbolBar({
   }
 
   return (
-    <View className="absolute bottom-0 left-0 right-0">
+    <View style={{ position: "absolute", bottom: 0, left: 0, right: 0 }}>
       <SymbolRow symbols={symbols} onInsert={onInsert} />
     </View>
   );

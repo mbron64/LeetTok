@@ -36,8 +36,8 @@ export default function RootLayout() {
 
   if (!ready) {
     return (
-      <View className="flex-1 items-center justify-center bg-black">
-        <ActivityIndicator color={theme.colors.accent} size="large" />
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#000" }}>
+        <ActivityIndicator color={theme.colors.textSecondary} size="large" />
       </View>
     );
   }

@@ -37,7 +37,7 @@ function DiffLine({
         style={{ borderLeftWidth: 3, borderLeftColor: color }}
         className="pl-2 py-1"
       >
-        <Text className="text-[#c9d1d9] text-xs font-mono break-all">{value}</Text>
+        <Text className="text-[#afb3b6] text-xs font-mono break-all">{value}</Text>
       </View>
     </View>
   );
@@ -62,7 +62,7 @@ export default function TestResults({
   if (loading) {
     return (
       <View className="py-8 items-center">
-        <Text className="text-[#a0a0a0]">Running...</Text>
+        <Text className="text-[#afb3b6]">Running...</Text>
       </View>
     );
   }
@@ -74,7 +74,7 @@ export default function TestResults({
           <Ionicons name="close-circle" size={20} color={theme.colors.error} />
           <Text className="text-red-400 font-medium">Error</Text>
         </View>
-        <Text className="text-[#c9d1d9] text-sm">{error}</Text>
+        <Text className="text-[#afb3b6] text-sm">{error}</Text>
       </View>
     );
   }
@@ -89,8 +89,8 @@ export default function TestResults({
 
   return (
     <ScrollView
-      className="flex-1"
-      contentContainerClassName="pb-6"
+      style={{ flex: 1 }}
+      contentContainerStyle={{ paddingBottom: 24 }}
       showsVerticalScrollIndicator={false}
     >
       <View

@@ -17,32 +17,44 @@ export default function CategoryBar({ active, onCategoryChange, onSearchPress }:
 
   return (
     <View
-      className="absolute left-0 right-0 z-10 flex-row items-center bg-black/40"
-      style={{ top: 0, paddingTop: insets.top }}
+      style={{ position: "absolute", left: 0, right: 0, zIndex: 10, flexDirection: "row", alignItems: "center", top: 0, paddingTop: insets.top }}
     >
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerClassName="flex-row items-center px-4 py-2.5 gap-5"
-        className="flex-1"
+        contentContainerStyle={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 10, gap: 20 }}
+        style={{ flex: 1 }}
       >
         {CATEGORIES.map((cat) => {
           const isActive = cat === active;
           return (
             <Pressable key={cat} onPress={() => onCategoryChange(cat)}>
               <Text
-                className={`text-[15px] ${isActive ? "font-bold text-white" : "font-normal text-white/60"}`}
+                style={{
+                  fontSize: 15,
+                  fontWeight: isActive ? "700" : "400",
+                  color: isActive ? "#fff" : "rgba(255,255,255,0.6)",
+                }}
               >
                 {cat}
               </Text>
               {isActive && (
-                <View className="mx-auto mt-1 h-[2px] w-5 rounded-full bg-white" />
+                <View
+                  style={{
+                    marginTop: 4,
+                    height: 2,
+                    width: 20,
+                    borderRadius: 9999,
+                    backgroundColor: "#fff",
+                    alignSelf: "center",
+                  }}
+                />
               )}
             </Pressable>
           );
         })}
       </ScrollView>
-      <Pressable onPress={onSearchPress} className="pr-4 pl-2">
+      <Pressable onPress={onSearchPress} style={{ paddingRight: 16, paddingLeft: 8 }}>
         <Ionicons name="search" size={22} color="#fff" />
       </Pressable>
     </View>

@@ -21,14 +21,14 @@ export default function ProblemFeedScreen() {
   const problem = clips[0];
 
   return (
-    <View className="flex-1 bg-black">
+    <View style={{ flex: 1, backgroundColor: "#000" }}>
       <StatusBar style="light" />
 
       {clips.length > 0 ? (
         <VideoFeed clips={clips} />
       ) : (
-        <View className="flex-1 items-center justify-center">
-          <Ionicons name="videocam-off-outline" size={48} color="#333" />
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <Ionicons name="videocam-off-outline" size={48} color="#5c6370" />
           <Text className="mt-3 text-sm text-gray-500">
             No clips for this problem
           </Text>
@@ -37,12 +37,12 @@ export default function ProblemFeedScreen() {
 
       {/* Floating header */}
       <SafeAreaView
-        className="absolute left-0 right-0 top-0"
+        style={{ position: "absolute", left: 0, right: 0, top: 0 }}
         edges={["top"]}
         pointerEvents="box-none"
       >
         <View
-          className="flex-row items-center gap-3 px-4 py-2"
+          style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 8 }}
           pointerEvents="box-none"
         >
           <Pressable
@@ -53,7 +53,7 @@ export default function ProblemFeedScreen() {
           </Pressable>
 
           {problem && (
-            <View className="flex-1 flex-row items-center gap-2" pointerEvents="none">
+            <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8 }} pointerEvents="none">
               <Text
                 className="shrink text-base font-bold text-white"
                 numberOfLines={1}

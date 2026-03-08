@@ -44,16 +44,16 @@ export default function ExploreScreen() {
   const cardWidth = (width - 48) / 2;
 
   return (
-    <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }} edges={["top"]}>
       <View className="px-4 pb-2 pt-2">
         <Text className="mb-3 text-2xl font-bold text-white">Explore</Text>
 
         <View className="mb-3 flex-row items-center rounded-xl bg-[#1a1a1a] px-3 py-2.5">
-          <Ionicons name="search" size={18} color="#666" />
+          <Ionicons name="search" size={18} color="#5c6370" />
           <TextInput
             className="ml-2 flex-1 text-sm text-white"
             placeholder="Search problems..."
-            placeholderTextColor="#666"
+            placeholderTextColor="#5c6370"
             value={search}
             onChangeText={setSearch}
             autoCorrect={false}
@@ -61,7 +61,7 @@ export default function ExploreScreen() {
           />
           {search.length > 0 && (
             <Pressable onPress={() => setSearch("")}>
-              <Ionicons name="close-circle" size={18} color="#666" />
+              <Ionicons name="close-circle" size={18} color="#5c6370" />
             </Pressable>
           )}
         </View>
@@ -110,7 +110,7 @@ export default function ExploreScreen() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View className="mt-20 items-center">
-              <Ionicons name="search-outline" size={48} color="#333" />
+              <Ionicons name="search-outline" size={48} color="#5c6370" />
               <Text className="mt-3 text-sm text-gray-500">
                 No problems found
               </Text>

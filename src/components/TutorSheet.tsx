@@ -17,6 +17,7 @@ import BottomSheet, {
   BottomSheetFlatList,
   BottomSheetFlatListMethods,
   BottomSheetTextInput,
+  BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../lib/auth";
@@ -212,49 +213,49 @@ const TutorSheet = forwardRef<TutorSheetRef, Props>(function TutorSheet(
       snapPoints={snapPoints}
       index={-1}
       enablePanDownToClose
+      enableDynamicSizing={false}
       onChange={handleSheetChange}
-      backgroundStyle={{ backgroundColor: "#0a0a0a" }}
-      handleIndicatorStyle={{ backgroundColor: "#444" }}
+      backgroundStyle={{ backgroundColor: "#111111" }}
+      handleIndicatorStyle={{ backgroundColor: "#5c6370" }}
     >
-      <View className="flex-1">
+      <BottomSheetView style={{ flex: 1 }}>
         {/* Header */}
-        <View className="flex-row items-center justify-between border-b border-[#1a1a1a] px-4 py-3">
-          <View className="flex-1 flex-row items-center gap-2">
-            <Text className="text-lg font-semibold text-white">LeetTok Tutor</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: "#1a1a1a", paddingHorizontal: 16, paddingVertical: 12 }}>
+          <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <Text style={{ fontSize: 18, fontWeight: "600", color: "#fff" }}>LeetTok Tutor</Text>
             {remaining !== null && !limitReached && (
-              <Text className="text-xs text-[#888]">
+              <Text style={{ fontSize: 12, color: "#5c6370" }}>
                 {remaining.remaining} messages left today
               </Text>
             )}
           </View>
           <Pressable
             onPress={() => bottomSheetRef.current?.close()}
-            className="h-8 w-8 items-center justify-center rounded-full bg-[#1a1a1a]"
+            style={{ height: 32, width: 32, alignItems: "center", justifyContent: "center", borderRadius: 16, backgroundColor: "#1a1a1a" }}
           >
             <Ionicons name="close" size={20} color="#fff" />
           </Pressable>
         </View>
 
         {/* Message list */}
-        <View className="flex-1 min-h-0">
-          <BottomSheetFlatList
-            ref={flatListRef}
-            data={messages}
-            renderItem={renderItem}
-            keyExtractor={keyExtractor}
-            ListHeaderComponent={messages.length === 0 ? ListHeaderComponent : null}
-            contentContainerStyle={{
-              paddingHorizontal: 16,
-              paddingBottom: 16,
-              flexGrow: 1,
-            }}
-            inverted={false}
-          />
-        </View>
+        <BottomSheetFlatList
+          ref={flatListRef}
+          data={messages}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          ListHeaderComponent={messages.length === 0 ? ListHeaderComponent : null}
+          style={{ flex: 1 }}
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            paddingBottom: 16,
+            flexGrow: 1,
+          }}
+          inverted={false}
+        />
 
         {/* Chips above input when messages exist */}
         {messages.length > 0 && (
-          <View className="border-t border-[#1a1a1a] px-4 pt-2">
+          <View style={{ borderTopWidth: 1, borderTopColor: "#1a1a1a", paddingHorizontal: 16, paddingTop: 8 }}>
             <QuickActionChips
               onSend={sendMessage}
               collapsed={chipsCollapsed}
@@ -265,38 +266,38 @@ const TutorSheet = forwardRef<TutorSheetRef, Props>(function TutorSheet(
 
         {/* Limit reached message */}
         {limitReached && (
-          <View className="border-t border-[#1a1a1a] bg-[#1a1a1a] px-4 py-3">
-            <Text className="text-center text-sm text-[#888]">
+          <View style={{ borderTopWidth: 1, borderTopColor: "#1a1a1a", backgroundColor: "#1a1a1a", paddingHorizontal: 16, paddingVertical: 12 }}>
+            <Text style={{ textAlign: "center", fontSize: 14, color: "#5c6370" }}>
               You've used all {remaining?.limit ?? 20} tutor messages today. Come back tomorrow!
             </Text>
           </View>
         )}
 
         {/* Input */}
-        <View className="flex-row items-center gap-2 border-t border-[#1a1a1a] px-4 py-3">
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8, borderTopWidth: 1, borderTopColor: "#1a1a1a", paddingHorizontal: 16, paddingVertical: 12 }}>
           <BottomSheetTextInput
             value={inputText}
             onChangeText={setInputText}
             placeholder="Ask about this problem..."
-            placeholderTextColor="#666"
+            placeholderTextColor="#5c6370"
             editable={!isStreaming && !limitReached}
             onSubmitEditing={handleSend}
             returnKeyType="send"
-            className="flex-1 rounded-xl bg-[#1e1e1e] px-4 py-3 text-[15px] text-white"
+            style={{ flex: 1, borderRadius: 12, backgroundColor: "#1a1a1a", paddingHorizontal: 16, paddingVertical: 12, fontSize: 15, color: "#fff" }}
           />
           <Pressable
             onPress={handleSend}
             disabled={!inputText.trim() || isStreaming || limitReached}
-            className="h-11 w-11 items-center justify-center rounded-full bg-[#6366f1] disabled:opacity-50"
+            style={{ height: 44, width: 44, alignItems: "center", justifyContent: "center", borderRadius: 22, backgroundColor: "#fff", opacity: (!inputText.trim() || isStreaming || limitReached) ? 0.5 : 1 }}
           >
             {isStreaming ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <ActivityIndicator size="small" color="#000" />
             ) : (
-              <Ionicons name="send" size={18} color="#fff" />
+              <Ionicons name="send" size={18} color="#000" />
             )}
           </Pressable>
         </View>
-      </View>
+      </BottomSheetView>
     </BottomSheet>
   );
 });
