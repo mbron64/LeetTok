@@ -53,11 +53,23 @@ We'll use **sample videos** initially (a few publicly available short coding cli
 3. **Add video playback with expo-video** -- Use `useVideoPlayer` hook + `<VideoView>` component (expo-av is deprecated as of SDK 54; `expo-video` is the replacement). Handle loading states.
 4. **Implement auto-play/pause based on visibility** -- Use `viewabilityConfig` + `onViewableItemsChanged` to track which item is on screen. Only the visible video plays. Others are paused. Note: on Android, multiple `VideoView` components sharing one `VideoPlayer` instance don't work -- each FlatList item needs its own player, or use a single player that swaps source on scroll.
 5. **Add tap-to-pause/play gesture** -- Tap the video to toggle playback. Show a brief play/pause icon overlay on tap.
-6. **Build overlay UI** -- Semi-transparent overlay on each video showing: problem title, difficulty badge (Easy/Med/Hard with color), topic tags, and the original creator name
-7. **Add action buttons sidebar** -- Right-side vertical button column (like TikTok): Like (heart), Bookmark, Share, "Full Solution" link. Include animated press states.
-8. **Add progress bar** -- Thin progress bar at bottom of each video showing playback position
-9. **Preload adjacent videos** -- When a video comes into view, start loading the next 1-2 videos in the background so swiping feels instant
-10. **Polish and stress-test the feed** -- Handle edge cases: rapid swiping, backgrounding the app, rotating device, slow network. Make sure memory doesn't leak from video components.
+6. **Build top category bar** -- Horizontally scrollable tab row overlaid on top of the video (semi-transparent, like TikTok's). Tabs: **For You** (default, bold + underline) | **MadLeets** | **NeetCode 150** | **Trending** | **New**. Tapping a tab swaps the feed content. Search icon on the far right.
+    - **For You**: Personalized feed based on watch history, likes, and topic preferences. Falls back to curated mix for new users.
+    - **MadLeets**: Only clips with an attached MadLeets challenge. Challenge auto-triggers at pause timestamp.
+    - **NeetCode 150**: Clips organized by NeetCode's curated 150-problem list. Shows progress (e.g., "47/150 seen").
+    - **Trending**: Ranked by engagement (likes + bookmarks) over past 7 days.
+    - **New**: Reverse chronological, most recently clipped content first.
+7. **Build right-side action column** -- Vertical button column on the right edge of the video, matching TikTok's layout (top to bottom):
+    - **Creator avatar** (circular thumbnail, tap to see their channel, "+" follow button beneath)
+    - **Like** (heart icon + count, tap to toggle, animated fill on like)
+    - **Discuss** (comment bubble icon + count, tap to open comment sheet)
+    - **Save** (bookmark icon + count, tap to toggle)
+    - **Share** (arrow icon + count, tap to open share sheet)
+    - **LeetCode problem badge** (bottom element, replaces TikTok's spinning album art): Shows problem number, name, and difficulty color (green/yellow/red). Tap to open the problem on LeetCode.com.
+8. **Build bottom-left overlay text** -- Creator name, clip title, and topic tags displayed at the bottom-left of the video (like TikTok's caption area). Truncated with "more" expansion.
+9. **Add progress bar** -- Thin progress bar at bottom of each video showing playback position
+10. **Preload adjacent videos** -- When a video comes into view, start loading the next 1-2 videos in the background so swiping feels instant
+11. **Polish and stress-test the feed** -- Handle edge cases: rapid swiping, backgrounding the app, rotating device, slow network. Make sure memory doesn't leak from video components.
 
 ---
 
@@ -67,11 +79,15 @@ Goal: A real app with multiple screens, not just a single feed.
 
 **Commits:**
 
-1. **Build tab bar navigation** -- Bottom tabs: Feed (home icon), Explore (search icon), Bookmarks (bookmark icon), Profile (user icon). Style the tab bar to be minimal and dark-themed.
-2. **Build Explore screen** -- Grid/list view of LeetCode problems organized by topic. Tap a problem to see its clips in feed format. Filter chips for difficulty.
+1. **Build 5-tab bottom bar** -- Solid black background, 5 tabs matching TikTok's layout:
+    - **Home** (house icon) -- The video feed with top category bar
+    - **Explore** (search icon) -- Browse problems by topic
+    - **[MadLeets]** (center button, branded + prominent, rounded-rectangle with gradient edge like TikTok's "+" button) -- Jumps straight into the next MadLeets challenge
+    - **Bookmarks** (bookmark icon) -- Saved clips
+    - **Profile** (user icon) -- Stats, XP, streaks, settings
+2. **Build Explore screen** -- Grid/list view of LeetCode problems organized by topic (Arrays, Trees, DP, Graphs, etc.). Tap a problem to see its clips in feed format. Filter chips for difficulty. Search bar at top to filter by problem name, number, or topic.
 3. **Build Bookmarks screen** -- Saved clips in a grid. Tap to play in feed mode.
-4. **Build Profile screen** -- Placeholder for now: avatar, stats (clips watched, problems covered), settings gear.
-5. **Add search** -- Search bar on Explore screen. Filter problems by name, number, or topic. Client-side filtering for now (we'll move to server-side later).
+4. **Build Profile screen** -- Avatar, XP level, MadLeets streak, stats (clips watched, problems covered, accuracy %), settings gear. Links to [MadLeets progress stats](madleets_interactive_challenges.plan.md) when that plan is implemented.
 
 ---
 
@@ -93,6 +109,8 @@ Goal: Move from hardcoded data to a real backend. Set up Supabase.
 ---
 
 > **Note**: The content pipeline (auto-clipper) has its own dedicated plan: see [NeetCode Clipping Engine](.cursor/plans/neetcode_clipping_engine.plan.md). It lives in `pipeline/` and can be built in parallel with the mobile app.
+
+> **Note**: The interactive fill-in-the-blank feature has its own dedicated plan: see [MadLeets Interactive Challenges](.cursor/plans/madleets_interactive_challenges.plan.md). It depends on both the mobile app feed (Phase 2) and the clipping pipeline.
 
 ---
 

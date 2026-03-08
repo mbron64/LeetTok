@@ -1,31 +1,31 @@
 ---
-name: "CodeCloze: Interactive Challenges"
-overview: "An interactive fill-in-the-blank coding challenge mode within LeetTok. Videos pause at key moments and users must type the next line of code. Combines active recall, spaced repetition, and TikTok-style video into a Duolingo-meets-LeetCode experience."
+name: "MadLeets: Interactive Challenges"
+overview: "An interactive fill-in-the-blank coding challenge mode within LeetTok -- like MadLibs, but for LeetCode. Videos pause at key moments and users must type the next line of code. Combines active recall, spaced repetition, and TikTok-style video into a Duolingo-meets-LeetCode experience."
 todos:
-  - id: cloze-pipeline
-    content: "Phase 1: Extend clipping pipeline to generate CodeCloze challenge data from video transcripts (commits 1-4)"
+  - id: madleets-pipeline
+    content: "Phase 1: Extend clipping pipeline to generate MadLeets challenge data from video transcripts (commits 1-4)"
     status: pending
-  - id: cloze-schema
+  - id: madleets-schema
     content: "Phase 2: Add challenges table to Supabase schema + seed data (commits 5-6)"
     status: pending
-  - id: cloze-ui-core
+  - id: madleets-ui-core
     content: "Phase 3: Build the core challenge UI -- video pause, code display, input, validation (commits 7-12)"
     status: pending
-  - id: cloze-keyboard
+  - id: madleets-keyboard
     content: "Phase 4: Build custom code keyboard with token suggestions (commits 13-14)"
     status: pending
-  - id: cloze-gamification
+  - id: madleets-gamification
     content: "Phase 5: Add gamification -- XP, streaks, difficulty progression, stats (commits 15-18)"
     status: pending
-  - id: cloze-modes
+  - id: madleets-modes
     content: "Phase 6: Add challenge modes -- daily challenge, topic drill, review queue (commits 19-21)"
     status: pending
 isProject: false
 ---
 
-# CodeCloze: Interactive Fill-in-the-Blank Challenges
+# MadLeets: Interactive Fill-in-the-Blank Challenges
 
-**Name**: "CodeCloze" -- from [cloze test](https://en.wikipedia.org/wiki/Cloze_test), the educational term for fill-in-the-blank exercises. Also plays on "code close" (closing the gap in your knowledge).
+**Name**: "MadLeets" -- like MadLibs, but for LeetCode. You fill in the blank line of code instead of a missing word. The name is instantly recognizable and fun.
 
 This is a new interactive mode within LeetTok where videos pause at critical moments and the user must type the next line of code to continue. It transforms passive video watching into active recall -- the single most effective learning technique according to cognitive science research.
 
@@ -75,13 +75,9 @@ Green flash, +15 XP, the video resumes showing NeetCode writing that exact line.
 ## Design Principles
 
 1. **Active recall over passive watching** -- Research shows active recall is 50% more effective than re-watching. Every clip becomes a quiz.
-
 2. **Forgiving validation** -- Code can be written many ways. `if complement in seen:` and `if complement in seen :` and `if seen.get(complement) is not None:` should all be accepted. Use fuzzy matching + multiple accepted answers.
-
 3. **The video IS the explanation** -- If the user gets it wrong, the video resumes and explains the answer. No separate "explanation" screen needed.
-
 4. **Low friction** -- The challenge appears inline during the video. No mode switching, no separate screen. Swipe to skip if you just want to watch.
-
 5. **Spaced repetition** -- Challenges you got wrong reappear later. Challenges you got right appear less frequently. The app learns what you need to practice.
 
 ---
@@ -218,7 +214,7 @@ create table user_progress (
 
 This is the most complex part -- the interactive overlay that appears when a video pauses.
 
-### Commit 7: Build ChallengeOverlay component
+### Commit 7: Build MadLeetsOverlay component
 
 The overlay slides up from the bottom when the video pauses at `pause_timestamp`:
 
@@ -228,7 +224,7 @@ The overlay slides up from the bottom when the video pauses at `pause_timestamp`
 |   [Video - paused, dimmed]       |
 |                                  |
 +----------------------------------+
-|  CodeCloze Challenge             |
+|  MadLeets Challenge              |
 |                                  |
 |  def twoSum(nums, target):      |
 |      seen = {}                   |
@@ -270,6 +266,7 @@ A specialized text input for typing code on mobile:
 - **Token-level comparison**: Split both answer and expected into tokens, compare token sets. This catches reordering issues.
 
 Validation tiers:
+
 1. Perfect match -> "Perfect!" + full XP
 2. Accepted variation -> "Correct!" + full XP
 3. Fuzzy match (>90% similar) -> "Close enough!" + 75% XP
@@ -279,7 +276,7 @@ Validation tiers:
 ### Commit 10: Wire video pause + challenge trigger
 
 - In the video player, monitor `player.currentTime` via a polling interval or `onPlaybackStatusUpdate`
-- When `currentTime >= challenge.pause_timestamp`, call `player.pause()` and show the ChallengeOverlay
+- When `currentTime >= challenge.pause_timestamp`, call `player.pause()` and show the MadLeetsOverlay
 - After the user submits (or skips), dismiss the overlay and call `player.play()` to resume
 - Store the attempt in `challenge_attempts` table
 
@@ -289,12 +286,12 @@ Validation tiers:
 - **Wrong answer**: Red shake animation on the input (translateX spring), the correct answer fades in below with a diff highlight showing what was different, gentle explanation text appears
 - **Skip**: Input grays out, correct answer revealed with no fanfare, -5 XP penalty
 
-### Commit 12: Add challenge toggle
+### Commit 12: Add MadLeets toggle
 
 - Not every user wants challenges interrupting their feed
-- Add a toggle in settings: "CodeCloze Challenges: On/Off"
+- Add a toggle in settings: "MadLeets Challenges: On/Off"
 - When off, videos play straight through without pausing
-- When on, a small "CodeCloze" badge appears on clips that have challenges
+- When on, a small "MadLeets" badge appears on clips that have challenges
 
 ---
 
@@ -344,7 +341,7 @@ A toolbar that sits above the system keyboard with common code tokens:
 
 - A challenge streak increments each day the user completes at least 1 challenge
 - Display streak count prominently (fire icon + number, like Duolingo)
-- Push notification at 8 PM if streak is about to break: "Your 7-day CodeCloze streak is at risk!"
+- Push notification at 8 PM if streak is about to break: "Your 7-day MadLeets streak is at risk!"
 - Streak freeze: earned every 7 days, automatically preserves streak for 1 missed day
 
 ### Commit 17: Build progress stats screen
@@ -443,7 +440,7 @@ All validation runs client-side for instant feedback. No server round-trip neede
 ## Dependencies on Other Plans
 
 - **Clipping Engine**: Phase 1 of this plan extends the pipeline in [neetcode_clipping_engine.plan.md](.cursor/plans/neetcode_clipping_engine.plan.md). The `pipeline/challenges.py` and `pipeline/code_extract.py` modules live alongside the existing pipeline modules.
-- **Mobile App**: Phases 3-6 of this plan build on top of the video feed from [leettok_mobile_app.plan.md](.cursor/plans/leettok_mobile_app.plan.md). The ChallengeOverlay integrates into the existing VideoFeed component.
+- **Mobile App**: Phases 3-6 of this plan build on top of the video feed from [leettok_mobile_app.plan.md](.cursor/plans/leettok_mobile_app.plan.md). The MadLeetsOverlay integrates into the existing VideoFeed component.
 - **Database**: The `challenges` and `challenge_attempts` tables are added to the shared Supabase schema.
 
 This plan can begin after Phase 2 of both other plans is complete (once we have a working video feed and a working clipping pipeline).
