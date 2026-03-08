@@ -3,23 +3,26 @@ import { supabase } from "./supabase";
 import { useAuth } from "./auth";
 import { isSupabaseConfigured } from "../constants/config";
 import { sampleClips } from "../constants/sampleData";
+import { assembleFeed } from "./feed";
+import { fetchUserProfile } from "./userProfile";
 import type { Clip, Difficulty } from "../types";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 
 // ------------------------------------------------------------------
-// useClips — paginated clip feed, falls back to sample data
+// useClips — feed assembly when Supabase configured, else sample data
 // ------------------------------------------------------------------
 
 export function useClips() {
+  const { user } = useAuth();
   const [clips, setClips] = useState<Clip[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [cursor, setCursor] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
   const fetchPage = useCallback(
-    async (after?: string | null) => {
+    async (pageNum: number, append: boolean) => {
       if (!isSupabaseConfigured) {
         setClips(sampleClips);
         setLoading(false);
@@ -27,71 +30,69 @@ export function useClips() {
         return;
       }
 
-      let query = supabase
-        .from("clips")
-        .select(
-          "id, title, video_url, creator, hook, likes_count, bookmarks_count, created_at, problems!inner(number, difficulty, topics)",
-        )
-        .order("created_at", { ascending: false })
-        .limit(PAGE_SIZE);
-
-      if (after) {
-        query = query.lt("created_at", after);
-      }
-
-      const { data, error } = await query;
-
-      if (error || !data) {
-        setClips(sampleClips);
+      if (!user?.id) {
+        setClips([]);
         setLoading(false);
         setHasMore(false);
         return;
       }
 
-      const mapped: Clip[] = data.map((row: any) => ({
-        id: row.id,
-        title: row.title,
-        problemNumber: row.problems.number,
-        difficulty: row.problems.difficulty as Difficulty,
-        topics: row.problems.topics ?? [],
-        videoUrl: row.video_url,
-        creator: row.creator ?? "",
-        hook: row.hook ?? "",
-        likes: row.likes_count,
-        comments: row.comments_count ?? 0,
-        bookmarks: row.bookmarks_count,
-        shares: row.shares_count ?? 0,
-      }));
+      const userProfile = await fetchUserProfile(user.id);
+      const feedClips = await assembleFeed({
+        userId: user.id,
+        userProfile,
+        page: pageNum,
+        pageSize: PAGE_SIZE,
+      });
 
-      if (after) {
-        setClips((prev) => [...prev, ...mapped]);
+      if (append) {
+        setClips((prev) => [...prev, ...feedClips]);
       } else {
-        setClips(mapped);
+        setClips(feedClips);
       }
 
-      const last = data[data.length - 1];
-      setCursor(last?.created_at ?? null);
-      setHasMore(data.length === PAGE_SIZE);
+      setHasMore(feedClips.length === PAGE_SIZE);
       setLoading(false);
     },
-    [],
+    [user?.id],
   );
 
   useEffect(() => {
-    fetchPage();
-  }, [fetchPage]);
+    if (!isSupabaseConfigured) {
+      setClips(sampleClips);
+      setLoading(false);
+      setHasMore(false);
+      return;
+    }
+    if (!user?.id) {
+      setClips([]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    fetchPage(1, false);
+  }, [user?.id, isSupabaseConfigured]);
 
   const loadMore = useCallback(() => {
-    if (!hasMore || loading) return;
-    fetchPage(cursor);
-  }, [cursor, hasMore, loading, fetchPage]);
+    if (!hasMore || loading || !user?.id) return;
+    setLoading(true);
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchPage(nextPage, true);
+  }, [page, hasMore, loading, user?.id, fetchPage]);
 
   const refresh = useCallback(async () => {
     setRefreshing(true);
-    setCursor(null);
-    await fetchPage();
+    setPage(1);
+    if (isSupabaseConfigured && user?.id) {
+      setLoading(true);
+      await fetchPage(1, false);
+    } else {
+      setClips(sampleClips);
+      setHasMore(false);
+    }
     setRefreshing(false);
-  }, [fetchPage]);
+  }, [user?.id, fetchPage]);
 
   return { clips, loading, refreshing, loadMore, refresh, hasMore };
 }

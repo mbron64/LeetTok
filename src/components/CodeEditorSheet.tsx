@@ -16,16 +16,21 @@ import {
   type NativeSyntheticEvent,
   type TextInputSelectionChangeEventData,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../lib/auth";
 import { submitCode, LANGUAGE_IDS } from "../lib/codeExecution";
 import { SAMPLE_PROBLEMS } from "../constants/sampleProblems";
 import { isSupabaseConfigured } from "../constants/config";
+import { trackEvent } from "../lib/track";
 import ProblemDescription from "./ProblemDescription";
 import TestResults from "./TestResults";
 import CodeSymbolBar from "./CodeSymbolBar";
 import { theme } from "../constants/theme";
+import type { ClipContext } from "../lib/tutor";
+
+const LANG_PREF_KEY = "code-editor-lang-pref";
 
 const CODE_SYMBOL_BAR_ID = "code-editor-symbol-bar";
 
@@ -47,7 +52,10 @@ export type CodeEditorSheetRef = {
 };
 
 type Props = {
+  clipId: string;
+  clipContext: ClipContext;
   onClose: () => void;
+  onAskTutor?: (context: string) => void;
 };
 
 function getStarterCode(problem: (typeof SAMPLE_PROBLEMS)[0], langKey: string): string {
@@ -61,14 +69,14 @@ function getStarterCode(problem: (typeof SAMPLE_PROBLEMS)[0], langKey: string): 
 }
 
 function CodeEditorSheetInner(
-  { onClose }: Props,
+  { clipId, clipContext, onClose, onAskTutor }: Props,
   ref: React.Ref<CodeEditorSheetRef>,
 ) {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const codeInputRef = useRef<TextInput>(null);
   const selectionRef = useRef<{ start: number; end: number }>({ start: 0, end: 0 });
 
-  const { session } = useAuth();
+  const { session, user } = useAuth();
   const [problemNumber, setProblemNumber] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<"problem" | "code">("problem");
   const [language, setLanguage] = useState<(typeof ALL_LANGUAGES)[0]>(ALL_LANGUAGES[0]);
@@ -83,14 +91,22 @@ function CodeEditorSheetInner(
     [problemNumber],
   );
 
-  const open = useCallback((num: number) => {
+  const open = useCallback(async (num: number) => {
     setProblemNumber(num);
     setResults(null);
     setError(null);
     const p = SAMPLE_PROBLEMS.find((x) => x.number === num);
     if (p) {
-      const starter = getStarterCode(p, language.key);
-      setCode(starter);
+      const langPref = await AsyncStorage.getItem(LANG_PREF_KEY);
+      const langKey =
+        langPref && ALL_LANGUAGES.some((l) => l.key === langPref)
+          ? langPref
+          : language.key;
+      const lang = ALL_LANGUAGES.find((l) => l.key === langKey) ?? ALL_LANGUAGES[0];
+      setLanguage(lang);
+      const codeKey = `code-${num}-${langKey}`;
+      const saved = await AsyncStorage.getItem(codeKey);
+      setCode(saved ?? getStarterCode(p, langKey));
     }
     bottomSheetRef.current?.expand();
   }, [language.key]);
@@ -101,24 +117,30 @@ function CodeEditorSheetInner(
 
   useImperativeHandle(ref, () => ({ open, close }), [open, close]);
 
-  useEffect(() => {
-    if (problem && problemNumber) {
-      const starter = getStarterCode(problem, language.key);
-      setCode(starter);
-    }
-  }, [problem, problemNumber, language.key]);
 
   const handleLangSelect = useCallback(
-    (lang: (typeof ALL_LANGUAGES)[number]) => {
+    async (lang: (typeof ALL_LANGUAGES)[number]) => {
       setLanguage(lang);
       setShowLangPicker(false);
-      if (problem) {
-        const starter = getStarterCode(problem, lang.key);
-        setCode(starter);
+      await AsyncStorage.setItem(LANG_PREF_KEY, lang.key);
+      if (problem && problemNumber) {
+        const codeKey = `code-${problemNumber}-${lang.key}`;
+        const saved = await AsyncStorage.getItem(codeKey);
+        setCode(saved ?? getStarterCode(problem, lang.key));
       }
     },
-    [problem],
+    [problem, problemNumber],
   );
+
+  // Auto-save code every 5 seconds
+  useEffect(() => {
+    if (!problemNumber || !code) return;
+    const key = `code-${problemNumber}-${language.key}`;
+    const id = setInterval(() => {
+      AsyncStorage.setItem(key, code);
+    }, 5000);
+    return () => clearInterval(id);
+  }, [problemNumber, language.key, code]);
 
   const handleRun = useCallback(async () => {
     if (!problem || !session?.access_token || !isSupabaseConfigured) {
@@ -170,12 +192,15 @@ function CodeEditorSheetInner(
         functionName: problem.functionSignature.name,
       });
       setResults(res);
+      if (user?.id) {
+        trackEvent(user.id, clipId, "code_submitted");
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Submission failed");
     } finally {
       setLoading(false);
     }
-  }, [problem, code, language, session?.access_token]);
+  }, [problem, code, language, session?.access_token, user?.id, clipId]);
 
   const handleInsertSymbol = useCallback(
     (text: string) => {
@@ -313,6 +338,25 @@ function CodeEditorSheetInner(
                     loading={loading}
                     isSubmit={!!problem && results?.length === problem.testCases.length}
                   />
+                  {onAskTutor && !loading && (error || (results && results.some((r) => !r.passed))) && (
+                    <Pressable
+                      onPress={() => {
+                        const msg = error
+                          ? `My code failed with error: ${error}. Problem: ${problem?.title ?? ""}.`
+                          : results
+                            ? `My code failed ${results.filter((r) => !r.passed).length} test(s). Problem: ${problem?.title ?? ""}. Failed cases: ${results
+                                .filter((r) => !r.passed)
+                                .map((r) => `expected ${r.expected_output}, got ${r.actual_output}`)
+                                .join("; ")}` 
+                            : "";
+                        onAskTutor(msg);
+                      }}
+                      className="mt-2 flex-row items-center justify-center gap-2 rounded-lg bg-indigo-500/20 py-2 px-3 border border-indigo-500/40 active:bg-indigo-500/30"
+                    >
+                      <Ionicons name="sparkles" size={18} color="#818cf8" />
+                      <Text className="text-indigo-400 font-medium text-sm">Ask Tutor</Text>
+                    </Pressable>
+                  )}
                 </View>
               )}
               <View className="flex-1 flex-row">

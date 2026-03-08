@@ -16,10 +16,12 @@ import { formatCount } from "../lib/format";
 import { useLike, useBookmark } from "../lib/hooks";
 import { useAuth } from "../lib/auth";
 import { theme } from "../constants/theme";
+import { SAMPLE_PROBLEMS } from "../constants/sampleProblems";
 import { trackEvent, trackImpression } from "../lib/track";
 import type { ClipContext } from "../lib/tutor";
 import MadLeetsOverlay from "./MadLeetsOverlay";
 import TutorSheet, { type TutorSheetRef } from "./TutorSheet";
+import CodeEditorSheet, { type CodeEditorSheetRef } from "./CodeEditorSheet";
 
 type Props = {
   clip: Clip;
@@ -37,10 +39,12 @@ function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true
   const [progress, setProgress] = useState(0);
   const [showChallenge, setShowChallenge] = useState(false);
   const [tutorSheetOpen, setTutorSheetOpen] = useState(false);
+  const [codeEditorSheetOpen, setCodeEditorSheetOpen] = useState(false);
   const challengeTriggered = useRef(false);
   const pauseIconOpacity = useRef(new Animated.Value(0)).current;
   const wasActiveRef = useRef(false);
   const tutorSheetRef = useRef<TutorSheetRef>(null);
+  const codeEditorSheetRef = useRef<CodeEditorSheetRef>(null);
 
   const clipContext: ClipContext = {
     clipId: clip.id,
@@ -66,19 +70,23 @@ function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true
   });
 
   useEffect(() => {
-    if (isActive && !isPaused && !tutorSheetOpen) {
+    if (isActive && !isPaused && !tutorSheetOpen && !codeEditorSheetOpen) {
       player.play();
     } else {
       player.pause();
     }
-  }, [isActive, isPaused, tutorSheetOpen, player]);
+  }, [isActive, isPaused, tutorSheetOpen, codeEditorSheetOpen, player]);
 
   useEffect(() => {
     if (!isActive && tutorSheetOpen) {
       tutorSheetRef.current?.close();
       setTutorSheetOpen(false);
     }
-  }, [isActive, tutorSheetOpen]);
+    if (!isActive && codeEditorSheetOpen) {
+      codeEditorSheetRef.current?.close();
+      setCodeEditorSheetOpen(false);
+    }
+  }, [isActive, tutorSheetOpen, codeEditorSheetOpen]);
 
   const lastWatchRef = useRef({ progress: 0, watchedSeconds: 0 });
 
@@ -174,6 +182,22 @@ function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true
     setTutorSheetOpen(false);
   }, []);
 
+  const handleCodeEditorOpen = useCallback(() => {
+    if (tutorSheetOpen) {
+      tutorSheetRef.current?.close();
+      setTutorSheetOpen(false);
+    }
+    codeEditorSheetRef.current?.open(clip.problemNumber);
+    setCodeEditorSheetOpen(true);
+    if (user?.id) {
+      trackEvent(user.id, clip.id, "code_editor_opened");
+    }
+  }, [tutorSheetOpen, clip.problemNumber, clip.id, user?.id]);
+
+  const handleCodeEditorClose = useCallback(() => {
+    setCodeEditorSheetOpen(false);
+  }, []);
+
   const initials = clip.creator
     .split(/\s+/)
     .map((w) => w[0])
@@ -252,6 +276,16 @@ function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true
           <Text className="mt-0.5 text-[11px] text-white">Tutor</Text>
         </Pressable>
 
+        {/* Code Editor - only when clip has a supported problem */}
+        {SAMPLE_PROBLEMS.some((p) => p.number === clip.problemNumber) && (
+          <Pressable onPress={handleCodeEditorOpen} className="items-center">
+            <View className="h-12 w-12 items-center justify-center rounded-full bg-emerald-500/90">
+              <Ionicons name="code-slash" size={24} color="#fff" />
+            </View>
+            <Text className="mt-0.5 text-[11px] text-white">Code</Text>
+          </Pressable>
+        )}
+
         {/* Creator avatar */}
         <View className="mb-1 items-center">
           <View className="h-12 w-12 items-center justify-center rounded-full border-2 border-white bg-gray-700">
@@ -318,6 +352,20 @@ function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true
         ref={tutorSheetRef}
         clipContext={clipContext}
         onClose={handleTutorClose}
+      />
+
+      {/* Code Editor Bottom Sheet */}
+      <CodeEditorSheet
+        ref={codeEditorSheetRef}
+        clipId={clip.id}
+        clipContext={clipContext}
+        onClose={handleCodeEditorClose}
+        onAskTutor={(context) => {
+          codeEditorSheetRef.current?.close();
+          setCodeEditorSheetOpen(false);
+          tutorSheetRef.current?.presentWithContext?.(context);
+          setTutorSheetOpen(true);
+        }}
       />
     </View>
   );

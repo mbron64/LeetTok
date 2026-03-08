@@ -1,4 +1,7 @@
 import { SUPABASE_URL } from "../constants/config";
+import { supabase } from "./supabase";
+
+const DAILY_LIMIT = 20;
 
 export interface TutorMessage {
   role: "user" | "assistant";
@@ -101,4 +104,60 @@ export async function streamTutorResponse(
   } catch (err) {
     onError(err instanceof Error ? err.message : String(err));
   }
+}
+
+/**
+ * Load conversation history for a clip from tutor_conversations.
+ */
+export async function loadConversation(clipId: string): Promise<TutorMessage[]> {
+  const { data, error } = await supabase
+    .from("tutor_conversations")
+    .select("messages")
+    .eq("clip_id", clipId)
+    .single();
+
+  if (error || !data?.messages) return [];
+  const messages = data.messages as unknown;
+  if (!Array.isArray(messages)) return [];
+  return messages.filter(
+    (m): m is TutorMessage =>
+      m && typeof m === "object" && (m.role === "user" || m.role === "assistant") && typeof m.content === "string"
+  );
+}
+
+/**
+ * Save conversation to tutor_conversations (upsert).
+ */
+export async function saveConversation(clipId: string, messages: TutorMessage[]): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase.from("tutor_conversations").upsert(
+    {
+      user_id: user.id,
+      clip_id: clipId,
+      messages,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id,clip_id" }
+  );
+}
+
+/**
+ * Get remaining tutor messages for today from tutor_usage.
+ */
+export async function getRemainingMessages(): Promise<{ remaining: number; limit: number }> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { remaining: DAILY_LIMIT, limit: DAILY_LIMIT };
+
+  const today = new Date().toISOString().slice(0, 10);
+  const { data } = await supabase
+    .from("tutor_usage")
+    .select("message_count")
+    .eq("user_id", user.id)
+    .eq("date", today)
+    .single();
+
+  const used = data?.message_count ?? 0;
+  return { remaining: Math.max(0, DAILY_LIMIT - used), limit: DAILY_LIMIT };
 }

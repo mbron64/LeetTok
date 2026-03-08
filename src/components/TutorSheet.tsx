@@ -21,15 +21,20 @@ import BottomSheet, {
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../lib/auth";
 import {
+  loadConversation,
+  saveConversation,
+  getRemainingMessages,
   streamTutorResponse,
   type ClipContext,
   type TutorMessage,
 } from "../lib/tutor";
+import { trackEvent } from "../lib/track";
 import TutorMessageComponent from "./TutorMessage";
 import QuickActionChips from "./QuickActionChips";
 
 export type TutorSheetRef = {
   present: () => void;
+  presentWithContext: (initialMessage: string) => void;
   close: () => void;
 };
 
@@ -50,22 +55,12 @@ const TutorSheet = forwardRef<TutorSheetRef, Props>(function TutorSheet(
   const [inputText, setInputText] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [chipsCollapsed, setChipsCollapsed] = useState(false);
+  const [remaining, setRemaining] = useState<{ remaining: number; limit: number } | null>(null);
   const streamingIndexRef = useRef<number | null>(null);
+  const prevStreamingRef = useRef(false);
+  const hasLoadedForOpenRef = useRef(false);
 
   const snapPoints = useMemo(() => ["50%", "85%"], []);
-
-  useImperativeHandle(
-    ref,
-    () => ({
-      present: () => {
-        bottomSheetRef.current?.snapToIndex(0);
-      },
-      close: () => {
-        bottomSheetRef.current?.close();
-      },
-    }),
-    []
-  );
 
   const scrollToBottom = useCallback(() => {
     flatListRef.current?.scrollToEnd({ animated: true });
@@ -77,10 +72,25 @@ const TutorSheet = forwardRef<TutorSheetRef, Props>(function TutorSheet(
     }
   }, [messages, scrollToBottom]);
 
+  // Save conversation when streaming completes
+  useEffect(() => {
+    if (prevStreamingRef.current && !isStreaming && messages.length > 0) {
+      saveConversation(clipContext.clipId, messages);
+      getRemainingMessages().then(setRemaining);
+    }
+    prevStreamingRef.current = isStreaming;
+  }, [isStreaming, messages, clipContext.clipId]);
+
+  const limitReached = remaining !== null && remaining.remaining <= 0;
+
   const sendMessage = useCallback(
     async (text: string) => {
       const trimmed = text.trim();
-      if (!trimmed || !session?.access_token || isStreaming) return;
+      if (!trimmed || !session?.access_token || isStreaming || limitReached) return;
+
+      if (session.user?.id) {
+        trackEvent(session.user.id, clipContext.clipId, "tutor_message_sent");
+      }
 
       const userMsg: TutorMessage = { role: "user", content: trimmed };
       setMessages((prev) => [...prev, userMsg]);
@@ -128,20 +138,50 @@ const TutorSheet = forwardRef<TutorSheetRef, Props>(function TutorSheet(
         }
       );
     },
-    [clipContext, messages, session?.access_token, isStreaming]
+    [clipContext, messages, session?.access_token, session?.user?.id, isStreaming, limitReached]
   );
 
   const handleSend = useCallback(() => {
     sendMessage(inputText);
   }, [inputText, sendMessage]);
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      present: () => {
+        bottomSheetRef.current?.snapToIndex(0);
+      },
+      presentWithContext: (initialMessage: string) => {
+        bottomSheetRef.current?.snapToIndex(0);
+        setInputText(initialMessage);
+        if (initialMessage.trim()) {
+          sendMessage(initialMessage.trim());
+        }
+      },
+      close: () => {
+        bottomSheetRef.current?.close();
+      },
+    }),
+    [sendMessage]
+  );
+
   const handleSheetChange = useCallback(
-    (index: number) => {
+    async (index: number) => {
       if (index < 0) {
+        hasLoadedForOpenRef.current = false;
         onClose();
+        return;
+      }
+      if (index >= 0 && !hasLoadedForOpenRef.current && session?.user?.id) {
+        hasLoadedForOpenRef.current = true;
+        const loaded = await loadConversation(clipContext.clipId);
+        if (loaded.length > 0) setMessages(loaded);
+        const usage = await getRemainingMessages();
+        setRemaining(usage);
+        trackEvent(session.user.id, clipContext.clipId, "tutor_opened");
       }
     },
-    [onClose]
+    [clipContext.clipId, onClose, session?.user?.id]
   );
 
   const renderItem = useCallback(
@@ -179,7 +219,14 @@ const TutorSheet = forwardRef<TutorSheetRef, Props>(function TutorSheet(
       <View className="flex-1">
         {/* Header */}
         <View className="flex-row items-center justify-between border-b border-[#1a1a1a] px-4 py-3">
-          <Text className="text-lg font-semibold text-white">LeetTok Tutor</Text>
+          <View className="flex-1 flex-row items-center gap-2">
+            <Text className="text-lg font-semibold text-white">LeetTok Tutor</Text>
+            {remaining !== null && !limitReached && (
+              <Text className="text-xs text-[#888]">
+                {remaining.remaining} messages left today
+              </Text>
+            )}
+          </View>
           <Pressable
             onPress={() => bottomSheetRef.current?.close()}
             className="h-8 w-8 items-center justify-center rounded-full bg-[#1a1a1a]"
@@ -216,6 +263,15 @@ const TutorSheet = forwardRef<TutorSheetRef, Props>(function TutorSheet(
           </View>
         )}
 
+        {/* Limit reached message */}
+        {limitReached && (
+          <View className="border-t border-[#1a1a1a] bg-[#1a1a1a] px-4 py-3">
+            <Text className="text-center text-sm text-[#888]">
+              You've used all {remaining?.limit ?? 20} tutor messages today. Come back tomorrow!
+            </Text>
+          </View>
+        )}
+
         {/* Input */}
         <View className="flex-row items-center gap-2 border-t border-[#1a1a1a] px-4 py-3">
           <BottomSheetTextInput
@@ -223,14 +279,14 @@ const TutorSheet = forwardRef<TutorSheetRef, Props>(function TutorSheet(
             onChangeText={setInputText}
             placeholder="Ask about this problem..."
             placeholderTextColor="#666"
-            editable={!isStreaming}
+            editable={!isStreaming && !limitReached}
             onSubmitEditing={handleSend}
             returnKeyType="send"
             className="flex-1 rounded-xl bg-[#1e1e1e] px-4 py-3 text-[15px] text-white"
           />
           <Pressable
             onPress={handleSend}
-            disabled={!inputText.trim() || isStreaming}
+            disabled={!inputText.trim() || isStreaming || limitReached}
             className="h-11 w-11 items-center justify-center rounded-full bg-[#6366f1] disabled:opacity-50"
           >
             {isStreaming ? (

@@ -10,7 +10,11 @@ export type InteractionType =
   | "skip"
   | "madleets_attempt"
   | "search"
-  | "tap_problem";
+  | "tap_problem"
+  | "tutor_opened"
+  | "tutor_message_sent"
+  | "code_editor_opened"
+  | "code_submitted";
 
 type QueuedEvent = {
   userId: string;
