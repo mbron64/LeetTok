@@ -1,22 +1,19 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { Image, Pressable, StyleSheet, View } from "react-native";
 
 function MadLeetsButton({ onPress }: { onPress?: () => void }) {
   return (
     <Pressable onPress={onPress} style={styles.centerBtnOuter}>
-      <LinearGradient
-        colors={["#00f2ea", "#ff0050"]}
-        start={{ x: 0, y: 0.5 }}
-        end={{ x: 1, y: 0.5 }}
-        style={styles.centerBtnGradient}
-      >
+      <View style={styles.centerBtnBorder}>
         <View style={styles.centerBtnInner}>
-          <Ionicons name="code-slash" size={22} color="#fff" />
+          <Image
+            source={require("../../assets/images/icon.png")}
+            style={styles.centerBtnLogo}
+          />
         </View>
-      </LinearGradient>
+      </View>
     </Pressable>
   );
 }
@@ -35,7 +32,7 @@ export default function TabLayout() {
           paddingTop: 6,
         },
         tabBarActiveTintColor: "#fff",
-        tabBarInactiveTintColor: "#888",
+        tabBarInactiveTintColor: "#5c6370",
         tabBarLabelStyle: {
           fontSize: 10,
           fontWeight: "600",
@@ -94,26 +91,32 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   centerBtnOuter: {
-    top: -14,
+    top: 0,
     justifyContent: "center",
     alignItems: "center",
     width: 56,
     alignSelf: "center",
   },
-  centerBtnGradient: {
-    width: 48,
-    height: 32,
-    borderRadius: 10,
+  centerBtnBorder: {
+    width: 50,
+    height: 44,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: "#fbb862",
     justifyContent: "center",
     alignItems: "center",
-    padding: 2,
+    backgroundColor: "#000",
   },
   centerBtnInner: {
-    flex: 1,
-    width: "100%",
-    backgroundColor: "#000",
-    borderRadius: 8,
+    width: 44,
+    height: 38,
+    borderRadius: 9,
+    overflow: "hidden",
     justifyContent: "center",
     alignItems: "center",
+  },
+  centerBtnLogo: {
+    width: 52,
+    height: 52,
   },
 });

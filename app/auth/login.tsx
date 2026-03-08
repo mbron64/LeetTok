@@ -47,10 +47,10 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-black">
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1 justify-center px-8"
+        style={{ flex: 1, justifyContent: "center", paddingHorizontal: 32 }}
       >
         <View className="mb-10 items-center">
           <Text className="text-4xl font-bold text-white">LeetTok</Text>
@@ -123,7 +123,7 @@ export default function LoginScreen() {
           <TextInput
             className="text-base text-white"
             placeholder="Email"
-            placeholderTextColor="#666"
+            placeholderTextColor="#5c6370"
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -137,7 +137,7 @@ export default function LoginScreen() {
           <TextInput
             className="text-base text-white"
             placeholder="Password"
-            placeholderTextColor="#666"
+            placeholderTextColor="#5c6370"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -148,13 +148,13 @@ export default function LoginScreen() {
         <Pressable
           onPress={handleSignIn}
           disabled={loading || isOauthInProgress}
-          className="mb-6 items-center rounded-xl bg-[#6366f1] py-4"
+          className="mb-6 items-center rounded-xl bg-white py-4"
           style={{ opacity: loading || isOauthInProgress ? 0.6 : 1 }}
         >
           {loading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#000" />
           ) : (
-            <Text className="text-base font-semibold text-white">Sign In</Text>
+            <Text className="text-base font-semibold text-black">Sign In</Text>
           )}
         </Pressable>
 
@@ -164,7 +164,7 @@ export default function LoginScreen() {
         >
           <Text className="text-sm text-gray-500">
             Don't have an account?{" "}
-            <Text className="font-semibold text-[#818cf8]">Sign Up</Text>
+            <Text className="font-semibold text-white">Sign Up</Text>
           </Text>
         </Pressable>
       </KeyboardAvoidingView>

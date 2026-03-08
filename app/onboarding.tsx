@@ -1,11 +1,13 @@
 import React, { useCallback, useRef, useState } from "react";
 import {
   Dimensions,
-  FlatList,
+  Image,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   Pressable,
+  ScrollView,
   Text,
   View,
-  ViewToken,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -17,10 +19,108 @@ import type { Difficulty } from "../src/types";
 export const ONBOARDING_COMPLETE_KEY = "leettok_onboarding_complete";
 export const PREFERRED_DIFFICULTIES_KEY = "leettok_preferred_difficulties";
 export const PREFERRED_TOPICS_KEY = "leettok_preferred_topics";
+export const INTERVIEW_GOAL_KEY = "leettok_interview_goal";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-const DIFFICULTIES: Difficulty[] = ["Easy", "Medium", "Hard"];
+type GoalOption = {
+  id: string;
+  label: string;
+  subtitle: string;
+  icon: React.ComponentProps<typeof Ionicons>["name"];
+  difficulties: Difficulty[];
+  topics: string[];
+};
+
+const GOALS: GoalOption[] = [
+  {
+    id: "faang",
+    label: "FAANG / Big Tech",
+    subtitle: "Google, Meta, Amazon, Apple, Microsoft",
+    icon: "rocket-outline",
+    difficulties: ["Medium", "Hard"],
+    topics: [
+      "Dynamic Programming",
+      "Graph",
+      "Tree",
+      "Binary Search",
+      "Two Pointers",
+      "Sliding Window",
+      "Heap",
+      "Trie",
+      "Backtracking",
+    ],
+  },
+  {
+    id: "mid-tier",
+    label: "Top Startups",
+    subtitle: "Stripe, Uber, Airbnb, Coinbase, etc.",
+    icon: "trending-up-outline",
+    difficulties: ["Medium", "Hard"],
+    topics: [
+      "Array",
+      "String",
+      "Hash Table",
+      "Dynamic Programming",
+      "Tree",
+      "Graph",
+      "Binary Search",
+      "Stack",
+    ],
+  },
+  {
+    id: "general",
+    label: "General SWE Prep",
+    subtitle: "Solid foundation across all topics",
+    icon: "code-slash-outline",
+    difficulties: ["Easy", "Medium"],
+    topics: [
+      "Array",
+      "String",
+      "Hash Table",
+      "Linked List",
+      "Stack",
+      "Two Pointers",
+      "Binary Search",
+      "Recursion",
+    ],
+  },
+  {
+    id: "new-grad",
+    label: "New Grad / Intern",
+    subtitle: "Breaking into tech for the first time",
+    icon: "school-outline",
+    difficulties: ["Easy", "Medium"],
+    topics: [
+      "Array",
+      "String",
+      "Hash Table",
+      "Stack",
+      "Linked List",
+      "Two Pointers",
+      "Recursion",
+      "Greedy",
+    ],
+  },
+  {
+    id: "competitive",
+    label: "Competitive / Grind Mode",
+    subtitle: "I want the hardest problems you have",
+    icon: "flame-outline",
+    difficulties: ["Medium", "Hard"],
+    topics: [
+      "Dynamic Programming",
+      "Graph",
+      "Tree",
+      "Backtracking",
+      "Trie",
+      "Heap",
+      "Binary Search",
+      "Sliding Window",
+      "Greedy",
+    ],
+  },
+];
 
 const TOPICS = [
   "Array",
@@ -62,32 +162,35 @@ const TOPIC_ICONS: Record<string, React.ComponentProps<typeof Ionicons>["name"]>
 
 export default function OnboardingScreen() {
   const router = useRouter();
-  const listRef = useRef<FlatList>(null);
+  const scrollRef = useRef<ScrollView>(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const [selectedDifficulties, setSelectedDifficulties] = useState<Set<Difficulty>>(new Set());
+  const [contentHeight, setContentHeight] = useState(0);
+  const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
   const [selectedTopics, setSelectedTopics] = useState<Set<string>>(new Set());
 
-  const onViewableItemsChanged = useRef(
-    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      if (viewableItems.length > 0 && viewableItems[0].index != null) {
-        setCurrentPage(viewableItems[0].index);
-      }
+  const onScroll = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const page = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+      setCurrentPage(page);
     },
-  ).current;
+    [],
+  );
 
   const goNext = useCallback(() => {
     if (currentPage < 2) {
-      listRef.current?.scrollToIndex({ index: currentPage + 1, animated: true });
+      scrollRef.current?.scrollTo({
+        x: (currentPage + 1) * SCREEN_WIDTH,
+        animated: true,
+      });
     }
   }, [currentPage]);
 
-  const toggleDifficulty = useCallback((d: Difficulty) => {
-    setSelectedDifficulties((prev) => {
-      const next = new Set(prev);
-      if (next.has(d)) next.delete(d);
-      else next.add(d);
-      return next;
-    });
+  const selectGoal = useCallback((goalId: string) => {
+    setSelectedGoal(goalId);
+    const goal = GOALS.find((g) => g.id === goalId);
+    if (goal) {
+      setSelectedTopics(new Set(goal.topics));
+    }
   }, []);
 
   const toggleTopic = useCallback((t: string) => {
@@ -102,12 +205,15 @@ export default function OnboardingScreen() {
   const handleComplete = useCallback(async () => {
     await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
 
-    if (selectedDifficulties.size > 0) {
+    const goal = GOALS.find((g) => g.id === selectedGoal);
+    if (goal) {
+      await AsyncStorage.setItem(INTERVIEW_GOAL_KEY, goal.id);
       await AsyncStorage.setItem(
         PREFERRED_DIFFICULTIES_KEY,
-        JSON.stringify([...selectedDifficulties]),
+        JSON.stringify(goal.difficulties),
       );
     }
+
     if (selectedTopics.size > 0) {
       await AsyncStorage.setItem(
         PREFERRED_TOPICS_KEY,
@@ -116,49 +222,61 @@ export default function OnboardingScreen() {
     }
 
     router.replace("/");
-  }, [router, selectedDifficulties, selectedTopics]);
-
-  const screens = [
-    <WelcomeSlide key="welcome" />,
-    <DifficultySlide
-      key="difficulty"
-      selected={selectedDifficulties}
-      onToggle={toggleDifficulty}
-    />,
-    <TopicsSlide
-      key="topics"
-      selected={selectedTopics}
-      onToggle={toggleTopic}
-    />,
-  ];
+  }, [router, selectedGoal, selectedTopics]);
 
   return (
-    <SafeAreaView className="flex-1 bg-black">
-      <FlatList
-        ref={listRef}
-        data={screens}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        scrollEventThrottle={16}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
-        keyExtractor={(_, i) => String(i)}
-        renderItem={({ item }) => (
-          <View style={{ width: SCREEN_WIDTH }}>{item}</View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }}>
+      <View
+        style={{ flex: 1 }}
+        onLayout={(e) => setContentHeight(e.nativeEvent.layout.height)}
+      >
+        {contentHeight > 0 && (
+          <ScrollView
+            ref={scrollRef}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            scrollEventThrottle={16}
+            onScroll={onScroll}
+          >
+            <View style={{ width: SCREEN_WIDTH, height: contentHeight }}>
+              <WelcomeSlide />
+            </View>
+            <View style={{ width: SCREEN_WIDTH, height: contentHeight }}>
+              <GoalSlide
+                selected={selectedGoal}
+                onSelect={selectGoal}
+              />
+            </View>
+            <View style={{ width: SCREEN_WIDTH, height: contentHeight }}>
+              <TopicsSlide
+                selected={selectedTopics}
+                onToggle={toggleTopic}
+              />
+            </View>
+          </ScrollView>
         )}
-      />
+      </View>
 
-      <View className="px-6 pb-4">
-        <View className="mb-6 flex-row items-center justify-center gap-2">
+      <View style={{ paddingHorizontal: 24, paddingBottom: 16 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            marginBottom: 24,
+          }}
+        >
           {[0, 1, 2].map((i) => (
             <View
               key={i}
-              className="h-2 rounded-full"
               style={{
+                height: 8,
+                borderRadius: 4,
                 width: i === currentPage ? 24 : 8,
                 backgroundColor:
-                  i === currentPage ? theme.colors.accent : theme.colors.surfaceElevated,
+                  i === currentPage ? "#ffffff" : theme.colors.surfaceElevated,
               }}
             />
           ))}
@@ -167,24 +285,39 @@ export default function OnboardingScreen() {
         {currentPage < 2 ? (
           <Pressable
             onPress={goNext}
-            className="items-center rounded-2xl py-4"
-            style={{ backgroundColor: theme.colors.accent }}
+            style={{
+              alignItems: "center",
+              borderRadius: 16,
+              paddingVertical: 16,
+              backgroundColor: "#ffffff",
+            }}
           >
-            <Text className="text-base font-bold text-white">Next</Text>
+            <Text style={{ fontSize: 16, fontWeight: "700", color: "#000" }}>
+              Next
+            </Text>
           </Pressable>
         ) : (
           <Pressable
             onPress={handleComplete}
-            className="items-center rounded-2xl py-4"
-            style={{ backgroundColor: theme.colors.accent }}
+            style={{
+              alignItems: "center",
+              borderRadius: 16,
+              paddingVertical: 16,
+              backgroundColor: "#ffffff",
+            }}
           >
-            <Text className="text-base font-bold text-white">Get Started</Text>
+            <Text style={{ fontSize: 16, fontWeight: "700", color: "#000" }}>
+              Get Started
+            </Text>
           </Pressable>
         )}
 
         {currentPage < 2 && (
-          <Pressable onPress={handleComplete} className="mt-3 items-center py-2">
-            <Text className="text-sm" style={{ color: theme.colors.textMuted }}>
+          <Pressable
+            onPress={handleComplete}
+            style={{ marginTop: 12, alignItems: "center", paddingVertical: 8 }}
+          >
+            <Text style={{ fontSize: 14, color: "#afb3b6" }}>
               Skip
             </Text>
           </Pressable>
@@ -196,30 +329,62 @@ export default function OnboardingScreen() {
 
 function WelcomeSlide() {
   return (
-    <View className="flex-1 items-center justify-center px-8">
+    <View
+      style={{
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        paddingHorizontal: 32,
+      }}
+    >
       <View
-        className="mb-8 h-28 w-28 items-center justify-center rounded-[32px]"
-        style={{ backgroundColor: theme.colors.accentDim }}
+        style={{
+          marginBottom: 24,
+          height: 180,
+          width: 200,
+          borderRadius: 44,
+          overflow: "hidden",
+        }}
       >
-        <Ionicons name="code-slash" size={56} color={theme.colors.accentLight} />
+        <Image
+          source={require("../assets/images/icon.png")}
+          style={{
+            height: 260,
+            width: 260,
+            marginTop: -30,
+            marginLeft: -30,
+          }}
+        />
       </View>
 
-      <Text className="mb-3 text-center text-4xl font-bold text-white">
+      <Text
+        style={{
+          marginBottom: 12,
+          textAlign: "center",
+          fontSize: 36,
+          fontWeight: "700",
+          color: "#fff",
+        }}
+      >
         LeetTok
       </Text>
 
       <Text
-        className="mb-4 text-center text-lg leading-7"
-        style={{ color: theme.colors.textSecondary }}
+        style={{
+          marginBottom: 16,
+          textAlign: "center",
+          fontSize: 18,
+          lineHeight: 28,
+          color: "#afb3b6",
+        }}
       >
-        Swipe through bite-sized LeetCode explanations. Learn algorithms the way
-        you scroll — one clip at a time.
+        Doomscroll your way to a job.
       </Text>
 
-      <View className="mt-6 gap-4">
-        <FeatureRow icon="play-circle" text="Short-form video solutions" />
-        <FeatureRow icon="trending-up" text="Track your progress" />
-        <FeatureRow icon="bulb-outline" text="Personalized recommendations" />
+      <View style={{ marginTop: 24, gap: 16 }}>
+        <FeatureRow icon="play-circle" text="TikTok-style LeetCode walkthroughs" />
+        <FeatureRow icon="code-slash" text="Solve problems right in the app" />
+        <FeatureRow icon="flash-outline" text="Actually retain what you learn" />
       </View>
     </View>
   );
@@ -233,90 +398,126 @@ function FeatureRow({
   text: string;
 }) {
   return (
-    <View className="flex-row items-center gap-3">
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
       <View
-        className="h-10 w-10 items-center justify-center rounded-xl"
-        style={{ backgroundColor: theme.colors.accentDim }}
+        style={{
+          height: 40,
+          width: 40,
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: 12,
+          backgroundColor: "rgba(255,255,255,0.08)",
+        }}
       >
-        <Ionicons name={icon} size={20} color={theme.colors.accentLight} />
+        <Ionicons name={icon} size={20} color="#afb3b6" />
       </View>
-      <Text className="text-base text-white">{text}</Text>
+      <Text style={{ fontSize: 16, color: "#fff" }}>{text}</Text>
     </View>
   );
 }
 
-function DifficultySlide({
+function GoalSlide({
   selected,
-  onToggle,
+  onSelect,
 }: {
-  selected: Set<Difficulty>;
-  onToggle: (d: Difficulty) => void;
+  selected: string | null;
+  onSelect: (id: string) => void;
 }) {
   return (
-    <View className="flex-1 justify-center px-8">
-      <Text className="mb-2 text-center text-3xl font-bold text-white">
-        Your Level
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={{
+        paddingHorizontal: 32,
+        paddingTop: 48,
+        paddingBottom: 16,
+      }}
+      showsVerticalScrollIndicator={false}
+    >
+      <Text
+        style={{
+          marginBottom: 8,
+          textAlign: "center",
+          fontSize: 30,
+          fontWeight: "700",
+          color: "#fff",
+        }}
+      >
+        What's your goal?
       </Text>
       <Text
-        className="mb-10 text-center text-base"
-        style={{ color: theme.colors.textSecondary }}
+        style={{
+          marginBottom: 32,
+          textAlign: "center",
+          fontSize: 16,
+          color: "#afb3b6",
+        }}
       >
-        Which difficulties are you practicing?
+        We'll tailor your feed to match
       </Text>
 
-      <View className="gap-4">
-        {DIFFICULTIES.map((d) => {
-          const isSelected = selected.has(d);
-          const color = theme.difficulty[d];
+      <View style={{ gap: 12 }}>
+        {GOALS.map((goal) => {
+          const isSelected = selected === goal.id;
           return (
             <Pressable
-              key={d}
-              onPress={() => onToggle(d)}
-              className="flex-row items-center rounded-2xl border-2 px-5 py-5"
+              key={goal.id}
+              onPress={() => onSelect(goal.id)}
               style={{
-                borderColor: isSelected ? color : theme.colors.surfaceElevated,
+                flexDirection: "row",
+                alignItems: "center",
+                borderRadius: 16,
+                borderWidth: 2,
+                paddingHorizontal: 16,
+                paddingVertical: 16,
+                borderColor: isSelected ? "#fbb862" : theme.colors.surfaceElevated,
                 backgroundColor: isSelected
-                  ? `${color}15`
+                  ? "rgba(251,184,98,0.08)"
                   : theme.colors.surface,
               }}
             >
               <View
-                className="mr-4 h-11 w-11 items-center justify-center rounded-xl"
-                style={{ backgroundColor: `${color}25` }}
+                style={{
+                  marginRight: 14,
+                  height: 44,
+                  width: 44,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: 12,
+                  backgroundColor: isSelected
+                    ? "rgba(251,184,98,0.15)"
+                    : "rgba(255,255,255,0.08)",
+                }}
               >
                 <Ionicons
-                  name={
-                    d === "Easy"
-                      ? "leaf-outline"
-                      : d === "Medium"
-                        ? "flame-outline"
-                        : "skull-outline"
-                  }
+                  name={goal.icon}
                   size={24}
-                  color={color}
+                  color={isSelected ? "#fbb862" : "#afb3b6"}
                 />
               </View>
-              <View className="flex-1">
-                <Text className="text-lg font-bold text-white">{d}</Text>
+              <View style={{ flex: 1 }}>
                 <Text
-                  className="mt-0.5 text-xs"
-                  style={{ color: theme.colors.textMuted }}
+                  style={{ fontSize: 17, fontWeight: "700", color: "#fff" }}
                 >
-                  {d === "Easy"
-                    ? "Building foundations"
-                    : d === "Medium"
-                      ? "Interview standard"
-                      : "Elite challenges"}
+                  {goal.label}
+                </Text>
+                <Text
+                  style={{
+                    marginTop: 2,
+                    fontSize: 12,
+                    color: "#5c6370",
+                  }}
+                >
+                  {goal.subtitle}
                 </Text>
               </View>
               {isSelected && (
-                <Ionicons name="checkmark-circle" size={24} color={color} />
+                <Ionicons name="checkmark-circle" size={24} color="#fbb862" />
               )}
             </Pressable>
           );
         })}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -328,43 +529,69 @@ function TopicsSlide({
   onToggle: (t: string) => void;
 }) {
   return (
-    <View className="flex-1 px-8 pt-16">
-      <Text className="mb-2 text-center text-3xl font-bold text-white">
-        Pick Topics
+    <View style={{ flex: 1, paddingHorizontal: 32, paddingTop: 48 }}>
+      <Text
+        style={{
+          marginBottom: 8,
+          textAlign: "center",
+          fontSize: 30,
+          fontWeight: "700",
+          color: "#fff",
+        }}
+      >
+        Fine-tune Topics
       </Text>
       <Text
-        className="mb-8 text-center text-base"
-        style={{ color: theme.colors.textSecondary }}
+        style={{
+          marginBottom: 32,
+          textAlign: "center",
+          fontSize: 16,
+          color: "#afb3b6",
+        }}
       >
-        What do you want to study?
+        Pre-selected based on your goal. Adjust if you want.
       </Text>
 
-      <View className="flex-row flex-wrap justify-center gap-3">
+      <View
+        style={{
+          flexDirection: "row",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          gap: 12,
+        }}
+      >
         {TOPICS.map((t) => {
           const isSelected = selected.has(t);
           return (
             <Pressable
               key={t}
               onPress={() => onToggle(t)}
-              className="flex-row items-center gap-2 rounded-full border px-4 py-2.5"
               style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                borderRadius: 999,
+                borderWidth: 1,
+                paddingHorizontal: 16,
+                paddingVertical: 10,
                 borderColor: isSelected
-                  ? theme.colors.accent
+                  ? "#fbb862"
                   : theme.colors.surfaceElevated,
                 backgroundColor: isSelected
-                  ? theme.colors.accentDim
+                  ? "rgba(251,184,98,0.1)"
                   : theme.colors.surface,
               }}
             >
               <Ionicons
                 name={TOPIC_ICONS[t] ?? "code-outline"}
                 size={16}
-                color={isSelected ? theme.colors.accentLight : theme.colors.textMuted}
+                color={isSelected ? "#fbb862" : "#5c6370"}
               />
               <Text
-                className="text-sm font-medium"
                 style={{
-                  color: isSelected ? theme.colors.accentLight : theme.colors.text,
+                  fontSize: 14,
+                  fontWeight: "500",
+                  color: isSelected ? "#fbb862" : "#afb3b6",
                 }}
               >
                 {t}
