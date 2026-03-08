@@ -8,6 +8,8 @@
     "scheme": "leettok",
     "userInterfaceStyle": "dark",
     "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
     "ios": {
