@@ -6,7 +6,9 @@ import React, {
   useState,
 } from "react";
 import { Session, User } from "@supabase/supabase-js";
+import * as Linking from "expo-linking";
 import { useRouter, useSegments } from "expo-router";
+import { createSessionFromUrl } from "./oauth";
 import { supabase } from "./supabase";
 import { isSupabaseConfigured } from "../constants/config";
 
@@ -52,6 +54,13 @@ function useProtectedRoute(user: User | null, loading: boolean) {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const url = Linking.useURL();
+
+  useEffect(() => {
+    if (url) {
+      createSessionFromUrl(url).catch(() => {});
+    }
+  }, [url]);
 
   useEffect(() => {
     if (!isSupabaseConfigured) {

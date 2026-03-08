@@ -14,7 +14,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { Clip, Challenge } from "../types";
 import { formatCount } from "../lib/format";
 import { useLike, useBookmark } from "../lib/hooks";
+import { useAuth } from "../lib/auth";
 import { theme } from "../constants/theme";
+import { trackEvent, trackImpression } from "../lib/track";
 import MadLeetsOverlay from "./MadLeetsOverlay";
 
 type Props = {
@@ -27,12 +29,14 @@ type Props = {
 
 function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true }: Props) {
   const { width } = useWindowDimensions();
+  const { user } = useAuth();
   const [isPaused, setIsPaused] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showChallenge, setShowChallenge] = useState(false);
   const challengeTriggered = useRef(false);
   const pauseIconOpacity = useRef(new Animated.Value(0)).current;
+  const wasActiveRef = useRef(false);
 
   const { liked, count: likeOffset, toggle: toggleLike } = useLike(clip.id);
   const {
@@ -55,11 +59,18 @@ function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true
     }
   }, [isActive, isPaused, player]);
 
+  const lastWatchRef = useRef({ progress: 0, watchedSeconds: 0 });
+
   useEffect(() => {
     const sub = player.addListener("timeUpdate", (payload) => {
       const duration = player.duration;
       if (duration > 0) {
-        setProgress(payload.currentTime / duration);
+        const p = payload.currentTime / duration;
+        setProgress(p);
+        lastWatchRef.current = {
+          progress: p,
+          watchedSeconds: payload.currentTime,
+        };
       }
 
       if (
@@ -76,6 +87,25 @@ function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true
     });
     return () => sub.remove();
   }, [player, challenge, challengesEnabled]);
+
+  const impressionTrackedRef = useRef(false);
+  useEffect(() => {
+    if (isActive && user?.id && !impressionTrackedRef.current) {
+      impressionTrackedRef.current = true;
+      trackImpression(user.id, clip.id);
+    }
+    if (!isActive) {
+      impressionTrackedRef.current = false;
+    }
+  }, [isActive, user?.id, clip.id]);
+
+  useEffect(() => {
+    if (wasActiveRef.current && !isActive && user?.id) {
+      const { progress: p, watchedSeconds } = lastWatchRef.current;
+      trackEvent(user.id, clip.id, "watch", { progress: p, watchedSeconds });
+    }
+    wasActiveRef.current = isActive;
+  }, [isActive, user?.id, clip.id]);
 
   const flashIcon = useCallback(() => {
     pauseIconOpacity.setValue(1);

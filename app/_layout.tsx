@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthProvider } from "../src/lib/auth";
+import { initTracking, cleanupTracking } from "../src/lib/track";
 import { ONBOARDING_COMPLETE_KEY } from "./onboarding";
 import { theme } from "../src/constants/theme";
 
@@ -19,6 +20,11 @@ export default function RootLayout() {
       setNeedsOnboarding(value !== "true");
       setReady(true);
     });
+  }, []);
+
+  useEffect(() => {
+    initTracking();
+    return cleanupTracking;
   }, []);
 
   useEffect(() => {
