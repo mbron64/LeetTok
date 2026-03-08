@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Pressable, ScrollView, Switch, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, Switch, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useAuth } from "../../src/lib/auth";
 import { isSupabaseConfigured } from "../../src/constants/config";
 import { theme } from "../../src/constants/theme";
@@ -13,6 +13,7 @@ import ProgressStats from "../../src/components/ProgressStats";
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
+  const router = useRouter();
   const [darkMode, setDarkMode] = useState(true);
   const { enabled: madLeetsEnabled, toggle: toggleMadLeets } =
     useMadLeetsEnabled();
@@ -128,6 +129,7 @@ export default function ProfileScreen() {
               iconBg="bg-white/10"
               label="Notifications"
               showBorder
+              onPress={() => Alert.alert("Notifications", "Push notifications coming soon! We'll notify you about streaks, new problems, and challenge reminders.")}
             />
 
             <SettingsRow
@@ -135,10 +137,11 @@ export default function ProfileScreen() {
               iconColor="#afb3b6"
               iconBg="bg-white/10"
               label="About"
-              showBorder={!!user}
+              showBorder
+              onPress={() => Alert.alert("About LeetTok", "LeetTok v1.0.0\n\nTikTok for LeetCode: doomscroll your way to a job.\n\nBuilt with React Native, Expo, and Supabase.")}
             />
 
-            {user && (
+            {user ? (
               <Pressable
                 onPress={signOut}
                 className="flex-row items-center gap-3 px-4 py-3.5"
@@ -147,6 +150,16 @@ export default function ProfileScreen() {
                   <Ionicons name="log-out" size={16} color="#ef4444" />
                 </View>
                 <Text className="text-sm text-red-400">Sign Out</Text>
+              </Pressable>
+            ) : (
+              <Pressable
+                onPress={() => router.push("/auth/login")}
+                className="flex-row items-center gap-3 px-4 py-3.5"
+              >
+                <View className="h-8 w-8 items-center justify-center rounded-lg bg-white/10">
+                  <Ionicons name="log-in" size={16} color="#fbb862" />
+                </View>
+                <Text className="text-sm text-[#fbb862]">Sign In</Text>
               </Pressable>
             )}
           </View>
@@ -166,15 +179,18 @@ function SettingsRow({
   iconBg,
   label,
   showBorder = false,
+  onPress,
 }: {
   icon: React.ComponentProps<typeof Ionicons>["name"];
   iconColor: string;
   iconBg: string;
   label: string;
   showBorder?: boolean;
+  onPress?: () => void;
 }) {
   return (
     <Pressable
+      onPress={onPress}
       className={`flex-row items-center justify-between px-4 py-3.5 ${showBorder ? "border-b border-[#1a1a1a]" : ""}`}
     >
       <View className="flex-row items-center gap-3">

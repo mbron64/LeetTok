@@ -37,21 +37,29 @@ export function useClips() {
         return;
       }
 
-      const userProfile = await fetchUserProfile(user.id);
-      const feedClips = await assembleFeed({
-        userId: user.id,
-        userProfile,
-        page: pageNum,
-        pageSize: PAGE_SIZE,
-      });
+      try {
+        const userProfile = await fetchUserProfile(user.id);
+        const feedClips = await assembleFeed({
+          userId: user.id,
+          userProfile,
+          page: pageNum,
+          pageSize: PAGE_SIZE,
+        });
 
-      if (append) {
-        setClips((prev) => [...prev, ...feedClips]);
-      } else {
-        setClips(feedClips);
+        if (feedClips.length === 0 && pageNum === 1) {
+          setClips(sampleClips);
+          setHasMore(false);
+        } else if (append) {
+          setClips((prev) => [...prev, ...feedClips]);
+          setHasMore(feedClips.length === PAGE_SIZE);
+        } else {
+          setClips(feedClips);
+          setHasMore(feedClips.length === PAGE_SIZE);
+        }
+      } catch {
+        if (pageNum === 1) setClips(sampleClips);
+        setHasMore(false);
       }
-
-      setHasMore(feedClips.length === PAGE_SIZE);
       setLoading(false);
     },
     [user?.id],

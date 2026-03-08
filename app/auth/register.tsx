@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -59,11 +60,24 @@ export default function RegisterScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }}>
+      <Pressable
+        onPress={() => router.back()}
+        style={{ position: "absolute", top: 60, left: 16, zIndex: 10, height: 36, width: 36, alignItems: "center", justifyContent: "center", borderRadius: 18, backgroundColor: "rgba(255,255,255,0.1)" }}
+      >
+        <Ionicons name="arrow-back" size={20} color="#fff" />
+      </Pressable>
+
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1, justifyContent: "center", paddingHorizontal: 32 }}
       >
         <View className="mb-10 items-center">
+          <View style={{ width: 140, height: 126, borderRadius: 32, overflow: "hidden", marginBottom: 12 }}>
+            <Image
+              source={require("../../assets/images/icon.png")}
+              style={{ width: 182, height: 182, marginTop: -21, marginLeft: -21 }}
+            />
+          </View>
           <Text className="text-4xl font-bold text-white">LeetTok</Text>
           <Text className="mt-2 text-sm text-gray-500">
             Create a new account
