@@ -5,18 +5,20 @@ import {
   ViewToken,
   ViewabilityConfig,
 } from "react-native";
-import { Clip } from "../types";
+import { Clip, Challenge } from "../types";
 import VideoCard from "./VideoCard";
 
 type Props = {
   clips: Clip[];
+  challengeMap?: Map<string, Challenge>;
+  challengesEnabled?: boolean;
 };
 
 const viewabilityConfig: ViewabilityConfig = {
   itemVisiblePercentThreshold: 50,
 };
 
-export default function VideoFeed({ clips }: Props) {
+export default function VideoFeed({ clips, challengeMap, challengesEnabled = true }: Props) {
   const { height: screenHeight } = useWindowDimensions();
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -34,9 +36,11 @@ export default function VideoFeed({ clips }: Props) {
         clip={item}
         isActive={index === activeIndex}
         height={screenHeight}
+        challenge={challengeMap?.get(item.id)}
+        challengesEnabled={challengesEnabled}
       />
     ),
-    [activeIndex, screenHeight],
+    [activeIndex, screenHeight, challengeMap, challengesEnabled],
   );
 
   const getItemLayout = useCallback(

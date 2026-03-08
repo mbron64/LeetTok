@@ -7,18 +7,29 @@ import CategoryBar, { Category } from "../../src/components/CategoryBar";
 import { useClips } from "../../src/lib/hooks";
 import { recommendClips } from "../../src/lib/recommend";
 import { theme } from "../../src/constants/theme";
+import { sampleChallenges } from "../../src/constants/sampleChallenges";
+import { useMadLeetsEnabled } from "../../src/lib/madleets-preferences";
 import {
   PREFERRED_DIFFICULTIES_KEY,
   PREFERRED_TOPICS_KEY,
 } from "../onboarding";
-import type { Difficulty } from "../../src/types";
+import type { Challenge, Difficulty } from "../../src/types";
 
 export default function FeedScreen() {
   const { clips, loading } = useClips();
+  const { enabled: madLeetsEnabled } = useMadLeetsEnabled();
   const [prefDifficulties, setPrefDifficulties] = useState<Difficulty[]>([]);
   const [prefTopics, setPrefTopics] = useState<string[]>([]);
   const [prefsLoaded, setPrefsLoaded] = useState(false);
   const [activeCategory, setActiveCategory] = useState<Category>("For You");
+
+  const challengeMap = useMemo(() => {
+    const map = new Map<string, Challenge>();
+    for (const ch of sampleChallenges) {
+      map.set(ch.clipId, ch);
+    }
+    return map;
+  }, []);
 
   useEffect(() => {
     Promise.all([
@@ -55,7 +66,11 @@ export default function FeedScreen() {
         </View>
       ) : (
         <>
-          <VideoFeed clips={recommended} />
+          <VideoFeed
+            clips={recommended}
+            challengeMap={challengeMap}
+            challengesEnabled={madLeetsEnabled}
+          />
           <CategoryBar
             active={activeCategory}
             onCategoryChange={handleCategoryChange}

@@ -11,22 +11,27 @@ import {
 import { useVideoPlayer, VideoView } from "expo-video";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import { Clip } from "../types";
+import { Clip, Challenge } from "../types";
 import { formatCount } from "../lib/format";
 import { useLike, useBookmark } from "../lib/hooks";
 import { theme } from "../constants/theme";
+import MadLeetsOverlay from "./MadLeetsOverlay";
 
 type Props = {
   clip: Clip;
   isActive: boolean;
   height: number;
+  challenge?: Challenge;
+  challengesEnabled?: boolean;
 };
 
-function VideoCard({ clip, isActive, height }: Props) {
+function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true }: Props) {
   const { width } = useWindowDimensions();
   const [isPaused, setIsPaused] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [showChallenge, setShowChallenge] = useState(false);
+  const challengeTriggered = useRef(false);
   const pauseIconOpacity = useRef(new Animated.Value(0)).current;
 
   const { liked, count: likeOffset, toggle: toggleLike } = useLike(clip.id);
@@ -56,9 +61,21 @@ function VideoCard({ clip, isActive, height }: Props) {
       if (duration > 0) {
         setProgress(payload.currentTime / duration);
       }
+
+      if (
+        challenge &&
+        challengesEnabled &&
+        !challengeTriggered.current &&
+        payload.currentTime >= challenge.pauseTimestamp
+      ) {
+        challengeTriggered.current = true;
+        player.pause();
+        setIsPaused(true);
+        setShowChallenge(true);
+      }
     });
     return () => sub.remove();
-  }, [player]);
+  }, [player, challenge, challengesEnabled]);
 
   const flashIcon = useCallback(() => {
     pauseIconOpacity.setValue(1);
@@ -73,6 +90,23 @@ function VideoCard({ clip, isActive, height }: Props) {
     setIsPaused((prev) => !prev);
     flashIcon();
   }, [flashIcon]);
+
+  const dismissChallenge = useCallback(() => {
+    setShowChallenge(false);
+    setIsPaused(false);
+    player.play();
+  }, [player]);
+
+  const handleChallengeSubmit = useCallback(
+    (_answer: string) => {
+      dismissChallenge();
+    },
+    [dismissChallenge],
+  );
+
+  const handleChallengeSkip = useCallback(() => {
+    dismissChallenge();
+  }, [dismissChallenge]);
 
   const openLeetCode = useCallback(() => {
     Linking.openURL(
@@ -199,6 +233,17 @@ function VideoCard({ clip, isActive, height }: Props) {
           className="h-full bg-white"
         />
       </View>
+
+      {/* MadLeets Challenge Overlay */}
+      {challenge && (
+        <MadLeetsOverlay
+          challenge={challenge}
+          visible={showChallenge}
+          onSubmit={handleChallengeSubmit}
+          onSkip={handleChallengeSkip}
+          onDismiss={dismissChallenge}
+        />
+      )}
     </View>
   );
 }

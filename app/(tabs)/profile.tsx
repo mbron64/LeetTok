@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../src/lib/auth";
 import { isSupabaseConfigured } from "../../src/constants/config";
 import { theme } from "../../src/constants/theme";
+import { useMadLeetsEnabled } from "../../src/lib/madleets-preferences";
 
 const STATS = [
   { label: "Clips Watched", value: "47" },
@@ -15,6 +16,7 @@ const STATS = [
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const [darkMode, setDarkMode] = useState(true);
+  const { enabled: madLeetsEnabled, toggle: toggleMadLeets } = useMadLeetsEnabled();
 
   const displayName =
     user?.email?.split("@")[0] ?? "LeetTok User";
@@ -75,6 +77,21 @@ export default function ProfileScreen() {
                 value={darkMode}
                 onValueChange={setDarkMode}
                 trackColor={{ false: theme.colors.textDim, true: theme.colors.accent }}
+                thumbColor={theme.colors.text}
+              />
+            </View>
+
+            <View className="flex-row items-center justify-between border-b border-[#1a1a1a] px-4 py-3.5">
+              <View className="flex-row items-center gap-3">
+                <View className="h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/20">
+                  <Ionicons name="code-slash" size={16} color="#06b6d4" />
+                </View>
+                <Text className="text-sm text-white">MadLeets Challenges</Text>
+              </View>
+              <Switch
+                value={madLeetsEnabled}
+                onValueChange={toggleMadLeets}
+                trackColor={{ false: theme.colors.textDim, true: "#06b6d4" }}
                 thumbColor={theme.colors.text}
               />
             </View>
