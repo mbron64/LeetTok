@@ -1,0 +1,7 @@
+yt-dlp>=2024.1
+faster-whisper>=1.0.0
+openai
+anthropic
+boto3
+supabase
+python-dotenv

@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "leettok-pipeline"
+version = "0.1.0"
+description = "NeetCode Clipping Engine — detect, extract, and publish viral coding clips"
+requires-python = ">=3.11"
+dependencies = [
+    "yt-dlp>=2024.1",
+    "faster-whisper>=1.0.0",
+    "openai",
+    "anthropic",
+    "boto3",
+    "supabase",
+    "python-dotenv",
+]
+
+[project.scripts]
+leettok = "pipeline.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
