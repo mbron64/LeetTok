@@ -54,6 +54,14 @@ export default function RootLayout() {
           options={{ animation: "slide_from_right" }}
         />
         <Stack.Screen
+          name="drill/[topic]"
+          options={{ animation: "slide_from_right" }}
+        />
+        <Stack.Screen
+          name="challenge-only"
+          options={{ animation: "slide_from_bottom" }}
+        />
+        <Stack.Screen
           name="auth/login"
           options={{ animation: "fade" }}
         />
