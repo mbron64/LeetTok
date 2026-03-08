@@ -79,7 +79,7 @@ function CodeEditorSheetInner(
   const { session, user } = useAuth();
   const [problemNumber, setProblemNumber] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<"problem" | "code">("problem");
-  const [language, setLanguage] = useState<(typeof ALL_LANGUAGES)[0]>(ALL_LANGUAGES[0]);
+  const [language, setLanguage] = useState<(typeof ALL_LANGUAGES)[number]>(ALL_LANGUAGES[0]);
   const [code, setCode] = useState("");
   const [showLangPicker, setShowLangPicker] = useState(false);
   const [results, setResults] = useState<import("../lib/codeExecution").TestCaseResult[] | null>(null);
