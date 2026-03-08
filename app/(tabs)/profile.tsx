@@ -1,25 +1,34 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Pressable, ScrollView, Switch, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "expo-router";
 import { useAuth } from "../../src/lib/auth";
 import { isSupabaseConfigured } from "../../src/constants/config";
 import { theme } from "../../src/constants/theme";
 import { useMadLeetsEnabled } from "../../src/lib/madleets-preferences";
-
-const STATS = [
-  { label: "Clips Watched", value: "47" },
-  { label: "Problems", value: "12" },
-  { label: "Day Streak", value: "5" },
-];
+import { getProgress, type ProgressData } from "../../src/lib/progress";
+import { checkStreakAtRisk } from "../../src/lib/streak";
+import ProgressStats from "../../src/components/ProgressStats";
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const [darkMode, setDarkMode] = useState(true);
-  const { enabled: madLeetsEnabled, toggle: toggleMadLeets } = useMadLeetsEnabled();
+  const { enabled: madLeetsEnabled, toggle: toggleMadLeets } =
+    useMadLeetsEnabled();
+  const [progress, setProgress] = useState<ProgressData | null>(null);
+  const [streakAtRisk, setStreakAtRisk] = useState(false);
 
-  const displayName =
-    user?.email?.split("@")[0] ?? "LeetTok User";
+  useFocusEffect(
+    useCallback(() => {
+      getProgress().then((data) => {
+        setProgress(data);
+        setStreakAtRisk(checkStreakAtRisk(data.streak.lastChallengeDate));
+      });
+    }, []),
+  );
+
+  const displayName = user?.email?.split("@")[0] ?? "LeetTok User";
   const initial = displayName.charAt(0).toUpperCase();
 
   return (
@@ -44,23 +53,37 @@ export default function ProfileScreen() {
           )}
         </View>
 
+        {/* Quick stats bar */}
         <View className="mx-4 mb-6 flex-row rounded-2xl bg-[#111] p-4">
-          {STATS.map((stat, i) => (
-            <View
-              key={stat.label}
-              className={`flex-1 items-center ${i < STATS.length - 1 ? "border-r border-[#222]" : ""}`}
-            >
+          <View className="flex-1 items-center border-r border-[#222]">
+            <Text className="text-2xl font-bold text-white">
+              {progress?.totalXP.toLocaleString() ?? "0"}
+            </Text>
+            <Text className="mt-0.5 text-[10px] text-gray-500">Total XP</Text>
+          </View>
+          <View className="flex-1 items-center border-r border-[#222]">
+            <Text className="text-2xl font-bold text-white">
+              {progress?.challengesCompleted ?? 0}
+            </Text>
+            <Text className="mt-0.5 text-[10px] text-gray-500">Problems</Text>
+          </View>
+          <View className="flex-1 items-center">
+            <View className="flex-row items-center gap-1">
               <Text className="text-2xl font-bold text-white">
-                {stat.value}
+                {progress?.streak.currentStreak ?? 0}
               </Text>
-              <Text className="mt-0.5 text-[10px] text-gray-500">
-                {stat.label}
-              </Text>
+              <Text className="text-base">🔥</Text>
             </View>
-          ))}
+            <Text className="mt-0.5 text-[10px] text-gray-500">
+              {streakAtRisk ? "At risk!" : "Day Streak"}
+            </Text>
+          </View>
         </View>
 
-        <View className="mx-4">
+        {/* Full progress stats */}
+        {progress && <ProgressStats data={progress} />}
+
+        <View className="mx-4 mt-6">
           <Text className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
             Settings
           </Text>
@@ -76,7 +99,10 @@ export default function ProfileScreen() {
               <Switch
                 value={darkMode}
                 onValueChange={setDarkMode}
-                trackColor={{ false: theme.colors.textDim, true: theme.colors.accent }}
+                trackColor={{
+                  false: theme.colors.textDim,
+                  true: theme.colors.accent,
+                }}
                 thumbColor={theme.colors.text}
               />
             </View>
