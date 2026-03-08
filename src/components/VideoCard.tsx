@@ -17,7 +17,9 @@ import { useLike, useBookmark } from "../lib/hooks";
 import { useAuth } from "../lib/auth";
 import { theme } from "../constants/theme";
 import { trackEvent, trackImpression } from "../lib/track";
+import type { ClipContext } from "../lib/tutor";
 import MadLeetsOverlay from "./MadLeetsOverlay";
+import TutorSheet, { type TutorSheetRef } from "./TutorSheet";
 
 type Props = {
   clip: Clip;
@@ -34,9 +36,21 @@ function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true
   const [expanded, setExpanded] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showChallenge, setShowChallenge] = useState(false);
+  const [tutorSheetOpen, setTutorSheetOpen] = useState(false);
   const challengeTriggered = useRef(false);
   const pauseIconOpacity = useRef(new Animated.Value(0)).current;
   const wasActiveRef = useRef(false);
+  const tutorSheetRef = useRef<TutorSheetRef>(null);
+
+  const clipContext: ClipContext = {
+    clipId: clip.id,
+    problemTitle: clip.title,
+    problemNumber: clip.problemNumber,
+    difficulty: clip.difficulty,
+    topics: clip.topics,
+    transcript: "",
+    codeSnippets: [],
+  };
 
   const { liked, count: likeOffset, toggle: toggleLike } = useLike(clip.id);
   const {
@@ -52,12 +66,19 @@ function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true
   });
 
   useEffect(() => {
-    if (isActive && !isPaused) {
+    if (isActive && !isPaused && !tutorSheetOpen) {
       player.play();
     } else {
       player.pause();
     }
-  }, [isActive, isPaused, player]);
+  }, [isActive, isPaused, tutorSheetOpen, player]);
+
+  useEffect(() => {
+    if (!isActive && tutorSheetOpen) {
+      tutorSheetRef.current?.close();
+      setTutorSheetOpen(false);
+    }
+  }, [isActive, tutorSheetOpen]);
 
   const lastWatchRef = useRef({ progress: 0, watchedSeconds: 0 });
 
@@ -144,6 +165,15 @@ function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true
     );
   }, [clip.title]);
 
+  const handleTutorOpen = useCallback(() => {
+    tutorSheetRef.current?.present();
+    setTutorSheetOpen(true);
+  }, []);
+
+  const handleTutorClose = useCallback(() => {
+    setTutorSheetOpen(false);
+  }, []);
+
   const initials = clip.creator
     .split(/\s+/)
     .map((w) => w[0])
@@ -214,6 +244,14 @@ function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true
 
       {/* Right-side action column */}
       <View className="absolute bottom-24 right-3 items-center gap-4">
+        {/* AI Tutor */}
+        <Pressable onPress={handleTutorOpen} className="items-center">
+          <View className="h-12 w-12 items-center justify-center rounded-full bg-[#6366f1]/90">
+            <Ionicons name="sparkles" size={24} color="#fff" />
+          </View>
+          <Text className="mt-0.5 text-[11px] text-white">Tutor</Text>
+        </Pressable>
+
         {/* Creator avatar */}
         <View className="mb-1 items-center">
           <View className="h-12 w-12 items-center justify-center rounded-full border-2 border-white bg-gray-700">
@@ -274,6 +312,13 @@ function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true
           onDismiss={dismissChallenge}
         />
       )}
+
+      {/* AI Tutor Bottom Sheet */}
+      <TutorSheet
+        ref={tutorSheetRef}
+        clipContext={clipContext}
+        onClose={handleTutorClose}
+      />
     </View>
   );
 }

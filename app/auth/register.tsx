@@ -10,7 +10,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../src/lib/auth";
+import { signInWithProvider } from "../../src/lib/oauth";
 
 export default function RegisterScreen() {
   const { signUp } = useAuth();
@@ -21,6 +23,20 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState<"github" | "google" | null>(
+    null
+  );
+  const [oauthError, setOauthError] = useState<string | null>(null);
+
+  const isOauthInProgress = oauthLoading !== null;
+
+  const handleOAuth = async (provider: "github" | "google") => {
+    setOauthError(null);
+    setOauthLoading(provider);
+    const err = await signInWithProvider(provider);
+    setOauthLoading(null);
+    if (err) setOauthError(err);
+  };
 
   const handleSignUp = async () => {
     if (!email.trim() || !password) return;
@@ -52,6 +68,60 @@ export default function RegisterScreen() {
           <Text className="mt-2 text-sm text-gray-500">
             Create a new account
           </Text>
+        </View>
+
+        <Pressable
+          onPress={() => handleOAuth("github")}
+          disabled={isOauthInProgress}
+          className="mb-3 flex-row items-center justify-center rounded-xl py-4"
+          style={{
+            backgroundColor: "#24292e",
+            opacity: isOauthInProgress ? 0.6 : 1,
+          }}
+        >
+          {oauthLoading === "github" ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <>
+              <Ionicons name="logo-github" size={22} color="#fff" />
+              <Text className="ml-2 text-base font-semibold text-white">
+                Continue with GitHub
+              </Text>
+            </>
+          )}
+        </Pressable>
+
+        <Pressable
+          onPress={() => handleOAuth("google")}
+          disabled={isOauthInProgress}
+          className="mb-4 flex-row items-center justify-center rounded-xl py-4"
+          style={{
+            backgroundColor: "#fff",
+            opacity: isOauthInProgress ? 0.6 : 1,
+          }}
+        >
+          {oauthLoading === "google" ? (
+            <ActivityIndicator color="#333" />
+          ) : (
+            <>
+              <Ionicons name="logo-google" size={22} color="#333" />
+              <Text className="ml-2 text-base font-semibold text-[#333]">
+                Continue with Google
+              </Text>
+            </>
+          )}
+        </Pressable>
+
+        {oauthError && (
+          <Text className="mb-4 text-center text-sm text-red-400">
+            {oauthError}
+          </Text>
+        )}
+
+        <View className="mb-4 flex-row items-center justify-center gap-3">
+          <View className="h-px flex-1 bg-gray-600" />
+          <Text className="text-sm text-gray-500">— or —</Text>
+          <View className="h-px flex-1 bg-gray-600" />
         </View>
 
         {error && (
@@ -100,9 +170,9 @@ export default function RegisterScreen() {
 
         <Pressable
           onPress={handleSignUp}
-          disabled={loading}
+          disabled={loading || isOauthInProgress}
           className="mb-6 items-center rounded-xl bg-[#6366f1] py-4"
-          style={{ opacity: loading ? 0.6 : 1 }}
+          style={{ opacity: loading || isOauthInProgress ? 0.6 : 1 }}
         >
           {loading ? (
             <ActivityIndicator color="#fff" />

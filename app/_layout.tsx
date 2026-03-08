@@ -4,6 +4,7 @@ import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthProvider } from "../src/lib/auth";
 import { initTracking, cleanupTracking } from "../src/lib/track";
@@ -42,40 +43,42 @@ export default function RootLayout() {
   }
 
   return (
-    <AuthProvider>
-      <StatusBar style="light" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: theme.colors.background },
-        }}
-      >
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AuthProvider>
+        <StatusBar style="light" />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: theme.colors.background },
+          }}
+        >
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen
           name="onboarding"
-          options={{ animation: "fade" }}
-        />
-        <Stack.Screen
-          name="problem/[id]"
-          options={{ animation: "slide_from_right" }}
-        />
-        <Stack.Screen
-          name="drill/[topic]"
-          options={{ animation: "slide_from_right" }}
-        />
-        <Stack.Screen
-          name="challenge-only"
-          options={{ animation: "slide_from_bottom" }}
-        />
-        <Stack.Screen
-          name="auth/login"
-          options={{ animation: "fade" }}
-        />
-        <Stack.Screen
-          name="auth/register"
-          options={{ animation: "fade" }}
-        />
-      </Stack>
-    </AuthProvider>
+            options={{ animation: "fade" }}
+          />
+          <Stack.Screen
+            name="problem/[id]"
+            options={{ animation: "slide_from_right" }}
+          />
+          <Stack.Screen
+            name="drill/[topic]"
+            options={{ animation: "slide_from_right" }}
+          />
+          <Stack.Screen
+            name="challenge-only"
+            options={{ animation: "slide_from_bottom" }}
+          />
+          <Stack.Screen
+            name="auth/login"
+            options={{ animation: "fade" }}
+          />
+          <Stack.Screen
+            name="auth/register"
+            options={{ animation: "fade" }}
+          />
+        </Stack>
+      </AuthProvider>
+    </GestureHandlerRootView>
   );
 }
