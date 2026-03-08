@@ -5,3 +5,4 @@ anthropic
 boto3
 supabase
 python-dotenv
+google-api-python-client

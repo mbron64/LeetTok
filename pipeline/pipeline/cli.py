@@ -1,11 +1,37 @@
 from __future__ import annotations
 
 import argparse
+import logging
 import sys
+
+from pipeline.config import load_config
+from pipeline.db import _init_client, get_known_video_ids, insert_discovered_videos
+from pipeline.discover import discover, filter_new_videos
+
+log = logging.getLogger(__name__)
 
 
 def _cmd_discover(args: argparse.Namespace) -> None:
-    print("Discovery not yet implemented")
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
+    )
+
+    config = load_config()
+    videos = discover(config)
+
+    client = _init_client(config)
+    known_ids = get_known_video_ids(client)
+    new_videos = filter_new_videos(videos, known_ids)
+
+    if not new_videos:
+        print("No new videos found.")
+        return
+
+    inserted = insert_discovered_videos(client, new_videos)
+    print(f"Discovered {len(videos)} videos, {len(new_videos)} new, {inserted} persisted.")
+    for v in new_videos:
+        problem = f" (LC #{v.problem_number})" if v.problem_number else ""
+        print(f"  • {v.title}{problem}")
 
 
 def _cmd_process(args: argparse.Namespace) -> None:
