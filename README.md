@@ -286,6 +286,6 @@ Distributed under the MIT License. See `LICENSE` for details.
 
 **Stop doomscrolling. Start doomsolving.**
 
-Built at HackBU 2026.
+Built at [HackBU 2026](https://devpost.com/software/leettok).
 
 </div>
