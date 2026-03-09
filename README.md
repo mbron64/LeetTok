@@ -57,46 +57,46 @@ Solve problems right in the app. Build streaks. Land offers.
 
 ## The Problem
 
-You open LeetCode. You stare at a problem. You alt-tab to YouTube. Two hours later, you've watched three vlogs, a cooking video, and zero algorithm explanations.
+I deleted TikTok and Instagram but was still itching for a scroll. LeetCode prep is stuck on desktop. You need a laptop, a browser, and a chunk of free time. Why isn't there a feed I can open on my phone that's actually making me better at interviews?
 
-**LeetTok fixes this.** We took the most addictive UX pattern ever invented -- the infinite vertical feed -- and filled it with bite-sized LeetCode walkthroughs. Every swipe is progress. Every scroll session is interview prep.
+So we built one. Video walkthroughs, a code editor, an AI tutor, all in a vertical feed you can open anywhere.
 
 ## Why LeetTok?
 
-| The Old Way | The LeetTok Way |
+| Without LeetTok | With LeetTok |
 |---|---|
-| Open LeetCode, feel overwhelmed | Open LeetTok, start swiping |
-| Watch a 45-min YouTube tutorial | Watch a 60-second walkthrough |
-| Read a solution, forget it tomorrow | Spaced repetition locks it in |
-| Practice feels like a chore | Practice feels like a feed |
+| Need a laptop open | Pull out your phone |
+| Long-form YouTube tutorials | 60-second walkthroughs |
+| Only works when you sit down to grind | Works in any dead time |
+| Watch a solution, forget it by tomorrow | Spaced repetition keeps it locked in |
 
 ---
 
 ## Features
 
 ### Swipe to Learn
-Full-screen, vertical-scroll video feed. Auto-play. Snap scroll. Exactly like TikTok, except every video makes you a better engineer.
+Full-screen vertical video feed. Auto-play, snap scroll. Same UX as TikTok, but every video is a LeetCode walkthrough.
 
 ### MadLeets
-Fill-in-the-blank coding challenges that pop up *mid-video* at the exact moment a key concept is explained. You're not just watching -- you're solving.
+Fill-in-the-blank coding challenges that pop up *mid-video* right when a key concept is explained. You're not watching, you're solving.
 
 ### Smart Categories
-**For You** · **NeetCode 150** · **Trending** · **New** · **MadLeets** -- curated feeds that adapt to where you are in your prep journey.
+**For You** · **NeetCode 150** · **Trending** · **New** · **MadLeets**. Curated feeds based on where you are in your prep.
 
 ### Built-in Code Editor
-See a problem you want to try? Solve it right in the app. No context-switching. No excuses.
+See a problem you want to try? Solve it right in the app. Never leave the feed.
 
 ### AI Tutor
-Stuck on a concept? The in-app AI tutor breaks it down for you without leaving the feed.
+Stuck? Ask the in-app AI tutor. It breaks down the concept without taking you out of the flow.
 
 ### Explore by Topic
-Browse problems by **Arrays**, **Trees**, **Graphs**, **Dynamic Programming**, and more. Filter by difficulty. Search by name.
+Browse by **Arrays**, **Trees**, **Graphs**, **DP**, and more. Filter by difficulty. Search by name.
 
 ### Streaks, XP & Progress
 Daily streaks. XP for every problem watched and solved. Topic-level accuracy breakdowns. The dopamine loop that actually helps your career.
 
 ### Personalized Onboarding
-Targeting FAANG? Top startups? Palantir? Tell us your goal and preferred topics -- we'll tailor the feed.
+Targeting FAANG? Top startups? Palantir? Tell us your goal and we tailor the feed.
 
 ---
 
@@ -150,7 +150,7 @@ Targeting FAANG? Top startups? Palantir? Tell us your goal and preferred topics 
 
 ## Content Pipeline
 
-LeetTok's secret sauce: an automated Python pipeline that turns long-form NeetCode videos into perfectly-clipped, mobile-first short content.
+Automated Python pipeline that takes long-form NeetCode videos and chops them into mobile-first short clips.
 
 ```
 YouTube ──▶ Discover ──▶ Download ──▶ Transcribe ──▶ Segment ──▶ Clip ──▶ Caption ──▶ Upload
@@ -160,7 +160,7 @@ YouTube ──▶ Discover ──▶ Download ──▶ Transcribe ──▶ Seg
                                                       Haiku    reframe
 ```
 
-**Cost:** < $0.01 per video when YouTube captions exist. ~$0.02--0.05 with Whisper fallback.
+**Cost:** < $0.01 per video when YouTube captions exist. ~$0.02-0.05 with Whisper fallback.
 
 See [`pipeline/README.md`](pipeline/README.md) for full documentation.
 
@@ -170,7 +170,7 @@ See [`pipeline/README.md`](pipeline/README.md) for full documentation.
 
 ### Quick Start
 
-This repo is currently wired to a hosted Supabase project in `src/constants/config.ts`, so you do **not** need to create a `.env` file just to boot the app and explore the main flows.
+The repo is already wired to a hosted Supabase project in `src/constants/config.ts`. No `.env` needed to boot it up.
 
 #### Prerequisites
 
@@ -199,24 +199,20 @@ From there you can:
 - press `a` to open Android
 - scan the QR code with Expo Go for the fastest phone preview
 
-#### What should work in quick start
+#### What works out of the box
 
-- onboarding
-- vertical feed browsing
-- explore flows
-- MadLeets feed behavior
-- most UI and navigation flows
-- hosted backend reads against the currently configured Supabase project
+- Onboarding, feed browsing, explore, MadLeets, all core UI/navigation
+- Reads from the hosted Supabase project
 
-#### What may still need more setup
+#### What needs more setup
 
-- Google OAuth and other native auth flows are more reliable in a development build than Expo Go
-- end-to-end code execution depends on the deployed `run-code` function plus Judge0 availability
-- AI tutor depends on the deployed tutor edge function and its server-side secrets
+- Google OAuth works better in a dev build than Expo Go
+- Code execution requires the deployed `run-code` edge function + Judge0
+- AI tutor requires the deployed tutor edge function + server-side secrets
 
-### Development Builds
+### Dev Builds
 
-If you want to run the native app instead of Expo Go:
+For native modules, device testing, and OAuth, run the native app instead of Expo Go:
 
 ```bash
 npm run ios
@@ -224,41 +220,18 @@ npm run ios
 npm run android
 ```
 
-This path is better for native modules, device testing, and OAuth.
-
 ### Full Maintainer Setup
 
-Use this section if you want to change backend projects, deploy functions, or ship builds.
+Only needed if you're swapping backend projects, deploying functions, or shipping builds.
 
-#### Client config
-
-The mobile app currently reads its public Supabase project directly from:
-
-- `src/constants/config.ts`
-
-If you want the app to point at a different project, update that file.
-
-#### Local secrets and backend work
-
-You only need local secrets such as `.env` values when you are doing maintainer work like:
-
-- configuring Google OAuth locally
-- running or deploying Supabase edge functions
-- managing backend service credentials
-- preparing EAS/TestFlight submissions
-
-#### EAS / TestFlight
-
-EAS build profiles live in `eas.json`.
-
-Typical commands:
+- **Client config:** App reads its Supabase project from `src/constants/config.ts`. Change that file to point at a different project.
+- **Local secrets (`.env`):** Only needed for Google OAuth config, deploying edge functions, managing backend credentials, or EAS/TestFlight submissions.
+- **EAS / TestFlight:** Build profiles live in `eas.json`.
 
 ```bash
 npx eas build --platform ios --profile preview
 npx eas submit --platform ios --profile production
 ```
-
-That path is the right one when you want installable device builds instead of local Expo sessions.
 
 ## Project Structure
 
@@ -284,13 +257,15 @@ leettok/
 
 ## Contributing
 
-We welcome contributions! Whether it's a new feature, bug fix, or improvement to the content pipeline -- all PRs are appreciated.
+PRs welcome. Fork it, branch it, ship it.
 
-1. Fork the repo
-2. Create your branch (`git checkout -b feat/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feat/amazing-feature`)
-5. Open a Pull Request
+```
+git checkout -b feat/your-thing
+git commit -m 'Add your thing'
+git push origin feat/your-thing
+```
+
+Then open a PR.
 
 ---
 
