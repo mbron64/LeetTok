@@ -42,10 +42,6 @@ export async function submitCode({
 }: SubmitCodeOptions): Promise<SubmissionResult> {
   const fnUrl = `${SUPABASE_URL.replace(/\/$/, "")}/functions/v1/run-code`;
 
-  // #region agent log
-  fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'run-code-rate-limit',hypothesisId:'C1',location:'src/lib/codeExecution.ts:submitCode',message:'Submitting code execution request',data:{action,languageId,testCaseCount:testCases.length,codeLength:code.length,functionName},timestamp:Date.now()})}).catch(()=>{});
-  // #endregion
-
   const res = await fetch(fnUrl, {
     method: "POST",
     headers: {
@@ -69,10 +65,6 @@ export async function submitCode({
   } catch {
     data = { message: raw };
   }
-
-  // #region agent log
-  fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'run-code-visibility',hypothesisId:'U1',location:'src/lib/codeExecution.ts:submitCode',message:'Received code execution response',data:{action,status:res.status,ok:res.ok,isArray:Array.isArray(data),resultCount:Array.isArray(data)?data.length:null,firstResult:Array.isArray(data)&&data.length>0&&typeof data[0]==='object'?{passed:(data[0] as TestCaseResult).passed,status:(data[0] as TestCaseResult).status,actual_output:(data[0] as TestCaseResult).actual_output,expected_output:(data[0] as TestCaseResult).expected_output}:null,response:(data as {error?: string; message?: string} | null)?.error ?? (data as {error?: string; message?: string} | null)?.message ?? null},timestamp:Date.now()})}).catch(()=>{});
-  // #endregion
 
   if (!res.ok) {
     const errorData = data as { error?: string; message?: string } | null;

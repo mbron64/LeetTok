@@ -38,6 +38,7 @@ interface Judge0Submission {
   memory?: number;
 }
 
+// TODO: restrict Access-Control-Allow-Origin to your app's domain in production
 function corsHeaders() {
   return {
     "Access-Control-Allow-Origin": "*",
@@ -229,14 +230,8 @@ Deno.serve(async (req) => {
     .eq("date", today)
     .single();
   const currentUsageCount = usageRow?.submission_count ?? 0;
-  // #region agent log
-  fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'run-code-rate-limit',hypothesisId:'C5',location:'supabase/functions/run-code/index.ts:preRateLimit',message:'Checked code execution usage before enforcing limit',data:{userId:user.id,action,currentUsageCount,dailyLimit:DAILY_SUBMISSION_LIMIT,testCaseCount:test_cases.length},timestamp:Date.now()})}).catch(()=>{});
-  // #endregion
 
   if (currentUsageCount >= DAILY_SUBMISSION_LIMIT || await checkRateLimit(user.id)) {
-    // #region agent log
-    fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'run-code-rate-limit',hypothesisId:'C6',location:'supabase/functions/run-code/index.ts:rateLimit',message:'Rejected code execution request due to daily limit',data:{userId:user.id,action,currentUsageCount,dailyLimit:DAILY_SUBMISSION_LIMIT},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     return jsonResponse(
       {
         error: "Rate limit exceeded",
@@ -297,9 +292,6 @@ Deno.serve(async (req) => {
     });
 
     await incrementUsage(user.id);
-    // #region agent log
-    fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'run-code-rate-limit',hypothesisId:'C7',location:'supabase/functions/run-code/index.ts:incrementUsage',message:'Incremented code execution usage after successful run-code request',data:{userId:user.id,action,previousUsageCount:currentUsageCount,newUsageCount:currentUsageCount + 1},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     return jsonResponse(results);
   } catch (err) {
     console.error("run-code error:", err);

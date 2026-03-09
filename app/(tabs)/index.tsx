@@ -85,15 +85,6 @@ export default function FeedScreen() {
         }
       }
     }
-    // #region agent log
-    fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'madleets-post-fix',hypothesisId:'M1',location:'index.tsx:challengeMap',message:'Built MadLeets challenge map from live clips',data:{clipCount:clips.length,challengeCount:sampleChallenges.length,challengeProblemNumbers:[...challengeProblemNumbers],mappedClipCount:map.size,firstMappedClipId:[...map.keys()][0] ?? null},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-    // #region agent log
-    fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'madleets-repeat-question',hypothesisId:'R1',location:'index.tsx:challengeMap',message:'Mapped clip problems to challenge ids',data:{sampleMappings:[...map.entries()].slice(0,6).map(([clipId,ch])=>({clipId,challengeId:ch.id,challengeProblemId:ch.problemId,challengePromptLine:ch.blankLineContent}))},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-    // #region agent log
-    fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'madleets-clip-segment-model',hypothesisId:'S1',location:'index.tsx:challengeMap',message:'Compared live clip data against static challenge model',data:{sampleMappings:[...map.entries()].slice(0,6).map(([clipId,ch])=>{const clip=clips.find((item)=>item.id===clipId);return{clipId,clipTitle:clip?.title ?? null,clipProblemNumber:clip?.problemNumber ?? null,challengeId:ch.id,challengeClipId:ch.clipId,challengeProblemId:ch.problemId,sameClipId:ch.clipId===clipId,hasClipSegmentMetadata:Boolean((clip as any)?.segmentStart || (clip as any)?.segmentEnd || (clip as any)?.pauseTimestamp || (clip as any)?.codeBlock)}})},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     return map;
   }, [clips]);
 
@@ -127,15 +118,6 @@ export default function FeedScreen() {
         );
         const madLeetsClips = clips.filter((c) => challengeProblemNumbers.has(c.problemNumber));
         const staggeredMadLeetsClips = staggerClipsByProblem(madLeetsClips);
-        // #region agent log
-        fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'madleets-post-fix',hypothesisId:'M1',location:'index.tsx:filteredClips:MadLeets',message:'Computed MadLeets category clips from problem numbers',data:{totalClips:clips.length,challengeProblemNumbers:[...challengeProblemNumbers],filteredCount:madLeetsClips.length,firstClipId:clips[0]?.id ?? null,firstFilteredId:madLeetsClips[0]?.id ?? null,firstFilteredProblemNumber:madLeetsClips[0]?.problemNumber ?? null},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
-        // #region agent log
-        fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'madleets-repeat-question',hypothesisId:'R2',location:'index.tsx:filteredClips:MadLeets',message:'MadLeets feed problem distribution',data:{firstSix:madLeetsClips.slice(0,6).map((clip)=>({clipId:clip.id,problemNumber:clip.problemNumber,title:clip.title})),distinctProblemCount:new Set(madLeetsClips.map((clip)=>clip.problemNumber)).size},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
-        // #region agent log
-        fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'madleets-demo-order',hypothesisId:'D1',location:'index.tsx:filteredClips:MadLeets',message:'Reordered MadLeets clips to avoid repeated problems',data:{firstSix:staggeredMadLeetsClips.slice(0,6).map((clip)=>({clipId:clip.id,problemNumber:clip.problemNumber,title:clip.title})),adjacentRepeatCount:staggeredMadLeetsClips.slice(1).reduce((count, clip, index)=>count + (clip.problemNumber === staggeredMadLeetsClips[index]?.problemNumber ? 1 : 0),0)},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
         return staggeredMadLeetsClips;
       }
       case "NeetCode 150":
@@ -150,9 +132,6 @@ export default function FeedScreen() {
   }, [clips, prefsLoaded, prefDifficulties, prefTopics, activeCategory]);
 
   const handleCategoryChange = useCallback((cat: Category) => {
-    // #region agent log
-    fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'madleets-empty-debug',hypothesisId:'M1',location:'index.tsx:handleCategoryChange',message:'Changed home feed category',data:{category:cat,clipCount:clips.length},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     setActiveCategory(cat);
   }, [clips.length]);
 

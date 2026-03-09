@@ -123,10 +123,6 @@ export default function MadLeetsScreen() {
     return sampleChallenges[dayIdx];
   }, []);
 
-  // #region agent log
-  fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'madleets-empty-debug',hypothesisId:'M2',location:'madleets.tsx:render',message:'Rendered MadLeets tab',data:{sampleChallengeCount:sampleChallenges.length,dailyChallengeId:dailyChallenge?.id ?? null,dailyProblemId:dailyChallenge?.problemId ?? null,reviewCount:reviewItems.length,hasProgress:!!progress,showDailyChallenge,dailyCompleted},timestamp:Date.now()})}).catch(()=>{});
-  // #endregion
-
   const topicMap = useMemo(() => {
     const map = new Map<string, number>();
     for (const ch of sampleChallenges) {
@@ -143,9 +139,6 @@ export default function MadLeetsScreen() {
       getReviewQueue(),
       getProgress(),
     ]);
-    // #region agent log
-    fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'madleets-empty-debug',hypothesisId:'M3',location:'madleets.tsx:loadData',message:'Loaded MadLeets tab data',data:{queueCount:queue.length,hasProgress:!!prog,totalXP:prog?.totalXP ?? null,currentStreak:prog?.streak?.currentStreak ?? null},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     setReviewItems(queue);
     setProgress(prog);
   }, []);

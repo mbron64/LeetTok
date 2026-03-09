@@ -1,3 +1,4 @@
+// TODO: restrict Access-Control-Allow-Origin to your app's domain in production
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 

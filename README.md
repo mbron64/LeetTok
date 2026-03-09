@@ -206,9 +206,13 @@ From there you can:
 
 #### What needs more setup
 
-- Google OAuth works better in a dev build than Expo Go
-- Code execution requires the deployed `run-code` edge function + Judge0
-- AI tutor requires the deployed tutor edge function + server-side secrets
+| Feature | What you need | Env var |
+|---|---|---|
+| Google OAuth | Dev build (not Expo Go) + Supabase auth config | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
+| Code execution | Deployed `run-code` edge function + Judge0 instance | `JUDGE0_URL`, `JUDGE0_AUTH_TOKEN` |
+| AI tutor | Deployed `chat-tutor` edge function + OpenAI key | `OPENAI_API_KEY` |
+
+See [`.env.example`](.env.example) for the full list.
 
 ### Dev Builds
 
@@ -224,9 +228,10 @@ npm run android
 
 Only needed if you're swapping backend projects, deploying functions, or shipping builds.
 
-- **Client config:** App reads its Supabase project from `src/constants/config.ts`. Change that file to point at a different project.
-- **Local secrets (`.env`):** Only needed for Google OAuth config, deploying edge functions, managing backend credentials, or EAS/TestFlight submissions.
-- **EAS / TestFlight:** Build profiles live in `eas.json`.
+1. Copy `.env.example` to `.env` and fill in the values.
+2. **Client config:** App reads its Supabase project from `src/constants/config.ts`. Change that file to point at a different project.
+3. **Edge function secrets:** Set via `supabase secrets set` (see `.env.example` for the full list).
+4. **EAS / TestFlight:** Build profiles live in `eas.json`.
 
 ```bash
 npx eas build --platform ios --profile preview

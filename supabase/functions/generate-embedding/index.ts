@@ -16,6 +16,7 @@ interface RequestBody {
   difficulty?: string;
 }
 
+// TODO: restrict Access-Control-Allow-Origin to your app's domain in production
 function corsHeaders() {
   return {
     "Access-Control-Allow-Origin": "*",

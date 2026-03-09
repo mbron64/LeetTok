@@ -152,9 +152,6 @@ export function useProblems() {
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
-      // #region agent log
-      fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'explore-mock-videos',hypothesisId:'E1',location:'src/lib/hooks.ts:useProblems',message:'Using sample problems because Supabase is disabled',data:{sampleClipCount:sampleClips.length},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       setProblems(extractProblemsFromClips(sampleClips));
       setLoading(false);
       return;
@@ -166,14 +163,8 @@ export function useProblems() {
       .order("number")
       .then(({ data, error }) => {
         if (error || !data) {
-          // #region agent log
-          fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'explore-mock-videos',hypothesisId:'E1',location:'src/lib/hooks.ts:useProblems',message:'Fell back to sample problems after problems query failed',data:{hasError:Boolean(error),errorMessage:error?.message ?? null,dataCount:data?.length ?? 0,sampleClipCount:sampleClips.length},timestamp:Date.now()})}).catch(()=>{});
-          // #endregion
           setProblems(extractProblemsFromClips(sampleClips));
         } else {
-          // #region agent log
-          fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'explore-mock-videos',hypothesisId:'E1',location:'src/lib/hooks.ts:useProblems',message:'Loaded live problems for explore screen',data:{dataCount:data.length,firstThree:data.slice(0,3).map((row:any)=>({id:row.id,number:row.number,title:row.title}))},timestamp:Date.now()})}).catch(()=>{});
-          // #endregion
           setProblems(
             data.map((r: any) => ({
               id: r.id,
@@ -205,9 +196,6 @@ export function useProblemClips(problemNumber: number) {
     const fallbackClips = sampleClips.filter((clip) => clip.problemNumber === problemNumber);
 
     if (!isSupabaseConfigured) {
-      // #region agent log
-      fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'explore-mock-videos-post-fix',hypothesisId:'E3',location:'src/lib/hooks.ts:useProblemClips',message:'Using sample clips because Supabase is disabled',data:{problemNumber,fallbackClipCount:fallbackClips.length},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       setClips(fallbackClips);
       setLoading(false);
       return;
@@ -225,9 +213,6 @@ export function useProblemClips(problemNumber: number) {
           .maybeSingle();
 
         if (problemError || !problem?.id) {
-          // #region agent log
-          fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'explore-mock-videos-post-fix',hypothesisId:'E3',location:'src/lib/hooks.ts:useProblemClips',message:'Falling back because problem lookup failed',data:{problemNumber,hasProblemError:Boolean(problemError),problemErrorMessage:problemError?.message ?? null,fallbackClipCount:fallbackClips.length},timestamp:Date.now()})}).catch(()=>{});
-          // #endregion
           if (!cancelled) {
             setClips(fallbackClips);
             setLoading(false);
@@ -254,9 +239,6 @@ export function useProblemClips(problemNumber: number) {
           .order("created_at", { ascending: false });
 
         if (error || !data?.length) {
-          // #region agent log
-          fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'explore-mock-videos-post-fix',hypothesisId:'E3',location:'src/lib/hooks.ts:useProblemClips',message:'Falling back because live clip query failed or returned empty',data:{problemNumber,hasError:Boolean(error),errorMessage:error?.message ?? null,liveClipCount:data?.length ?? 0,fallbackClipCount:fallbackClips.length},timestamp:Date.now()})}).catch(()=>{});
-          // #endregion
           if (!cancelled) {
             setClips(fallbackClips);
             setLoading(false);
@@ -282,18 +264,11 @@ export function useProblemClips(problemNumber: number) {
           };
         });
 
-        // #region agent log
-        fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'explore-mock-videos-post-fix',hypothesisId:'E3',location:'src/lib/hooks.ts:useProblemClips',message:'Loaded live clips for problem detail screen',data:{problemNumber,liveClipCount:liveClips.length,firstClipTitle:liveClips[0]?.title ?? null,firstClipVideoUrl:liveClips[0]?.videoUrl ?? null},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
-
         if (!cancelled) {
           setClips(liveClips);
           setLoading(false);
         }
       } catch {
-        // #region agent log
-        fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'explore-mock-videos-post-fix',hypothesisId:'E3',location:'src/lib/hooks.ts:useProblemClips',message:'Falling back because live clip loader threw unexpectedly',data:{problemNumber,fallbackClipCount:fallbackClips.length},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
         if (!cancelled) {
           setClips(fallbackClips);
           setLoading(false);

@@ -95,9 +95,6 @@ function CodeEditorSheetInner(
     setProblemNumber(num);
     setResults(null);
     setError(null);
-    // #region agent log
-    fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'run-code-visibility',hypothesisId:'U3',location:'src/components/CodeEditorSheet.tsx:open',message:'Opened code editor sheet',data:{problemNumber:num,activeTabBeforeOpen:activeTab},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     const p = SAMPLE_PROBLEMS.find((x) => x.number === num);
     if (p) {
       const langPref = await AsyncStorage.getItem(LANG_PREF_KEY);
@@ -115,9 +112,6 @@ function CodeEditorSheetInner(
   }, [language.key]);
 
   const close = useCallback(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'run-code-visibility',hypothesisId:'U3',location:'src/components/CodeEditorSheet.tsx:close',message:'Closed code editor sheet',data:{problemNumber,activeTab,hasResults:!!results,resultCount:results?.length ?? 0,hasError:!!error},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     bottomSheetRef.current?.close();
   }, [activeTab, error, problemNumber, results]);
 
@@ -154,9 +148,6 @@ function CodeEditorSheetInner(
       return;
     }
     setActiveTab("code");
-    // #region agent log
-    fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'run-code-rate-limit',hypothesisId:'C3',location:'src/components/CodeEditorSheet.tsx:handleRun',message:'User pressed Run',data:{problemNumber,language:language.key,sampleTestCaseCount:problem.testCases.filter((tc)=>tc.sample).length},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     setLoading(true);
     setError(null);
     setResults(null);
@@ -176,9 +167,6 @@ function CodeEditorSheetInner(
       });
       setResults(res);
     } catch (e) {
-      // #region agent log
-      fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'run-code-rate-limit',hypothesisId:'C4',location:'src/components/CodeEditorSheet.tsx:handleRun',message:'Run request failed',data:{problemNumber,error:e instanceof Error ? e.message : 'Execution failed'},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       setError(e instanceof Error ? e.message : "Execution failed");
     } finally {
       setLoading(false);
@@ -191,9 +179,6 @@ function CodeEditorSheetInner(
       return;
     }
     setActiveTab("code");
-    // #region agent log
-    fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'run-code-rate-limit',hypothesisId:'C3',location:'src/components/CodeEditorSheet.tsx:handleSubmit',message:'User pressed Submit',data:{problemNumber,language:language.key,testCaseCount:problem.testCases.length},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     setLoading(true);
     setError(null);
     setResults(null);
@@ -215,9 +200,6 @@ function CodeEditorSheetInner(
         trackEvent(user.id, clipId, "code_submitted");
       }
     } catch (e) {
-      // #region agent log
-      fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'run-code-rate-limit',hypothesisId:'C4',location:'src/components/CodeEditorSheet.tsx:handleSubmit',message:'Submit request failed',data:{problemNumber,error:e instanceof Error ? e.message : 'Submission failed'},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       setError(e instanceof Error ? e.message : "Submission failed");
     } finally {
       setLoading(false);
@@ -249,11 +231,6 @@ function CodeEditorSheetInner(
     [],
   );
 
-  useEffect(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'run-code-visibility',hypothesisId:'U2',location:'src/components/CodeEditorSheet.tsx:stateEffect',message:'Code editor state changed after run/submit path',data:{problemNumber,activeTab,loading,hasError:!!error,error,resultCount:results?.length ?? 0,allPassed:results ? results.every((r)=>r.passed) : null,firstStatus:results?.[0]?.status ?? null},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-  }, [activeTab, error, loading, problemNumber, results]);
 
   const lineCount = code.split("\n").length;
   const lineNumbers = Array.from({ length: Math.max(1, lineCount) }, (_, i) => i + 1);
@@ -350,12 +327,6 @@ function CodeEditorSheetInner(
           <View style={{ flex: 1, backgroundColor: "#111111" }}>
             {(results !== null || error) && (
               <>
-                {/* #region agent log */}
-                {(() => {
-                  fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'run-code-visibility',hypothesisId:'U2',location:'src/components/CodeEditorSheet.tsx:resultsRender',message:'Rendering results section in code editor',data:{problemNumber,activeTab,hasError:!!error,resultCount:results?.length ?? 0},timestamp:Date.now()})}).catch(()=>{});
-                  return null;
-                })()}
-                {/* #endregion */}
               <View style={{ paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.1)", maxHeight: "40%" }}>
                 <TestResults
                   results={results}
