@@ -68,7 +68,7 @@ So we built one. Video walkthroughs, a code editor, an AI tutor, all in a vertic
 | Need a laptop open | Pull out your phone |
 | Long-form YouTube tutorials | 60-second clips |
 | Only works when you sit down to grind | Works in any dead time |
-| Watch a solution, forget it by tomorrow | Spaced repetition keeps it locked in |
+| Can't code on your phone | Built-in mobile code editor |
 
 ---
 
