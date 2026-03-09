@@ -1,11 +1,11 @@
-import React, { useMemo } from "react";
-import { Pressable, Text, View } from "react-native";
+import React from "react";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import VideoFeed from "../../src/components/VideoFeed";
-import { sampleClips } from "../../src/constants/sampleData";
+import { useProblemClips } from "../../src/lib/hooks";
 import { theme } from "../../src/constants/theme";
 
 export default function ProblemFeedScreen() {
@@ -13,10 +13,11 @@ export default function ProblemFeedScreen() {
   const router = useRouter();
 
   const problemNumber = Number(id);
-  const clips = useMemo(
-    () => sampleClips.filter((c) => c.problemNumber === problemNumber),
-    [problemNumber],
-  );
+  const { clips, loading } = useProblemClips(problemNumber);
+
+  // #region agent log
+  fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'explore-mock-videos-post-fix',hypothesisId:'E4',location:'app/problem/[id].tsx:render',message:'Rendered problem feed screen',data:{problemIdParam:id ?? null,problemNumber,loading,clipCount:clips.length,firstClipTitle:clips[0]?.title ?? null,firstClipVideoUrl:clips[0]?.videoUrl ?? null},timestamp:Date.now()})}).catch(()=>{});
+  // #endregion
 
   const problem = clips[0];
 
@@ -24,7 +25,11 @@ export default function ProblemFeedScreen() {
     <View style={{ flex: 1, backgroundColor: "#000" }}>
       <StatusBar style="light" />
 
-      {clips.length > 0 ? (
+      {loading ? (
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <ActivityIndicator color="#fff" size="large" />
+        </View>
+      ) : clips.length > 0 ? (
         <VideoFeed clips={clips} />
       ) : (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
