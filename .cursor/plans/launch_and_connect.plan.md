@@ -56,7 +56,7 @@ This means **Path A works immediately** -- the core TikTok-style UI is fully fun
 ### Step 1: Install dependencies
 
 ```bash
-cd /Users/mbron/Desktop/LeetTok
+cd LeetTok
 npm install
 ```
 
