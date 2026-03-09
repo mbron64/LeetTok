@@ -1,5 +1,5 @@
 ---
-name: "Launch and Connect"
+name: Launch and Connect
 overview: "Get LeetTok running in the iOS Simulator, then connect it to the real Supabase backend. Two paths: (A) quick UI preview with sample data, (B) full Supabase connection with auth, database, and Edge Functions."
 todos:
   - id: launch-install
@@ -69,12 +69,14 @@ npx expo start --ios
 ```
 
 This will:
+
 1. Start the Metro bundler
 2. Launch the iOS Simulator (requires Xcode + iOS Simulator installed)
 3. Build and install the Expo development client
 4. Load the app
 
 **What you'll see:**
+
 - Onboarding screen (pick difficulty + topics)
 - After onboarding: full TikTok-style vertical feed with 8 sample clips
 - Videos auto-play with sound as you scroll
@@ -87,6 +89,7 @@ This will:
 - Profile tab with XP, streaks, progress stats
 
 **What won't work (no backend):**
+
 - Auth screens (accessible but can't actually sign in)
 - AI Tutor responses (sheet opens, but no OpenAI streaming)
 - Code Editor execution (sheet opens, but no Judge0)
@@ -106,6 +109,7 @@ export const SUPABASE_ANON_KEY = "sb_publishable_BDfV_eVtgmb4_apS0e5ymw_j6DAjl6_
 ```
 
 This flips `isSupabaseConfigured` to `true`, which enables:
+
 - Auth (login/register screens become active, route protection kicks in)
 - Supabase data fetching (feed, problems, likes, bookmarks)
 - Event tracking (interactions, impressions)
@@ -123,7 +127,7 @@ supabase db push
 
 **Option B -- SQL Editor in Supabase Dashboard:**
 
-Go to https://supabase.com/dashboard/project/zqhbjgioibiyaagjihhx/sql and run each file in order:
+Go to [https://supabase.com/dashboard/project/zqhbjgioibiyaagjihhx/sql](https://supabase.com/dashboard/project/zqhbjgioibiyaagjihhx/sql) and run each file in order:
 
 1. `supabase/migrations/001_initial_schema.sql` -- problems, clips, users, bookmarks, likes
 2. `supabase/migrations/002_madleets_challenges.sql` -- challenges, challenge_attempts
@@ -188,35 +192,41 @@ npx expo start --ios --clear
 The `--clear` flag clears the Metro cache so the new config values are picked up.
 
 **Test checklist:**
-- [ ] Register a new account (email/password)
-- [ ] Login with the account
-- [ ] Feed loads (from Supabase if seeded, else empty)
-- [ ] Like a clip (persists in database)
-- [ ] Bookmark a clip
-- [ ] Open AI Tutor (should stream responses if OPENAI_API_KEY is set)
-- [ ] Open Code Editor, write code, tap Run (should execute if Judge0 is configured)
-- [ ] MadLeets challenge triggers during video
+
+- Register a new account (email/password)
+- Login with the account
+- Feed loads (from Supabase if seeded, else empty)
+- Like a clip (persists in database)
+- Bookmark a clip
+- Open AI Tutor (should stream responses if OPENAI_API_KEY is set)
+- Open Code Editor, write code, tap Run (should execute if Judge0 is configured)
+- MadLeets challenge triggers during video
 
 ---
 
 ## Prerequisites
 
-| Requirement | How to check | Install if missing |
-|-------------|-------------|--------------------|
-| Node.js 18+ | `node -v` | `brew install node` |
-| Xcode + iOS Simulator | `xcode-select -p` | Install from App Store |
-| Supabase CLI (optional) | `supabase --version` | `brew install supabase/tap/supabase` |
-| Expo CLI | Included via `npx expo` | Already in package.json |
+
+| Requirement             | How to check            | Install if missing                   |
+| ----------------------- | ----------------------- | ------------------------------------ |
+| Node.js 18+             | `node -v`               | `brew install node`                  |
+| Xcode + iOS Simulator   | `xcode-select -p`       | Install from App Store               |
+| Supabase CLI (optional) | `supabase --version`    | `brew install supabase/tap/supabase` |
+| Expo CLI                | Included via `npx expo` | Already in package.json              |
+
 
 ---
 
 ## Troubleshooting
 
-| Issue | Fix |
-|-------|-----|
+
+| Issue                               | Fix                                                                                        |
+| ----------------------------------- | ------------------------------------------------------------------------------------------ |
 | `expo-video` not working in Expo Go | Use development build (`npx expo prebuild && npx expo run:ios`) or use `--dev-client` flag |
-| NativeWind styles not applying | Clear Metro cache: `npx expo start --clear` |
-| Supabase connection fails | Check URL and anon key in config.ts, ensure project is active |
-| pgvector migration fails | Enable the vector extension in Supabase Dashboard > Database > Extensions |
-| OAuth not working | Requires dev build (not Expo Go) + GitHub/Google providers configured in Supabase |
-| Edge Functions 401 | Make sure anon key in app matches the project, and function has correct CORS headers |
+| NativeWind styles not applying      | Clear Metro cache: `npx expo start --clear`                                                |
+| Supabase connection fails           | Check URL and anon key in config.ts, ensure project is active                              |
+| pgvector migration fails            | Enable the vector extension in Supabase Dashboard > Database > Extensions                  |
+| OAuth not working                   | Requires dev build (not Expo Go) + GitHub/Google providers configured in Supabase          |
+| Edge Functions 401                  | Make sure anon key in app matches the project, and function has correct CORS headers       |
+
+

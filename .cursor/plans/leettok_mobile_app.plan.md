@@ -54,13 +54,13 @@ We'll use **sample videos** initially (a few publicly available short coding cli
 4. **Implement auto-play/pause based on visibility** -- Use `viewabilityConfig` + `onViewableItemsChanged` to track which item is on screen. Only the visible video plays. Others are paused. Note: on Android, multiple `VideoView` components sharing one `VideoPlayer` instance don't work -- each FlatList item needs its own player, or use a single player that swaps source on scroll.
 5. **Add tap-to-pause/play gesture** -- Tap the video to toggle playback. Show a brief play/pause icon overlay on tap.
 6. **Build top category bar** -- Horizontally scrollable tab row overlaid on top of the video (semi-transparent, like TikTok's). Tabs: **For You** (default, bold + underline) | **MadLeets** | **NeetCode 150** | **Trending** | **New**. Tapping a tab swaps the feed content. Search icon on the far right.
-    - **For You**: Personalized feed based on watch history, likes, and topic preferences. Falls back to curated mix for new users.
+  - **For You**: Personalized feed based on watch history, likes, and topic preferences. Falls back to curated mix for new users.
     - **MadLeets**: Only clips with an attached MadLeets challenge. Challenge auto-triggers at pause timestamp.
     - **NeetCode 150**: Clips organized by NeetCode's curated 150-problem list. Shows progress (e.g., "47/150 seen").
     - **Trending**: Ranked by engagement (likes + bookmarks) over past 7 days.
     - **New**: Reverse chronological, most recently clipped content first.
 7. **Build right-side action column** -- Vertical button column on the right edge of the video, matching TikTok's layout (top to bottom):
-    - **Creator avatar** (circular thumbnail, tap to see their channel, "+" follow button beneath)
+  - **Creator avatar** (circular thumbnail, tap to see their channel, "+" follow button beneath)
     - **Like** (heart icon + count, tap to toggle, animated fill on like)
     - **Discuss** (comment bubble icon + count, tap to open comment sheet)
     - **Save** (bookmark icon + count, tap to toggle)
@@ -80,7 +80,7 @@ Goal: A real app with multiple screens, not just a single feed.
 **Commits:**
 
 1. **Build 5-tab bottom bar** -- Solid black background, 5 tabs matching TikTok's layout:
-    - **Home** (house icon) -- The video feed with top category bar
+  - **Home** (house icon) -- The video feed with top category bar
     - **Explore** (search icon) -- Browse problems by topic
     - **[MadLeets]** (center button, branded + prominent, rounded-rectangle with gradient edge like TikTok's "+" button) -- Jumps straight into the next MadLeets challenge
     - **Bookmarks** (bookmark icon) -- Saved clips

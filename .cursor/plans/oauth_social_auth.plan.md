@@ -1,6 +1,6 @@
 ---
-name: "OAuth Social Auth"
-overview: "Add GitHub and Google social login to LeetTok alongside the existing email/password auth. Uses Supabase OAuth with expo-auth-session for the browser-based redirect flow on React Native."
+name: OAuth Social Auth
+overview: Add GitHub and Google social login to LeetTok alongside the existing email/password auth. Uses Supabase OAuth with expo-auth-session for the browser-based redirect flow on React Native.
 todos:
   - id: oauth-deps
     content: "Phase 1: Install deps, configure deep linking scheme, set up Supabase OAuth providers (commits 1-3)"
@@ -40,6 +40,8 @@ flowchart TD
     Tap --> OAuth --> Browser --> Consent --> Redirect --> Session --> Done
 ```
 
+
+
 Key constraint: **This requires a development build** (not Expo Go) because Expo Go doesn't support custom URL schemes.
 
 ---
@@ -69,8 +71,9 @@ In [app.json](app.json), add a URL scheme so the OS knows how to redirect back t
 ```
 
 Then add the redirect URL in the Supabase dashboard:
+
 - Go to **Authentication > URL Configuration > Redirect URLs**
-- Add: `leettok://**`
+- Add: `leettok://`**
 
 This tells Supabase that `leettok://` is a valid redirect target after OAuth completes.
 
@@ -79,11 +82,13 @@ This tells Supabase that `leettok://` is a valid redirect target after OAuth com
 In the Supabase dashboard under **Authentication > Providers**:
 
 **GitHub:**
-1. Create an OAuth App at https://github.com/settings/developers
+
+1. Create an OAuth App at [https://github.com/settings/developers](https://github.com/settings/developers)
 2. Set the Authorization callback URL to: `https://<project-ref>.supabase.co/auth/v1/callback`
 3. Copy the Client ID and Client Secret into Supabase's GitHub provider settings
 
 **Google:**
+
 1. Create OAuth credentials in the Google Cloud Console
 2. Use the **Web** client ID type (not Android/iOS -- this is critical for React Native)
 3. Add `https://<project-ref>.supabase.co/auth/v1/callback` as an authorized redirect URI
@@ -215,6 +220,7 @@ Update the register screen layout to match login: social buttons on top, email f
 ### Commit 8: Add GitHub/Google icons
 
 Either:
+
 - Use `@expo/vector-icons` (Ionicons has `logo-github`, `logo-google`)
 - Or bundle small SVG icons for pixel-perfect branding
 
@@ -234,6 +240,7 @@ npx expo run:ios   # or run:android
 ```
 
 Test matrix:
+
 - GitHub OAuth: login, first-time signup, re-login
 - Google OAuth: login, first-time signup, re-login
 - Email/password: still works alongside OAuth
@@ -252,19 +259,22 @@ Test matrix:
 
 ## Files Changed
 
-| File | Change |
-|------|--------|
-| `package.json` | Add expo-auth-session, expo-crypto, expo-web-browser |
-| `app.json` | Add `"scheme": "leettok"` |
-| `src/lib/oauth.ts` | New -- OAuth helper functions |
-| `src/lib/auth.tsx` | Add deep link listener |
-| `app/auth/login.tsx` | Add GitHub + Google buttons above email form |
-| `app/auth/register.tsx` | Add GitHub + Google buttons above email form |
+
+| File                    | Change                                               |
+| ----------------------- | ---------------------------------------------------- |
+| `package.json`          | Add expo-auth-session, expo-crypto, expo-web-browser |
+| `app.json`              | Add `"scheme": "leettok"`                            |
+| `src/lib/oauth.ts`      | New -- OAuth helper functions                        |
+| `src/lib/auth.tsx`      | Add deep link listener                               |
+| `app/auth/login.tsx`    | Add GitHub + Google buttons above email form         |
+| `app/auth/register.tsx` | Add GitHub + Google buttons above email form         |
+
 
 Plus Supabase dashboard configuration (not in code):
+
 - Enable GitHub provider with OAuth app credentials
 - Enable Google provider with web client ID
-- Add `leettok://**` to redirect URLs
+- Add `leettok://`** to redirect URLs
 
 ---
 
@@ -272,3 +282,4 @@ Plus Supabase dashboard configuration (not in code):
 
 - **Mobile App** ([leettok_mobile_app.plan.md](.cursor/plans/leettok_mobile_app.plan.md)): Phase 4 (Supabase backend + auth) must be complete. The existing `AuthProvider` and `supabase.ts` client are extended, not replaced.
 - **Supabase project**: Must be created with auth enabled. GitHub and Google providers configured in the dashboard.
+

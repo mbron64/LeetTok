@@ -1,6 +1,6 @@
 ---
-name: "LeetTok Recommendation Engine"
-overview: "A hybrid recommendation engine powering the For You feed and all personalized surfaces in LeetTok. Combines TikTok-style engagement scoring with educational adaptive difficulty (zone of proximal development) and spaced repetition. Built on Supabase (Postgres + pgvector + Edge Functions)."
+name: LeetTok Recommendation Engine
+overview: A hybrid recommendation engine powering the For You feed and all personalized surfaces in LeetTok. Combines TikTok-style engagement scoring with educational adaptive difficulty (zone of proximal development) and spaced repetition. Built on Supabase (Postgres + pgvector + Edge Functions).
 todos:
   - id: reco-signals
     content: "Phase 1: Instrument engagement tracking -- record all user signals (watch time, likes, skips, MadLeets results) into an interactions table (commits 1-3)"
@@ -85,6 +85,8 @@ flowchart TD
     Blend --> Diversity --> Dedup --> Feed
 ```
 
+
+
 ---
 
 ## What We Can Learn from TikTok
@@ -95,17 +97,19 @@ TikTok's Monolith system (published by ByteDance) is a real-time recommendation 
 
 TikTok's research shows not all engagement signals are equal. Adapted for LeetTok:
 
-| Signal | TikTok Weight | LeetTok Weight | Why |
-|--------|--------------|----------------|-----|
-| **Watch completion %** | Highest | High | Did they watch the whole clip or swipe away? |
-| **Share** | 5x likes | High | Sharing = "this helped me, others need this" |
-| **Save/Bookmark** | High | High | "I need to come back to this" = high intent |
-| **MadLeets correct** | N/A | **Highest** | Unique to us -- proves actual learning happened |
-| **MadLeets wrong** | N/A | High (negative) | Shows the topic needs more practice |
-| **Comment/Discuss** | Medium | Medium | Engagement, but less signal for learning |
-| **Like** | Lowest explicit | Low | Weakest signal (low effort, low intent) |
-| **Skip (swipe away <2s)** | Strong negative | Strong negative | "Not relevant to me" |
-| **Replay** | High | High | "I need to see this again" = learning signal |
+
+| Signal                    | TikTok Weight   | LeetTok Weight  | Why                                             |
+| ------------------------- | --------------- | --------------- | ----------------------------------------------- |
+| **Watch completion %**    | Highest         | High            | Did they watch the whole clip or swipe away?    |
+| **Share**                 | 5x likes        | High            | Sharing = "this helped me, others need this"    |
+| **Save/Bookmark**         | High            | High            | "I need to come back to this" = high intent     |
+| **MadLeets correct**      | N/A             | **Highest**     | Unique to us -- proves actual learning happened |
+| **MadLeets wrong**        | N/A             | High (negative) | Shows the topic needs more practice             |
+| **Comment/Discuss**       | Medium          | Medium          | Engagement, but less signal for learning        |
+| **Like**                  | Lowest explicit | Low             | Weakest signal (low effort, low intent)         |
+| **Skip (swipe away <2s)** | Strong negative | Strong negative | "Not relevant to me"                            |
+| **Replay**                | High            | High            | "I need to see this again" = learning signal    |
+
 
 ### The Interest Graph (not Social Graph)
 
@@ -114,6 +118,7 @@ Like TikTok, we rank clips by *content relevance*, not by who the creator is. A 
 ### Cold Start: Exploration Phase
 
 TikTok shows new videos to 200-500 users first to test engagement. We do the same:
+
 - New clips start with a small **exploration bonus** in the score
 - After ~100 impressions, the bonus decays and the clip's real engagement score takes over
 - This prevents new content from being buried and old popular content from dominating forever
@@ -135,6 +140,7 @@ Example: If a user is 80% accurate on array problems but 30% on DP problems, the
 ### Spaced Repetition (ts-fsrs)
 
 Using the open-source `ts-fsrs` library (v5.2.3, 27K weekly npm downloads):
+
 - Problems the user got wrong in MadLeets enter a review schedule
 - FSRS calculates optimal review intervals based on difficulty, stability, and retrievability
 - Review items get a boost in the feed score when they're "due"
@@ -163,6 +169,7 @@ create index idx_interactions_clip on interactions(clip_id);
 ```
 
 Interaction types and their `value` payloads:
+
 - `watch`: `{ duration_ms, total_duration_ms, completed: bool, replayed: bool }`
 - `like`: `{ liked: bool }`
 - `save`: `{ saved: bool }`
@@ -294,6 +301,7 @@ Supabase Edge Function or pg_cron job that runs every hour:
 ### Commit 9: Handle cold start (new users)
 
 For users with < 10 interactions:
+
 - Use the **onboarding selections** (difficulty preference + topic interests from the onboarding flow in the mobile app plan)
 - Fall back to **global popularity** (highest Wilson score clips) blended with **topic diversity**
 - Transition gradually: `personalizedScore * min(interactions/10, 1) + globalScore * max(1 - interactions/10, 0)`
@@ -354,12 +362,14 @@ This is where everything comes together. The feed is assembled by scoring every 
 Two-stage approach (like TikTok's):
 
 **Stage 1: Candidate Retrieval** (broad, fast, ~200 clips)
+
 - Pull unseen clips (not in user's impressions for last 7 days)
 - Filter by language and basic preferences
 - Include clips from all topics (don't filter too aggressively)
 - Include any spaced repetition "due" clips
 
 **Stage 2: Scoring + Ranking** (precise, scored, top 20)
+
 - Score each candidate with the blended formula (see commit 14)
 - Apply diversity filter
 - Return top 20 as a page of the feed
@@ -468,6 +478,7 @@ npm install ts-fsrs
 - When user watches a due clip and attempts the MadLeets challenge again, update the FSRS card with the new rating
 
 FSRS card ratings mapped to MadLeets outcomes:
+
 - Correct on first try -> `Rating.Easy` (long interval before next review)
 - Correct with hint -> `Rating.Good` (medium interval)
 - Wrong but close (fuzzy match) -> `Rating.Hard` (short interval)
@@ -527,6 +538,7 @@ Key metrics to track (stored in a `metrics` table, aggregated daily):
 ### Commit 22: Tune weights based on data
 
 After 2-4 weeks of data:
+
 - Analyze which scoring weights produce the best learning outcomes + retention
 - Adjust the blend formula weights in commit 14
 - Iterate on the adaptive difficulty curve (commit 17)
@@ -538,39 +550,45 @@ After 2-4 weeks of data:
 
 Each top category tab uses a different subset of the scoring engine:
 
-| Tab | Strategy |
-|-----|----------|
-| **For You** | Full blended algorithm (engagement + personal relevance + adaptive difficulty + spaced repetition + exploration) |
-| **MadLeets** | Same as For You, but filtered to clips with MadLeets challenges. Heavier weight on `adaptiveDifficultyScore` and `reviewBoost`. |
-| **NeetCode 150** | Ordered by the NeetCode 150 list sequence. Within a problem, rank clips by engagement score. Mark completed problems. |
-| **Trending** | Ranked by Wilson score over last 7 days. No personalization. Same for all users. |
-| **New** | Reverse chronological (newest first). No personalization. Minimal scoring (just dedup). |
+
+| Tab              | Strategy                                                                                                                        |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **For You**      | Full blended algorithm (engagement + personal relevance + adaptive difficulty + spaced repetition + exploration)                |
+| **MadLeets**     | Same as For You, but filtered to clips with MadLeets challenges. Heavier weight on `adaptiveDifficultyScore` and `reviewBoost`. |
+| **NeetCode 150** | Ordered by the NeetCode 150 list sequence. Within a problem, rank clips by engagement score. Mark completed problems.           |
+| **Trending**     | Ranked by Wilson score over last 7 days. No personalization. Same for all users.                                                |
+| **New**          | Reverse chronological (newest first). No personalization. Minimal scoring (just dedup).                                         |
+
 
 ---
 
 ## Tech Stack
 
-| Component | Tool |
-|-----------|------|
-| Data storage | Supabase Postgres (interactions, profiles, impressions) |
-| Vector similarity | pgvector extension (built into Supabase) |
-| Embeddings | Supabase AI inference (`gte-small`, 384 dimensions, free) |
-| Spaced repetition | `ts-fsrs` v5.2.3 (npm package, MIT license) |
-| Feed generation | Supabase Edge Function (Deno, globally distributed) |
-| Scheduled jobs | pg_cron (profile updates, engagement score refresh) |
-| A/B testing | Custom (experiment_group column + metrics logging) |
+
+| Component         | Tool                                                      |
+| ----------------- | --------------------------------------------------------- |
+| Data storage      | Supabase Postgres (interactions, profiles, impressions)   |
+| Vector similarity | pgvector extension (built into Supabase)                  |
+| Embeddings        | Supabase AI inference (`gte-small`, 384 dimensions, free) |
+| Spaced repetition | `ts-fsrs` v5.2.3 (npm package, MIT license)               |
+| Feed generation   | Supabase Edge Function (Deno, globally distributed)       |
+| Scheduled jobs    | pg_cron (profile updates, engagement score refresh)       |
+| A/B testing       | Custom (experiment_group column + metrics logging)        |
+
 
 ---
 
 ## Scaling Notes
 
 At MVP scale (< 10K users, < 5K clips), everything runs in Postgres:
+
 - Candidate generation is a single SQL query with joins
 - Scoring runs in a Supabase Edge Function (~50ms)
 - pgvector similarity search on 5K items is instant (< 10ms)
 - No need for Redis, Kafka, or separate ML infrastructure
 
 If we hit 100K+ users, consider:
+
 - Precomputing feed pages in a background job instead of real-time
 - Moving to a dedicated vector database if pgvector latency increases
 - Adding a simple collaborative filtering layer ("users similar to you also liked...")
@@ -582,3 +600,4 @@ If we hit 100K+ users, consider:
 - **Mobile App** ([leettok_mobile_app.plan.md](.cursor/plans/leettok_mobile_app.plan.md)): Phase 4 (Supabase backend) must be complete. The feed API endpoint replaces the simple `clips.select(*)` query.
 - **MadLeets** ([madleets_interactive_challenges.plan.md](.cursor/plans/madleets_interactive_challenges.plan.md)): MadLeets attempt data is a primary signal. The recommendation engine is significantly better with MadLeets data, but can function without it (engagement-only mode).
 - **Clipping Engine** ([neetcode_clipping_engine.plan.md](.cursor/plans/neetcode_clipping_engine.plan.md)): Clip metadata (topics, difficulty, transcript) is used for embeddings and adaptive difficulty. The pipeline should tag clips with this data.
+

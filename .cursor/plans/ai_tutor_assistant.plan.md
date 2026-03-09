@@ -1,6 +1,6 @@
 ---
-name: "AI Tutor Assistant"
-overview: "An AI-powered contextual tutor accessible from the right sidebar of any clip. Tapping the AI icon opens a half-screen bottom sheet chat where users can ask questions about the current problem, code, or concept. Powered by OpenAI via a Supabase Edge Function proxy. Video remains visible above the sheet."
+name: AI Tutor Assistant
+overview: An AI-powered contextual tutor accessible from the right sidebar of any clip. Tapping the AI icon opens a half-screen bottom sheet chat where users can ask questions about the current problem, code, or concept. Powered by OpenAI via a Supabase Edge Function proxy. Video remains visible above the sheet.
 todos:
   - id: tutor-backend
     content: "Phase 1: Supabase Edge Function proxy for OpenAI chat completions with streaming (commits 1-3)"
@@ -50,7 +50,10 @@ flowchart LR
     Proxy -->|"streamed tokens"| Sheet
 ```
 
+
+
 **Why a proxy?** API keys never leave the server. The Edge Function also handles:
+
 - Authentication (only logged-in users can chat)
 - Rate limiting (prevent abuse)
 - Context injection (system prompt with clip/problem data)
@@ -151,6 +154,7 @@ if (error || !user) return new Response("Unauthorized", { status: 401 });
 ### Commit 3: Add rate limiting
 
 Simple token-bucket rate limiter stored in Supabase:
+
 - **Free tier**: 20 messages per day per user
 - **Future premium**: unlimited
 
@@ -204,7 +208,8 @@ Rules:
 ### Commit 5: Extract code snippets from transcripts
 
 During the clipping pipeline (or as a post-processing step), extract code blocks from the transcript using a simple heuristic:
-- Lines that look like code (contain `=`, `def `, `for `, `if `, `return`, `class `, `->`, `{`, etc.)
+
+- Lines that look like code (contain `=`, `def` , `for` , `if` , `return`, `class` , `->`, `{`, etc.)
 - Or use GPT-4.1-mini to extract code from the transcript in a separate pipeline step
 
 Store extracted `code_snippets` as a JSON array on the `clips` table:
@@ -226,6 +231,7 @@ npx expo install @gorhom/bottom-sheet react-native-reanimated react-native-gestu
 ```
 
 `@gorhom/bottom-sheet` v5 has:
+
 - Smooth 60fps gesture-driven animations
 - Built-in keyboard handling (critical for a chat input)
 - FlatList/ScrollView support inside the sheet
@@ -260,6 +266,7 @@ npx expo install @gorhom/bottom-sheet react-native-reanimated react-native-gestu
 ```
 
 Key implementation details:
+
 - **Snap points**: `["50%", "85%"]` -- starts at half screen, can drag up to near-full
 - **Message list**: `BottomSheetFlatList` (gorhom's FlatList that works inside the sheet) with `inverted={true}` so newest messages appear at the bottom
 - **Streaming display**: Append tokens to the last assistant message as they arrive. Use a ref to avoid re-renders on every token -- batch updates with `requestAnimationFrame`
@@ -325,6 +332,7 @@ Fallback: If streaming proves unreliable on certain Android devices, fall back t
 ### Commit 9: Style messages with code highlighting
 
 Messages from the tutor may contain markdown and code blocks. Render them with:
+
 - `react-native-markdown-display` for markdown formatting
 - `react-native-code-highlighter` (already needed for MadLeets) for syntax-highlighted code blocks
 - Monospace font for inline code
@@ -349,6 +357,7 @@ Update the right-side action column (defined in the mobile app plan, Phase 2 com
 ```
 
 Icon options:
+
 - Sparkles icon (`sparkles` from Ionicons) -- matches the "AI" feel
 - Or a custom brain/chat-bubble icon
 
@@ -357,14 +366,17 @@ The icon should have a subtle glow or shimmer animation to draw attention on the
 ### Commit 11: Wire open/close behavior with video state
 
 When the bottom sheet opens:
+
 - **Pause the video** -- The user's attention is shifting to the chat. Auto-pause so they don't miss content.
 - Pass the current clip's context (transcript, problem metadata, code snippets) to the `TutorSheet`
 
 When the bottom sheet closes:
+
 - **Resume the video** -- Pick up where they left off
 - Keep the chat history in memory (so reopening shows the previous conversation for this clip)
 
 When the user **swipes to a new clip**:
+
 - Clear the chat history (new clip = new context)
 - Close the bottom sheet if it's open
 
@@ -393,6 +405,7 @@ When the user opens the tutor on a clip they've chatted about before, load the p
 ### Commit 13: Show remaining message count + upgrade prompt
 
 Display "X messages remaining today" at the top of the chat sheet. When the user hits the limit:
+
 - Show a friendly message: "You've used all 20 tutor messages for today. Come back tomorrow!"
 - Disable the input
 - (Future: show an upgrade CTA for premium)
@@ -401,19 +414,22 @@ Display "X messages remaining today" at the top of the chat sheet. When the user
 
 The preset question chips from Commit 7, implemented as a horizontally scrollable row:
 
-| Chip | Sends |
-|------|-------|
-| Explain this | "Can you explain the approach used in this video step by step?" |
-| Time/Space | "What is the time and space complexity of this solution and why?" |
-| Give me a hint | "I want to solve this myself. Give me a hint without revealing the full solution." |
-| Other approaches | "What other approaches could solve this problem? How do they compare?" |
-| Why this works | "Why does this specific approach work? What's the key insight?" |
+
+| Chip             | Sends                                                                              |
+| ---------------- | ---------------------------------------------------------------------------------- |
+| Explain this     | "Can you explain the approach used in this video step by step?"                    |
+| Time/Space       | "What is the time and space complexity of this solution and why?"                  |
+| Give me a hint   | "I want to solve this myself. Give me a hint without revealing the full solution." |
+| Other approaches | "What other approaches could solve this problem? How do they compare?"             |
+| Why this works   | "Why does this specific approach work? What's the key insight?"                    |
+
 
 Chips are only shown when the chat is empty (first interaction). After the first message, they collapse to save space but can be expanded via a "+" button.
 
 ### Commit 15: Analytics and iteration
 
 Track tutor usage in the existing `interactions` table:
+
 - `tutor_opened` event (which clip, timestamp)
 - `tutor_message_sent` event (message length, was it a quick-action chip?)
 - `tutor_session_duration` (how long the sheet was open)
@@ -424,26 +440,30 @@ This feeds into the recommendation engine: if a user frequently asks the tutor a
 
 ## Files Changed / Created
 
-| File | Type | Description |
-|------|------|-------------|
-| `supabase/functions/chat-tutor/index.ts` | New | Edge Function: OpenAI proxy with auth + rate limiting |
-| `supabase/migrations/xxx_tutor_tables.sql` | New | `tutor_usage` and `tutor_conversations` tables |
-| `src/lib/tutor.ts` | New | Client-side streaming fetch + types |
-| `src/components/TutorSheet.tsx` | New | Bottom sheet chat UI component |
-| `src/components/TutorMessage.tsx` | New | Individual message bubble with markdown/code rendering |
-| `src/components/QuickActionChips.tsx` | New | Preset question chip row |
-| `src/components/VideoFeed.tsx` | Edit | Add AI icon to right sidebar, wire sheet open/close |
-| `package.json` | Edit | Add @gorhom/bottom-sheet, react-native-sse or polyfill, react-native-markdown-display |
+
+| File                                       | Type | Description                                                                           |
+| ------------------------------------------ | ---- | ------------------------------------------------------------------------------------- |
+| `supabase/functions/chat-tutor/index.ts`   | New  | Edge Function: OpenAI proxy with auth + rate limiting                                 |
+| `supabase/migrations/xxx_tutor_tables.sql` | New  | `tutor_usage` and `tutor_conversations` tables                                        |
+| `src/lib/tutor.ts`                         | New  | Client-side streaming fetch + types                                                   |
+| `src/components/TutorSheet.tsx`            | New  | Bottom sheet chat UI component                                                        |
+| `src/components/TutorMessage.tsx`          | New  | Individual message bubble with markdown/code rendering                                |
+| `src/components/QuickActionChips.tsx`      | New  | Preset question chip row                                                              |
+| `src/components/VideoFeed.tsx`             | Edit | Add AI icon to right sidebar, wire sheet open/close                                   |
+| `package.json`                             | Edit | Add @gorhom/bottom-sheet, react-native-sse or polyfill, react-native-markdown-display |
+
 
 ---
 
 ## Cost Estimate
 
-| Component | Model | Cost |
-|-----------|-------|------|
-| Typical question (short context) | GPT-4.1-mini | ~$0.001-0.003 per message |
-| Complex question (full transcript context) | GPT-4.1-mini | ~$0.005-0.01 per message |
-| Escalated question | GPT-5.4 | ~$0.02-0.05 per message |
+
+| Component                                  | Model        | Cost                      |
+| ------------------------------------------ | ------------ | ------------------------- |
+| Typical question (short context)           | GPT-4.1-mini | ~$0.001-0.003 per message |
+| Complex question (full transcript context) | GPT-4.1-mini | ~$0.005-0.01 per message  |
+| Escalated question                         | GPT-5.4      | ~$0.02-0.05 per message   |
+
 
 At 20 messages/day/user, mostly on GPT-4.1-mini: **~$0.05-0.10 per user per day**. Manageable at early scale. The rate limit keeps costs predictable.
 
@@ -455,3 +475,4 @@ At 20 messages/day/user, mostly on GPT-4.1-mini: **~$0.05-0.10 per user per day*
 - **Clipping Engine** ([neetcode_clipping_engine.plan.md](.cursor/plans/neetcode_clipping_engine.plan.md)): Clip transcripts are the primary context source. The tutor works without `code_snippets` but is better with them.
 - **MadLeets** ([madleets_interactive_challenges.plan.md](.cursor/plans/madleets_interactive_challenges.plan.md)): Optional integration -- if a user gets a MadLeets challenge wrong, the tutor could automatically offer to explain.
 - **Supabase**: Must be set up with Edge Functions enabled. OpenAI API key stored as an Edge Function secret.
+
