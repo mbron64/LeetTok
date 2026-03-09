@@ -19,7 +19,7 @@ Solve problems right in the app. Build streaks. Get hired.
 
 **The algorithm is addictive. The scroll is productive.**
 
-[Get Started](#-getting-started) · [Features](#-features) · [Architecture](#-architecture) · [Pipeline](#-content-pipeline) · [Contributing](#-contributing)
+[Get Started](#getting-started) · [Features](#features) · [Architecture](#architecture) · [Pipeline](#content-pipeline) · [Contributing](#contributing)
 
 </div>
 
