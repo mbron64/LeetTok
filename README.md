@@ -46,11 +46,11 @@ Solve problems right in the app. Build streaks. Land offers.
 </table>
 
 <p align="center">
-  <img src="docs/images/onboarding.png" alt="Onboarding" width="150" />
-  <img src="docs/images/fyp.png" alt="For You feed" width="150" />
-  <img src="docs/images/ide.png" alt="Code Editor" width="150" />
-  <img src="docs/images/tutor.png" alt="AI Tutor" width="150" />
-  <img src="docs/images/madleets.png" alt="MadLeets" width="150" />
+  <img src="docs/images/01-onboarding.png" alt="Onboarding" width="150" />
+  <img src="docs/images/02-fyp.png" alt="For You feed" width="150" />
+  <img src="docs/images/03-ide.png" alt="Code Editor" width="150" />
+  <img src="docs/images/04-tutor.png" alt="AI Tutor" width="150" />
+  <img src="docs/images/05-madleets.png" alt="MadLeets" width="150" />
 </p>
 
 ---
