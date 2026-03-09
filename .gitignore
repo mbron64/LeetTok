@@ -47,5 +47,6 @@ app-example
 /videos/
 /build/
 /assets/app_screenshots/
+/assets/app_gif/
 DEVPOST.md
 .cursor/debug-*.log

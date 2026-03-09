@@ -25,6 +25,35 @@ Solve problems right in the app. Build streaks. Land offers.
 
 ---
 
+## Product Preview
+
+<table align="center">
+  <tr>
+    <td align="center" valign="middle" width="180">
+      <h3>Stop<br>doomscrolling.</h3>
+    </td>
+    <td align="center" valign="middle">
+      <a href="https://youtube.com/shorts/x4Kk_tTICfI?feature=share">
+        <img src="docs/images/leettok-demo.gif" alt="LeetTok demo GIF" width="170" />
+      </a>
+      <br>
+      <sub>Tap to watch the full demo</sub>
+    </td>
+    <td align="center" valign="middle" width="180">
+      <h3>Start<br>doomsolving.</h3>
+    </td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="docs/images/onboarding.png" alt="Onboarding" width="150" />
+  <img src="docs/images/fyp.png" alt="For You feed" width="150" />
+  <img src="docs/images/tutor.png" alt="AI Tutor" width="150" />
+  <img src="docs/images/madleets.png" alt="MadLeets" width="150" />
+</p>
+
+---
+
 ## The Problem
 
 You open LeetCode. You stare at a problem. You alt-tab to YouTube. Two hours later, you've watched three vlogs, a cooking video, and zero algorithm explanations.
@@ -138,38 +167,97 @@ See [`pipeline/README.md`](pipeline/README.md) for full documentation.
 
 ## Getting Started
 
-### Prerequisites
+### Quick Start
+
+This repo is currently wired to a hosted Supabase project in `src/constants/config.ts`, so you do **not** need to create a `.env` file just to boot the app and explore the main flows.
+
+#### Prerequisites
 
 - [Node.js](https://nodejs.org/) 18+
-- [Expo CLI](https://docs.expo.dev/get-started/installation/)
-- iOS Simulator or Android Emulator (or [Expo Go](https://expo.dev/go))
+- npm
+- One of:
+  - [Expo Go](https://expo.dev/go) on your phone
+  - iOS Simulator
+  - Android Emulator
 
-### Installation
+#### Install and run
 
 ```bash
-# Clone the repo
-git clone https://github.com/your-username/leettok.git
-cd leettok
+git clone https://github.com/mbron64/LeetTok.git
+cd LeetTok
 
-# Install dependencies
 npm install
 
-# Start the dev server
-npx expo start
+# Start Metro
+npx expo start --clear
 ```
 
-### Environment Variables
+From there you can:
 
-Create a `.env` file in the root:
+- press `i` to open the iOS Simulator
+- press `a` to open Android
+- scan the QR code with Expo Go for the fastest phone preview
 
-```env
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
+#### What should work in quick start
+
+- onboarding
+- vertical feed browsing
+- explore flows
+- MadLeets feed behavior
+- most UI and navigation flows
+- hosted backend reads against the currently configured Supabase project
+
+#### What may still need more setup
+
+- Google OAuth and other native auth flows are more reliable in a development build than Expo Go
+- end-to-end code execution depends on the deployed `run-code` function plus Judge0 availability
+- AI tutor depends on the deployed tutor edge function and its server-side secrets
+
+### Development Builds
+
+If you want to run the native app instead of Expo Go:
+
+```bash
+npm run ios
+# or
+npm run android
 ```
 
-Supabase credentials are configured in `src/constants/config.ts`.
+This path is better for native modules, device testing, and OAuth.
 
----
+### Full Maintainer Setup
+
+Use this section if you want to change backend projects, deploy functions, or ship builds.
+
+#### Client config
+
+The mobile app currently reads its public Supabase project directly from:
+
+- `src/constants/config.ts`
+
+If you want the app to point at a different project, update that file.
+
+#### Local secrets and backend work
+
+You only need local secrets such as `.env` values when you are doing maintainer work like:
+
+- configuring Google OAuth locally
+- running or deploying Supabase edge functions
+- managing backend service credentials
+- preparing EAS/TestFlight submissions
+
+#### EAS / TestFlight
+
+EAS build profiles live in `eas.json`.
+
+Typical commands:
+
+```bash
+npx eas build --platform ios --profile preview
+npx eas submit --platform ios --profile production
+```
+
+That path is the right one when you want installable device builds instead of local Expo sessions.
 
 ## Project Structure
 
