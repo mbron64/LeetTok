@@ -6,8 +6,8 @@
 
 ### Doomscroll your way to a job.
 
-TikTok-style LeetCode walkthroughs you can't stop swiping.  
-Solve problems right in the app. Build streaks. Land offers.
+TikTok-style LeetCode clips you can't stop swiping.  
+Solve problems right in the app. Build streaks. Get hired.
 
 [![React Native](https://img.shields.io/badge/React_Native-0.83-61DAFB?logo=react&logoColor=white)](https://reactnative.dev)
 [![Expo](https://img.shields.io/badge/Expo_SDK-55-000020?logo=expo&logoColor=white)](https://expo.dev)
@@ -155,12 +155,12 @@ Automated Python pipeline that takes long-form NeetCode videos and chops them in
 ```
 YouTube ──▶ Discover ──▶ Download ──▶ Transcribe ──▶ Segment ──▶ Clip ──▶ Caption ──▶ Upload
               │              │            │              │           │          │          │
-          YT Data API    yt-dlp     faster-whisper   GPT-4.1    FFmpeg    FFmpeg    R2 + Supabase
-                                     / GPT-4o-mini   / Claude    9:16
+          YT Data API    yt-dlp     faster-whisper  GPT-4.1-mini  FFmpeg    FFmpeg    R2 + Supabase
+                                     / GPT-4o-mini   / Claude      9:16
                                                       Haiku    reframe
 ```
 
-**Cost:** < $0.01 per video when YouTube captions exist. ~$0.02-0.05 with Whisper fallback.
+**Cost:** Low cost per clip, especially when YouTube captions are available.
 
 See [`pipeline/README.md`](pipeline/README.md) for full documentation.
 
