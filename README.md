@@ -306,6 +306,6 @@ Distributed under the MIT License. See `LICENSE` for details.
 
 **Stop doomscrolling. Start doomsolving.**
 
-Built with sleepless nights, too much coffee, and the dream that interview prep doesn't have to suck.
+Built at HackBU 2026.
 
 </div>
