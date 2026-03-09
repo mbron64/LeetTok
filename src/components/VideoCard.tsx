@@ -108,9 +108,6 @@ function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true
         !challengeTriggered.current &&
         payload.currentTime >= challenge.pauseTimestamp
       ) {
-        // #region agent log
-        fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'madleets-repeat-question',hypothesisId:'R3',location:'VideoCard.tsx:timeUpdate',message:'Triggered MadLeets challenge popup',data:{clipId:clip.id,clipProblemNumber:clip.problemNumber,clipTitle:clip.title,challengeId:challenge.id,challengeProblemId:challenge.problemId,challengePromptLine:challenge.blankLineContent,currentTime:payload.currentTime,pauseTimestamp:challenge.pauseTimestamp},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
         challengeTriggered.current = true;
         player.pause();
         setIsPaused(true);
@@ -119,13 +116,6 @@ function VideoCard({ clip, isActive, height, challenge, challengesEnabled = true
     });
     return () => sub.remove();
   }, [player, challenge, challengesEnabled, clip.id, clip.problemNumber, clip.title]);
-
-  useEffect(() => {
-    if (!challenge) return;
-    // #region agent log
-    fetch('http://127.0.0.1:7360/ingest/6c8e6634-9421-411a-9ff6-fab53aed419d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a81f82'},body:JSON.stringify({sessionId:'a81f82',runId:'madleets-repeat-question',hypothesisId:'R4',location:'VideoCard.tsx:challengeProp',message:'VideoCard received challenge prop',data:{clipId:clip.id,clipProblemNumber:clip.problemNumber,clipTitle:clip.title,challengeId:challenge.id,challengeProblemId:challenge.problemId,challengePromptLine:challenge.blankLineContent},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-  }, [clip.id, clip.problemNumber, clip.title, challenge]);
 
   const impressionTrackedRef = useRef(false);
   useEffect(() => {

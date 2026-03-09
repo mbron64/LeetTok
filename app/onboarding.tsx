@@ -54,7 +54,7 @@ const GOALS: GoalOption[] = [
   {
     id: "mid-tier",
     label: "Top Startups",
-    subtitle: "Stripe, Uber, Airbnb, Coinbase, etc.",
+    subtitle: "Credal, Stripe, Uber, Airbnb, Coinbase, etc.",
     icon: "trending-up-outline",
     difficulties: ["Medium", "Hard"],
     topics: [

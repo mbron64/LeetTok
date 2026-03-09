@@ -67,6 +67,7 @@ export default function FeedScreen() {
   const [prefTopics, setPrefTopics] = useState<string[]>([]);
   const [prefsLoaded, setPrefsLoaded] = useState(false);
   const [activeCategory, setActiveCategory] = useState<Category>("For You");
+  const madLeetsActive = madLeetsEnabled && activeCategory === "MadLeets";
 
   const challengeMap = useMemo(() => {
     const map = new Map<string, Challenge>();
@@ -166,8 +167,8 @@ export default function FeedScreen() {
         <>
           <VideoFeed
             clips={filteredClips}
-            challengeMap={challengeMap}
-            challengesEnabled={madLeetsEnabled}
+            challengeMap={madLeetsActive ? challengeMap : undefined}
+            challengesEnabled={madLeetsActive}
             screenFocused={isFocused}
           />
           <CategoryBar
